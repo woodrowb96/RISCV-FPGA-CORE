@@ -35,21 +35,22 @@ module alu(
   output logic [31:0] result,
   output logic zero             // 1 if result == 0, else 0
 );
-  
-  assign zero = result == 'b0 ? 1'b1 : 1'b0;
+
+  //zero flag set when result is all 0s
+  assign zero = (result == '0) ? 1'b1 : 1'b0;
 
   always_comb begin
     case(alu_op)
-      4'b0000:
+      4'b0000:  //and
         result = in_a & in_b;
-      4'b0001:
+      4'b0001:  //or
         result = in_a | in_b;
-      4'b0010:
+      4'b0010:  //add
         result = in_a + in_b;
-      4'b0110:
+      4'b0110:  //sub
         result = in_a - in_b;
       default:
-        result = 'd0;
+        result = '0;
     endcase
   end
 
