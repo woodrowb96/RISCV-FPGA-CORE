@@ -73,7 +73,7 @@ while getopts ":hcd:" FLAG; do
       if [[ "$OPTARG" == -* ]] ; then   #if arg is a flag, then we didnt pass a .do file
         echo "Error: -d missing do file"
         exit 1
-      elif [[ "$OPTARG" != *.do ]] ; then   #make sure arg is a .do file
+      elif [[ "$OPTARG" != *.do && "$OPTARG" != *.tcl ]] ; then #use a .do or .tcl file
         echo "Error: -d invalid do file"
         exit 1
       fi
@@ -126,8 +126,8 @@ TEST_BENCH=${TEST_BENCH%.*}   #strip .sv from TEST_BENCH
 
 #get do file
 if [[ ! -n "$DO_FILE" ]] ; then   #if a do file was not set by the -d flag
-  if [[ -f "$PROJECT_ROOT_DIR/do/$TEST_BENCH.do" ]] ; then  #if default do file exists
-    DO_FILE="$PROJECT_ROOT_DIR/do/$TEST_BENCH.do"   #get abs path to do file
+  if [[ -f "$PROJECT_ROOT_DIR/tcl/$TEST_BENCH.tcl" ]] ; then  #if default do file exists
+    DO_FILE="$PROJECT_ROOT_DIR/tcl/$TEST_BENCH.tcl"   #get abs path to do file
   fi
 fi
 
@@ -181,7 +181,7 @@ echo $'\n'
 #create do command
 DO="$DO_FILE"               #by default use the do file
 if [[ ! -n "$DO" ]] ; then  #but if there is none, then just run -all
-  echo "WARNING:  Default do file ($TEST_BENCH.do) not found."
+  echo "WARNING:  Default do script file ($TEST_BENCH.tcl) not found."
   echo "          Running sim with no do file"
   echo $'\n'
 
