@@ -20,7 +20,7 @@ print_options()
   cat <<EOF
 Options:
   -h                    Display help message
-  -c                    Run simulation in terminal, using CLI mode
+  -g                    Run simulation using the gui
   -t  <tcl_file>         Specify a non-default tcl script to run simulation with
 
 EOF
@@ -35,7 +35,7 @@ print_help()
 Description:
   Script will simulate the <tb_file> testbench.
 
-  By default script will run the simulation in GUI mode, and will attempt to use the
+  By default script will run the simulation in cli mode, and will attempt to use the
   testbench's default tcl file (tcl file named <tb_file>.tcl, located in tcl directory).
   If no default do file exists, simulation will run without a tcl file.
 
@@ -60,13 +60,13 @@ fi
 
 #--------------------  Parse options -------------------------------------------
 
-CLI_MODE="false"    #by default we dont run in CLI mode
+GUI_MODE="false"    #by default we dont run in CLI mode
 TCL_FILE=""          #if -t flag isnt set, this will stay empty
 
-while getopts ":hcd:" FLAG; do
+while getopts ":hgt:" FLAG; do
   case "$FLAG" in
-    c)
-      CLI_MODE="true"
+    g)
+      GUI_MODE="true"
       ;;
     t)
       #check for valid do file
@@ -200,16 +200,17 @@ if [[ ! -n "$TCL" ]] ; then  #but if there is none, then just run -all
   echo $'\n'
 fi
 
-if [ "$CLI_MODE" = "true" ] ; then        #if we are in cli mode 
-  if [ -n "$TCL" ] ; then
-    xsim $TEST_BENCH -tclbatch "$TCL"
-  else
-    xsim $TEST_BENCH -runall
-  fi
-else                                      #else we are in GUI mode
+#run in cli or in gui
+if [ "$GUI_MODE" = "true" ] ; then        #if we are in gui mode
   if [ -n "$TCL" ] ; then
     xsim $TEST_BENCH -gui -tclbatch "$TCL"
   else
     xsim $TEST_BENCH -gui
+  fi
+else                                      #else we are in GUI mode
+  if [ -n "$TCL" ] ; then
+    xsim $TEST_BENCH -tclbatch "$TCL"
+  else
+    xsim $TEST_BENCH -runall
   fi
 fi
