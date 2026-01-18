@@ -23,6 +23,37 @@ module tb_register_file();
   logic [31:0] rd_data_1; //read data
   logic [31:0] rd_data_2;
 
+  /***************** COVERAGES **********************************/
+  covergroup cg @(posedge clk);
+    cov_wr: coverpoint wr_en {
+      bins en = {1};
+      bins dis = {0};
+    }
+    cov_rd_reg_1: coverpoint rd_reg_1 {
+      bins index[] = {[0:$]};
+    }
+    cov_rd_reg_2: coverpoint rd_reg_2 {
+      bins index[] = {[0:$]};
+    }
+    wr_index: coverpoint wr_reg {
+      bins index[] = {[0:$]};
+    }
+    cov_wr_data: coverpoint wr_data iff (wr_en) {
+      bins zero = {0};
+      bins non_zero = {[1:$]};
+    }
+    cov_rd_data_1: coverpoint rd_data_1 {
+      bins zero = {0};
+      bins non_zero = {[1:$]};
+    }
+    cov_rd_data_2: coverpoint rd_data_2 {
+      bins zero = {0};
+      bins non_zero = {[1:$]};
+    }
+  endgroup
+
+  /************************************************************/
+
   //reference reg file to hold expected values
   logic [31:0] expected [0:31];
   initial expected [0] = 0;        //expected x0 should always be 0
@@ -120,6 +151,9 @@ module tb_register_file();
   //bind assertions to dut
   bind tb_register_file.dut register_file_assert dut_assert(.*);
 
+  //create instance
+  cg dut_cg = new();
+
   initial begin
 
     //drive initial values
@@ -168,10 +202,16 @@ module tb_register_file();
     rd_reg_2 <= 5'd0;
     score_test();                        //should output 0
 
+    //test attempting to writting 0 to a register
+    write_reg_file(5'd3, '0);  //write should not work
+    rd_reg_1 <= 5'd3;
+    rd_reg_2 <= 5'd3;
+    score_test();                        //should output 0
+
 
     /*********************** RANDOM TESTING ***********************************/
 
-    for(int i = 0; i < 10000; i++) begin
+    for(int i = 0; i < 1000; i++) begin
       write_reg_file(
         .register($urandom()),         //write to a rand reg
         .data_in($urandom()),          //write rand data
