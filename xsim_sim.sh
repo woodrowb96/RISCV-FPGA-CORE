@@ -126,8 +126,8 @@ TEST_BENCH=${TEST_BENCH%.*}   #strip .sv from TEST_BENCH
 
 #get do file
 if [[ ! -n "$TCL_FILE" ]] ; then   #if a tcl file was not set by the -t flag
-  if [[ -f "$PROJECT_ROOT_DIR/waves/xsim/$TEST_BENCH.tcl" ]] ; then  #if default tcl file exists
-    TCL_FILE="$PROJECT_ROOT_DIR/waves/xsim/$TEST_BENCH.tcl"   #get abs path to tcl file
+  if [[ -f "$PROJECT_ROOT_DIR/scripts/xsim/$TEST_BENCH.tcl" ]] ; then  #if default tcl file exists
+    TCL_FILE="$PROJECT_ROOT_DIR/scripts/xsim/$TEST_BENCH.tcl"   #get abs path to tcl file
   fi
 fi
 
