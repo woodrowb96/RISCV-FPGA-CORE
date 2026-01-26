@@ -1,11 +1,7 @@
-module tb_alu_coverage(
-  input logic clk,
-  input logic [3:0] alu_op,
-  input logic [31:0] in_a,
-  input logic [31:0] in_b,
-  input logic [31:0] result,
-  input logic zero
-);
+class tb_alu_coverage;
+
+  virtual alu_intf.coverage vif;
+
   //function used to determine if two inputs will overflow when added
   //in_a and in_b are treated as unsigned numbers
   function automatic bit add_overflow(logic [31:0] in_a, logic [31:0] in_b);
@@ -33,7 +29,7 @@ module tb_alu_coverage(
   endfunction
 
   covergroup cg_alu;
-    cov_op: coverpoint alu_op {
+    cov_op: coverpoint vif.alu_op {
       bins op_and = {4'b0000};
       bins op_or = {4'b0001};
       bins op_add = {4'b0010};
@@ -41,9 +37,9 @@ module tb_alu_coverage(
       bins invalid = default;
     }
 
-    cov_zero_flag: coverpoint zero{
-      bins asserted = {'1};
-      bins de_asserted = {'0};
+    cov_zero_flag: coverpoint vif.zero{
+      bins asserted = {1'b1};
+      bins de_asserted = {1'b0};
     }
 
     //make sure we assert and deasert zero flag for all ops
@@ -52,8 +48,8 @@ module tb_alu_coverage(
 
     /********** LOGICAL OPERATIONS COVERAGE ************/
     //corner cases we want to cover as inputs to logical operations
-    cov_in_a_log_op: coverpoint in_a
-    iff (alu_op inside {4'b0000,4'b0001}) {
+    cov_in_a_log_op: coverpoint vif.in_a
+    iff (vif.alu_op inside {4'b0000,4'b0001}) {
       bins all_zero = {32'h0000_0000};
       bins alt_ones_55 = {32'h5555_5555};
       bins alt_ones_aa = {32'haaaa_aaaa};
@@ -62,8 +58,8 @@ module tb_alu_coverage(
                           [32'h5555_5556 : 32'haaaa_aaa9],
                           [32'haaaa_aaab : 32'hffff_fffe]};
     }
-    cov_in_b_log_op: coverpoint in_b
-    iff (alu_op inside {4'b0000,4'b0001}) {
+    cov_in_b_log_op: coverpoint vif.in_b
+    iff (vif.alu_op inside {4'b0000,4'b0001}) {
       bins all_zero = {32'h0000_0000};
       bins alt_ones_55 = {32'h5555_5555};
       bins alt_ones_aa = {32'haaaa_aaaa};
@@ -74,21 +70,21 @@ module tb_alu_coverage(
     }
 
     //We want to cover all combos of corner cases for each logical op
-    cross_inputs_and: cross cov_in_a_log_op, cov_in_b_log_op iff (alu_op == 4'b0000);
-    cross_inputs_or: cross cov_in_a_log_op, cov_in_b_log_op iff (alu_op == 4'b0001);
+    cross_inputs_and: cross cov_in_a_log_op, cov_in_b_log_op iff (vif.alu_op == 4'b0000);
+    cross_inputs_or: cross cov_in_a_log_op, cov_in_b_log_op iff (vif.alu_op == 4'b0001);
 
 
     /********** ADD OPERATION COVERAGE ************/
     //input corner cases to ADD operations
-    cov_in_a_ADD_op: coverpoint in_a
-    iff (alu_op == 4'b0010) {
+    cov_in_a_ADD_op: coverpoint vif.in_a
+    iff (vif.alu_op == 4'b0010) {
       bins zero = {32'h0000_0000};
       bins one = {32'h0000_0001};
       bins max_unsigned = {32'hffff_ffff};
       bins non_corners = {[32'h0000_0002 : 32'hffff_fffe]};
     }
-    cov_in_b_ADD_op: coverpoint in_b
-    iff (alu_op == 4'b0010) {
+    cov_in_b_ADD_op: coverpoint vif.in_b
+    iff (vif.alu_op == 4'b0010) {
       bins zero = {32'h0000_0000};
       bins one = {32'h0000_0001};
       bins max_unsigned = {32'hffff_ffff};
@@ -96,10 +92,10 @@ module tb_alu_coverage(
     }
 
     //we want to cover all combos of corner cases for ADD operation
-    cross_inputs_ADD: cross cov_in_a_ADD_op, cov_in_b_ADD_op iff (alu_op == 4'b0010);
+    cross_inputs_ADD: cross cov_in_a_ADD_op, cov_in_b_ADD_op iff (vif.alu_op == 4'b0010);
 
     //we want to cover overflowing and not overflowing the addition operation
-    cov_ADD_overflow: coverpoint add_overflow(in_a, in_b) iff (alu_op == 4'b0010){
+    cov_ADD_overflow: coverpoint add_overflow(vif.in_a, vif.in_b) iff (vif.alu_op == 4'b0010){
         bins yes = {1};
         bins no = {0};
     }
@@ -107,8 +103,8 @@ module tb_alu_coverage(
 
     /********** SUB OPERATION COVERAGE ************/
     //corner inputs we want to cover with the sub operation
-    cov_in_a_SUB_op: coverpoint in_a
-    iff (alu_op == 4'b0110) {
+    cov_in_a_SUB_op: coverpoint vif.in_a
+    iff (vif.alu_op == 4'b0110) {
       bins zero = {32'h0000_0000};            //these numbers are signes 2s compliment
       bins signed_pos_one = {32'h0000_0001};
       bins signed_neg_one = {32'hffff_ffff};
@@ -117,8 +113,8 @@ module tb_alu_coverage(
       bins non_corners_pos = {[32'h0000_0002 : 32'h7fff_fffe]};
       bins non_corners_neg = {[32'h8000_0001 : 32'hffff_fffe]};
     }
-    cov_in_b_SUB_op: coverpoint in_b
-    iff (alu_op == 4'b0110) {
+    cov_in_b_SUB_op: coverpoint vif.in_b
+    iff (vif.alu_op == 4'b0110) {
       bins zero = {32'h0000_0000};
       bins one = {32'h0000_0001};
       bins neg_one = {32'hffff_ffff};
@@ -129,14 +125,21 @@ module tb_alu_coverage(
     }
 
     //cross the corners for the sub operation
-    cross_inputs_SUB: cross cov_in_a_SUB_op, cov_in_b_SUB_op iff (alu_op == 4'b0110);
+    cross_inputs_SUB: cross cov_in_a_SUB_op, cov_in_b_SUB_op iff (vif.alu_op == 4'b0110);
 
     //we want to cover overflowing during sub operations
-    cov_SUB_overflow: coverpoint sub_overflow(in_a, in_b) iff (alu_op == 4'b0110){
+    cov_SUB_overflow: coverpoint sub_overflow(vif.in_a, vif.in_b) iff (vif.alu_op == 4'b0110){
         bins yes = {1};
         bins no = {0};
     }
   endgroup
 
-  cg_alu cov_alu = new();
-endmodule
+  function new(virtual alu_intf.coverage vif);
+    this.vif = vif;
+    this.cg_alu = new();
+  endfunction
+
+  function void sample();
+    cg_alu.sample();
+  endfunction
+endclass

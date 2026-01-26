@@ -5,6 +5,21 @@ interface alu_intf;
   logic [31:0] result;
   logic zero;
 
-  modport COV(input alu_op, in_a, in_b, result, zero);
-  modport ASSERT(input alu_op, in_a, in_b, result, zero);
+  modport coverage(input alu_op, in_a, in_b, result, zero);
+  modport dut(input alu_op, in_a, in_b, output result, zero);
+
+  task print_state(string msg = "");
+    $display("-----------------------");
+    $display(msg);
+    $display("time: %t", $time);
+    $display("-----------------------");
+    $display("alu_op: %b", intf.alu_op);
+    $display("-----------------------");
+    $display("in_a: %h", intf.in_a);
+    $display("in_b: %h", intf.in_b);
+    $display("-----------------------");
+    $display("result: %h", intf.result);
+    $display("zero: %b", intf.zero);
+    $display("-----------------------");
+  endtask
 endinterface
