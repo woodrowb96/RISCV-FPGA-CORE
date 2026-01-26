@@ -10,7 +10,7 @@ interface alu_intf;
 
   task print_state(string msg = "");
     $display("-----------------------");
-    $display(msg);
+    $display("INTERFACE_STATE:%s\n",msg);
     $display("time: %t", $time);
     $display("-----------------------");
     $display("alu_op: %b", intf.alu_op);
