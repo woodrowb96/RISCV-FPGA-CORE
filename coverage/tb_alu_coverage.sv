@@ -182,18 +182,22 @@ class tb_alu_coverage;
         bins signed_neg_one = {32'hffff_ffff};
         bins max_signed_pos = {32'h7fff_ffff};
         bins min_signed_neg = {32'h8000_0000};
-        bins non_corners_pos = {[32'h0000_0002 : 32'h7fff_fffe]};
-        bins non_corners_neg = {[32'h8000_0001 : 32'hffff_fffe]};
+        bins non_corners_low_pos = {[32'h0000_0002 : 32'h3fff_ffff]};
+        bins non_corners_high_pos = {[32'h4000_0000 : 32'h7fff_fffe]};
+        bins non_corners_low_neg = {[32'h8000_0001 : 32'hbfff_ffff]};
+        bins non_corners_high_neg = {[32'hc000_0000 : 32'hffff_fffe]};
       }
     cov_in_b_SUB_op: coverpoint vif.in_b
       iff (vif.alu_op == 4'b0110) {
-        bins zero = {32'h0000_0000};
-        bins one = {32'h0000_0001};
-        bins neg_one = {32'hffff_ffff};
+        bins zero = {32'h0000_0000};            //these numbers are signes 2s compliment
+        bins signed_pos_one = {32'h0000_0001};
+        bins signed_neg_one = {32'hffff_ffff};
         bins max_signed_pos = {32'h7fff_ffff};
         bins min_signed_neg = {32'h8000_0000};
-        bins non_corners_pos = {[32'h0000_0002 : 32'h7fff_fffe]};
-        bins non_corners_neg = {[32'h8000_0001 : 32'hffff_fffe]};
+        bins non_corners_low_pos = {[32'h0000_0002 : 32'h3fff_ffff]};
+        bins non_corners_high_pos = {[32'h4000_0000 : 32'h7fff_fffe]};
+        bins non_corners_low_neg = {[32'h8000_0001 : 32'hbfff_ffff]};
+        bins non_corners_high_neg = {[32'hc000_0000 : 32'hffff_fffe]};
       }
 
     //cross the corners for the sub operation
