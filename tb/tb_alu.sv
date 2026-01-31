@@ -1,24 +1,277 @@
-// `timescale 1ns / 1ns
 `include "../coverage/tb_alu_coverage.sv"
+// `timescale 1ns / 1ns
 
 module tb_alu();
 
   alu_intf intf();
 
+  class general_transaction;
+    rand logic [3:0] alu_op;
+    rand logic [31:0] in_a;
+    rand logic [31:0] in_b;
+
+    constraint valid_ops { alu_op inside {4'b0000, 4'b0001, 4'b0010, 4'b0110}; }
+
+    task print(string msg = "");
+    $display("-----------------------");
+    $display("TRANSACTION:%s\n",msg);
+    $display("time: %t", $time);
+    $display("-----------------------");
+    $display("alu_op: %b", alu_op);
+    $display("-----------------------");
+    $display("in_a: %h", in_a);
+    $display("in_b: %h", in_b);
+    $display("-----------------------");
+    endtask
+  endclass
+
+  typedef enum {ONLY_CORNERS, ONLY_NON_CORNERS, MIXED} corner_mode;
+
+  virtual class alu_op_specific_transaction extends general_transaction;
+    typedef enum {CORNER, NON_CORNER} input_catagory;
+    rand input_catagory in_a_cat;
+    rand input_catagory in_b_cat;
+
+    corner_mode in_a_mode = MIXED;
+    corner_mode in_b_mode = MIXED;
+
+    constraint input_catagories {
+      if(in_a_mode == ONLY_CORNERS)
+          in_a_cat == CORNER;
+      else if(in_a_mode == ONLY_NON_CORNERS)
+          in_a_cat == NON_CORNER;
+      else if(in_a_mode == MIXED)
+        in_a_cat dist {CORNER := 1, NON_CORNER := 100};
+
+      if(in_b_mode == ONLY_CORNERS)
+          in_b_cat == CORNER;
+      else if(in_b_mode == ONLY_NON_CORNERS)
+          in_b_cat == NON_CORNER;
+      else if(in_b_mode == MIXED)
+        in_b_cat dist {CORNER := 1, NON_CORNER := 100};
+    }
+  endclass
+
+  class logical_op_transaction extends alu_op_specific_transaction;
+    typedef enum {LOW, MED, HIGH} bit_density_level;
+
+    rand bit_density_level density_a;
+    rand bit_density_level density_b;
+
+    constraint density_weights {
+      density_a dist {LOW := 5, MED := 1, HIGH := 10};
+      density_b dist {LOW := 5, MED := 1, HIGH := 10};
+    }
+
+    constraint logical_op_inputs {
+      if(in_a_cat == CORNER)
+        in_a inside {
+          32'h0000_0000,
+          32'h5555_5555,
+          32'haaaa_aaaa,
+          32'hffff_ffff
+        };
+      else {
+        !(in_a inside {
+          32'h0000_0000,
+          32'h5555_5555,
+          32'haaaa_aaaa,
+          32'hffff_ffff
+        });
+
+        // if(density_a == LOW){
+        //   foreach(in_a[i])
+        //     in_a[i] dist {0 := 10, 1 := 1};
+        // } else if (density_a == MED) {
+        //   foreach(in_a[i])
+        //     in_a[i] dist {0 := 1, 1 := 1};
+        // } else {
+        //   foreach(in_a[i])
+        //     in_a[i] dist {0 := 1, 1 := 10};
+        // }
+      }
+
+      if(in_b_cat == CORNER)
+        in_b inside {
+          32'h0000_0000,
+          32'h5555_5555,
+          32'haaaa_aaaa,
+          32'hffff_ffff
+          };
+      else {
+        !(in_b inside {
+          32'h0000_0000,
+          32'h5555_5555,
+          32'haaaa_aaaa,
+          32'hffff_ffff
+        });
+
+        // if(density_b == LOW){
+        //   foreach(in_b[i])
+        //     in_b[i] dist {0 := 100, 1 := 1};
+        // } else if (density_b == MED) {
+        //   foreach(in_b[i])
+        //     in_b[i] dist {0 := 1, 1 := 1};
+        // } else {
+        //   foreach(in_b[i])
+        //     in_b[i] dist {0 := 1, 1 := 100};
+        // }
+      }
+    }
+  endclass
+
+  class add_op_transaction extends alu_op_specific_transaction;
+
+    constraint add_op { alu_op == 4'b0010; }
+
+    constraint add_op_inputs {
+      if(in_a_cat == CORNER)
+        in_a inside {
+          32'h0000_0000,
+          32'h0000_0001,
+          32'hffff_ffff
+          };
+      else {
+        in_a inside {[32'h0000_0000 : 32'hffff_ffff]};
+
+        !(in_a inside {
+          32'h0000_0000,
+          32'h0000_0001,
+          32'hffff_ffff
+        });
+      }
+
+      if(in_b_cat == CORNER)
+        in_b inside {
+          32'h0000_0000,
+          32'h0000_0001,
+          32'hffff_ffff
+          };
+      else {
+        in_b inside {[32'h0000_0000 : 32'hffff_ffff]};
+
+        !(in_b inside {
+          32'h0000_0000,
+          32'h0000_0001,
+          32'hffff_ffff
+        });
+      }
+    }
+  endclass
+
+  class sub_op_transaction extends alu_op_specific_transaction;
+
+    constraint sub_op { alu_op == 4'b0110; }
+
+    constraint sub_op_inputs {
+      if(in_a_cat == CORNER) {
+        in_a inside {
+          32'h0000_0000,
+          32'h0000_0001,
+          32'hffff_ffff,
+          32'h7fff_ffff,
+          32'h8000_0000
+          };
+          }
+      else {
+        in_a[31] dist { 1'b0 := 1, 1'b1 := 1 };
+
+        !(in_a inside {
+          32'h0000_0000,
+          32'h0000_0001,
+          32'hffff_ffff,
+          32'h7fff_ffff,
+          32'h8000_0000
+        });
+      }
+
+      if(in_b_cat == CORNER) {
+        in_b inside {
+          32'h0000_0000,
+          32'h0000_0001,
+          32'hffff_ffff,
+          32'h7fff_ffff,
+          32'h8000_0000
+          };
+      }
+      else {
+        in_b[31] dist { 1'b0 := 1, 1'b1 := 1 };
+
+        !(in_b inside {
+          32'h0000_0000,
+          32'h0000_0001,
+          32'hffff_ffff,
+          32'h7fff_ffff,
+          32'h8000_0000
+        });
+      }
+    }
+  endclass
+
+
+  task drive(general_transaction trans);
+    intf.alu_op = trans.alu_op;
+    intf.in_a = trans.in_a;
+    intf.in_b = trans.in_b;
+  endtask
+
+  typedef struct {
+    logic [31:0] result;
+    logic zero;
+  } expected_output;
+
+  class reference_alu;
+    function expected_output expected(logic [3:0] alu_op,
+                                      logic [31:0] in_a,
+                                      logic [31:0] in_b);
+      logic [32:0] in_a_wide = {1'b0, in_a};
+      logic [32:0] in_b_wide = {1'b0, in_b};
+      logic [32:0] result_wide = '0;
+      logic zero = 1'b0;
+
+      expected_output exp;
+
+      if(alu_op == 4'b0110) begin
+        result_wide = in_a_wide - in_b_wide;
+      end
+      else if(alu_op == 4'b0010) begin
+        result_wide = in_a_wide + in_b_wide;
+      end
+      else if(alu_op == 4'b0001) begin
+        result_wide = in_a_wide | in_b_wide;
+      end
+      else if(alu_op == 4'b0000) begin
+        result_wide = in_a_wide & in_b_wide;
+      end
+
+      if(result_wide[31:0] == '0) begin
+        zero = 1'b1;
+      end
+
+      exp.result = result_wide[31:0];
+      exp.zero = zero;
+
+      return exp;
+    endfunction
+  endclass
+
   int num_tests = 0;
   int num_fails = 0;
 
-  task automatic score_test(logic [31:0] expected);
+  reference_alu ref_alu;
+
+  task automatic score_test();
 
     bit test_fail = 0;
+    expected_output expected = ref_alu.expected(intf.alu_op, intf.in_a, intf.in_b);
 
-    if(intf.result != expected) begin
-      $error("FAIL\nIncorect Result\nExpected: %h",expected);
+    if(intf.result != expected.result) begin
+      $error("FAIL\nIncorect Result\nExpected: %h",expected.result);
       test_fail = 1;
     end
 
-    if(intf.zero != (intf.result == '0)) begin
-      $error("Zero flag incorect\nexpected: %b", intf.result == '0);
+    if(intf.zero != expected.zero) begin
+      $error("Zero flag incorect\nexpected: %b", expected.zero);
       test_fail = 1;
     end
 
@@ -45,205 +298,71 @@ module tb_alu();
           .zero(intf.zero)
           );
 
-  //create coverage
-  tb_alu_coverage coverage = new(intf.coverage);
 
   //bind assertions to the dut
   bind tb_alu.dut alu_assert dut_assert(intf.assertion);
 
+  //coverage
+  tb_alu_coverage coverage;
+
+  logical_op_transaction alu_log_trans;
+
+  add_op_transaction alu_add_trans;
+
+  sub_op_transaction alu_sub_trans;
+
   initial begin
+
+    //create coverage and connect it to the interface
+    coverage = new(intf.coverage);
+    ref_alu = new();
+    alu_log_trans = new();
+    alu_add_trans = new();
+    alu_sub_trans = new();
 
     /*************  TEST AND ***************/
 
-    intf.alu_op = 4'b0000;
-    intf.in_a = 32'hffffffff;
-    intf.in_b = 32'h00000000;
-    #1
-    coverage.sample();
-    score_test(32'h00000000);
-    #49
-    
-    intf.alu_op = 4'b0000;
-    intf.in_a = 32'hffffffff;
-    intf.in_b = 32'h00ff00ff;
-    #1
-    coverage.sample();
-    score_test(32'h00ff00ff);
-    #49
-    //
-    //
+    for(int i = 0; i < 1000; i++) begin
+      alu_log_trans.randomize() with { alu_op == 4'b0000; };
+      drive(alu_log_trans);
+      #1;
+      coverage.sample();
+      score_test();
+      #49;
+    end
+
     // /************   TEST OR *****************/
-    // alu_op = 4'b0001;
-    // in_a = 32'hffffffff;
-    // in_b = 32'h00000000;
-    // #1
-    // coverage.sample();
-    // score_test(32'hffffffff);
-    // #49
-    //
-    // alu_op = 4'b0001;
-    // in_a = 32'h0f0f0f0f;
-    // in_b = 32'hffff0000;
-    // #1
-    // coverage.sample();
-    // score_test(32'hffff0f0f);
-    // #49
-    //
-    // alu_op = 4'b0001;             //testing zero flag is set with OR op
-    // in_a = 32'h00000000;
-    // in_b = 32'h00000000;
-    // #1
-    // coverage.sample();
-    // score_test(32'h00000000);
-    // #49
-    //
+    for(int i = 0; i < 1000; i++) begin
+      alu_log_trans.randomize() with { alu_op == 4'b0001; };
+      drive(alu_log_trans);
+      #1;
+      coverage.sample();
+      score_test();
+      #49;
+    end
+
     // /*****************  TEST ADD **************/
-    // alu_op = 4'b0010;
-    // in_a = 32'd5;
-    // in_b = 32'd6;
-    // #1
-    // coverage.sample();
-    // score_test(32'd11);
-    // #49
-    //
-    // alu_op = 4'b0010;     //test zero flag with ADD op
-    // in_a = 32'd0;
-    // in_b = 32'd0;
-    // #1
-    // coverage.sample();
-    // score_test(32'd0);
-    // #49
-    // 
-    // alu_op = 4'b0010;     //test overflow
-    // in_a = 32'hffffffff;
-    // in_b = 32'd1;
-    // #1
-    // coverage.sample();
-    // score_test(32'd0);    //result should overflow back to 0
-    // #49
-    //
-    // alu_op = 4'b0010;     //test overflow
-    // in_a = 32'hffffffff;
-    // in_b = 32'd400;
-    // #1
-    // coverage.sample();
-    // score_test(32'd399);    //result should overflow to 399
-    // #49
-    //
-    // alu_op = 4'b0010;         //test overflow
-    // in_a = 32'hffffffff;
-    // in_b = 32'hffffffff;
-    // #1
-    // coverage.sample();
-    // score_test(32'hfffffffe); //result should overflow to 1 less than max
-    // #49
-    //
-    // alu_op = 4'b0010;     //test overflow
-    // in_a = 32'h8000_0000;
-    // in_b = 32'h8000_0000;
-    // #1
-    // coverage.sample();
-    // score_test(32'd0);    //result should overflow back to 0
-    // #49
-    //
-    // alu_op = 4'b0010;         //test adding 0
-    // in_a = 32'hffffffff;
-    // in_b = 32'd0;
-    // #1
-    // coverage.sample();
-    // score_test(32'hffffffff); //shouldnt overflow
-    // #49
-    //
+    for(int i = 0; i < 1000; i++) begin
+      alu_add_trans.randomize();
+      drive(alu_add_trans);
+      #1;
+      coverage.sample();
+      score_test();
+      #49;
+    end
+
     // /************ TEST SUB ****************/
-    //
-    // alu_op = 4'b0110;         //test sub, with pos result
-    // in_a = 32'd5;
-    // in_b = 32'd3;
-    // #1
-    // coverage.sample();
-    // score_test(32'd2);
-    // #49
-    // 
-    // alu_op = 4'b0110;         //test sub, with neg result
-    // in_a = 32'd5;
-    // in_b = 32'd6;
-    // #1
-    // coverage.sample();
-    // score_test(-32'd1);
-    // #49
-    // 
-    // alu_op = 4'b0110;         //test sub, positive from a neg
-    // in_a = -32'd5;
-    // in_b = 32'd6;
-    // #1
-    // coverage.sample();
-    // score_test(-32'd11);
-    // #49
-    // 
-    // alu_op = 4'b0110;         //test sub, neg from a neg
-    // in_a = -32'd15;
-    // in_b = -32'd9;
-    // #1
-    // coverage.sample();
-    // score_test(-32'd6);       //result should still be neg
-    // #49
-    // 
-    // alu_op = 4'b0110;         //test sub, neg from a neg
-    // in_a = -32'd53512;
-    // in_b = -32'd53513;
-    // #1
-    // coverage.sample();
-    // score_test(32'd1);       //result should now be positive
-    // #49
-    //
-    // alu_op = 4'b0110;         //test subtracting from 0
-    // in_a = 32'd0;
-    // in_b = 32'd500;
-    // #1
-    // coverage.sample();
-    // score_test(-32'd500);
-    // #49
-    // 
-    // alu_op = 4'b0110;         //test subtracting 0
-    // in_a = 32'h80000000;      //in_a = max neg number
-    // in_b = 32'd0;             //in_b = 0
-    // #1
-    // coverage.sample();
-    // score_test(32'h80000000);   //result should still be max neg number
-    // #49
-    // 
-    // alu_op = 4'b0110;         //sub -1 from -1, shouldnt overflow
-    // in_a = 32'hffffffff;      //in_a = -1 in 2s compl
-    // in_b = 32'hffffffff;      //in_b = -1
-    // #1
-    // coverage.sample();
-    // score_test(32'd0);        //result = -1 - -1 = 0
-    // #49
-    // 
-    // alu_op = 4'b0110;         //test overflow (max_neg - 1 => overflow)
-    // in_a = 32'h80000000;      //in_a = max neg number
-    // in_b = 32'd1;             //in_b = 1
-    // #1
-    // coverage.sample();
-    // score_test(32'h7fffffff);  //result should overflow to max pos num
-    // #49
-    //
-    // alu_op = 4'b0110;         //test overflow (max_pos - (-1) => overflow)
-    // in_a = 32'h7fffffff;      //in_a = max positive number
-    // in_b = -32'd1;            //in_b = -1
-    // #1
-    // coverage.sample();
-    // score_test(32'h80000000);  //result should overflow to max neg
-    // #49
-    //
-    // alu_op = 4'b0110;         //test zero flag with sub op
-    // in_a = 32'd555121;
-    // in_b = 32'd555121;
-    // #1
-    // coverage.sample();
-    // score_test(-32'd0);     //zero flag should be set
-    // #49
-    // 
+    for(int i = 0; i < 1000; i++) begin
+      if (! alu_sub_trans.randomize() ) begin
+        $fatal("sub transaction randomization failed");
+      end
+      drive(alu_sub_trans);
+      #1;
+      coverage.sample();
+      score_test();
+      #49;
+    end
+
     // /************ TEST INVALID OP ****************/
     // 
     // alu_op = 4'b1110;         //not a valid operation
