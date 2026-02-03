@@ -204,6 +204,18 @@ for STIMULUS_FILE in "$PROJECT_ROOT_DIR"/stimulus/*.sv ; do
   echo $'\n'
 done
 echo $'\n'
+
+#-------------------- compile all ref models files ------------------------------
+
+echo "COMPILING REF_MODEL FILES:"
+echo $'\n'
+for REF_MODEL_FILE in "$PROJECT_ROOT_DIR"/ref_model/*.sv ; do
+  [ -f "$REF_MODEL_FILE" ] || break
+  xvlog -sv "$REF_MODEL_FILE"
+  echo $'\n'
+done
+echo $'\n'
+
 #-------------------- compile test_bench ------------------------------
 
 echo "COMPILING TEST BENCH: $TEST_BENCH"
