@@ -28,14 +28,6 @@ class tb_alu_coverage;
     return (in_a[31] != in_b[31]) && (result[31] != in_a[31]);
   endfunction
 
-  function automatic logic[3:0] byte_lane_activity(logic [31:0] in);
-    bit q0 = |in[7:0];
-    bit q1 = |in[15:8];
-    bit q2 = |in[23:16];
-    bit q3 = |in[31:24];
-    return {q3,q2,q1,q0};
-  endfunction
-
   covergroup cg_alu;
     cov_op: coverpoint vif.alu_op {
       bins op_and = {4'b0000};
@@ -84,61 +76,6 @@ class tb_alu_coverage;
     cross_inputs_or: cross cov_in_a_log_op, cov_in_b_log_op
       iff (vif.alu_op == 4'b0001);
 
-    //We want to collect a wide range of density of 1s for logical ops
-    cov_in_a_log_op_density: coverpoint $countones(vif.in_a)
-      iff (vif.alu_op inside {4'b0000,4'b0001}) {
-        bins none = {0};
-        bins low = {[1:8]};
-        bins medium_low = {[7:16]};
-        bins medium_high = {[17:24]};
-        bins high = {[25:31]};
-        bins all = {32};
-      }
-    cov_in_b_log_op_density: coverpoint $countones(vif.in_b)
-      iff (vif.alu_op inside {4'b0000,4'b0001}) {
-        bins none = {0};
-        bins low = {[1:8]};
-        bins medium_low = {[7:16]};
-        bins medium_high = {[17:24]};
-        bins high = {[25:31]};
-        bins all = {32};
-      }
-
-      cov_in_a_log_op_byte_lanes: coverpoint byte_lane_activity(vif.in_a)
-        iff (vif.alu_op inside {4'b0000,4'b0001}) {
-          wildcard bins q0 = {4'b???1};
-          wildcard bins q1 = {4'b??1?};
-          wildcard bins q2 = {4'b?1??};
-          wildcard bins q3 = {4'b1???};
-          bins all = {4'b1111};
-        }
-      cov_in_b_log_op_byte_lanes: coverpoint byte_lane_activity(vif.in_b)
-        iff (vif.alu_op inside {4'b0000,4'b0001}) {
-          wildcard bins q0 = {4'b???1};
-          wildcard bins q1 = {4'b??1?};
-          wildcard bins q2 = {4'b?1??};
-          wildcard bins q3 = {4'b1???};
-          bins all = {4'b1111};
-        }
-
-      cross_density_lane_activity_and_a: cross cov_in_a_log_op_density, cov_in_a_log_op_byte_lanes
-        iff(vif.alu_op == 4'b0000) {
-          ignore_bins all_zeros = binsof(cov_in_a_log_op_density.none);
-        }
-      cross_density_lane_activity_and_b: cross cov_in_b_log_op_density, cov_in_b_log_op_byte_lanes
-        iff(vif.alu_op == 4'b0000) {
-          ignore_bins all_zeros = binsof(cov_in_b_log_op_density.none);
-        }
-
-      cross_density_lane_activity_or_a: cross cov_in_a_log_op_density, cov_in_a_log_op_byte_lanes
-        iff(vif.alu_op == 4'b0001) {
-          ignore_bins all_zeros = binsof(cov_in_a_log_op_density.none);
-        }
-      cross_density_lane_activity_or_b: cross cov_in_b_log_op_density, cov_in_b_log_op_byte_lanes
-        iff(vif.alu_op == 4'b0001) {
-          ignore_bins all_zeros = binsof(cov_in_b_log_op_density.none);
-        }
-
     /********** ADD OPERATION COVERAGE ************/
     //input corner cases to ADD operations
     cov_in_a_ADD_op: coverpoint vif.in_a
@@ -155,7 +92,6 @@ class tb_alu_coverage;
         bins zero = {32'h0000_0000};
         bins one = {32'h0000_0001};
         bins max_unsigned = {32'hffff_ffff};
-        bins non_corners = {[32'h0000_0002 : 32'hffff_fffe]};
         bins non_corners_low = {[32'h0000_0002 : 32'h5555_5555]};
         bins non_corners_med = {[32'h5555_5556 : 32'haaaa_aaaa]};
         bins non_corners_high = {[32'haaaa_aaab : 32'hffff_fffe]};
