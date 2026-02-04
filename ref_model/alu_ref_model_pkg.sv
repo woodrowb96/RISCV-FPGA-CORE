@@ -1,13 +1,15 @@
 package alu_ref_model_pkg;
+
+  //so we can return both expected values at the same time
   typedef struct {
     logic [31:0] result;
     logic zero;
   } expected_output;
 
   class alu_ref_model;
-    function expected_output expected(logic [3:0] alu_op,
-                                      logic [31:0] in_a,
-                                      logic [31:0] in_b);
+
+    //look at the input and calc the expected output
+    function expected_output expected(logic [3:0] alu_op, logic [31:0] in_a, logic [31:0] in_b);
       logic [32:0] in_a_wide = {1'b0, in_a};
       logic [32:0] in_b_wide = {1'b0, in_b};
       logic [32:0] result_wide = '0;
