@@ -6,6 +6,9 @@ package tb_alu_stimulus_pkg;
     rand logic [31:0] in_a;
     rand logic [31:0] in_b;
 
+    logic [31:0] result;
+    logic zero;
+
     include_invalid_ops inc_inv_ops = FALSE;
 
     constraint valid_ops {
@@ -21,6 +24,9 @@ package tb_alu_stimulus_pkg;
       $display("-----------------------");
       $display("in_a: %h", in_a);
       $display("in_b: %h", in_b);
+      $display("-----------------------");
+      $display("result: %h", result);
+      $display("zero: %b", zero);
       $display("-----------------------");
     endfunction
   endclass

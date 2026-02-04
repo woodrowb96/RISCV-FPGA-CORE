@@ -1,15 +1,24 @@
 import tb_alu_coverage_pkg::*;
 import tb_alu_stimulus_pkg::*;
 import alu_ref_model_pkg::*;
-// `timescale 1ns / 1ns
 
 module tb_alu();
+  bit clk;
+  initial begin
+    clk = 0;
+    forever #5 clk = ~clk;
+  end
+
   //interface
   alu_intf intf();
 
   //dut
-  alu dut(.alu_op(intf.alu_op), .in_a(intf.in_a), .in_b(intf.in_b),
-          .result(intf.result), .zero(intf.zero) );
+  alu dut(.alu_op(intf.alu_op),
+          .in_a(intf.in_a),
+          .in_b(intf.in_b),
+          .result(intf.result), 
+          .zero(intf.zero) 
+          );
 
   //bind assertions to the dut
   bind tb_alu.dut alu_assert dut_assert(intf.assertion);
@@ -17,12 +26,8 @@ module tb_alu();
   //we will be collecting coverage
   tb_alu_coverage coverage;
 
-  //reference alu to score tests
+  //reference alu used to score tests
   alu_ref_model ref_alu;
-
-  //keep track of how many tests, and how many failed
-  int num_tests = 0;
-  int num_fails = 0;
 
   //Drive transaction into dut
   task drive(general_trans trans);
@@ -31,27 +36,45 @@ module tb_alu();
     intf.in_b = trans.in_b;
   endtask
 
-  task automatic score_test();
+  task monitor(general_trans trans);
+    trans.result = intf.result;
+    trans.zero = intf.zero;
+  endtask
+
+  //keep track of how many tests, and how many failed
+  int num_tests = 0;
+  int num_fails = 0;
+
+  task automatic score(general_trans trans);
 
     bit test_fail = 0;
-    expected_output expected = ref_alu.expected(intf.alu_op, intf.in_a, intf.in_b);
+    expected_output expected = ref_alu.expected(trans.alu_op, trans.in_a, trans.in_b);
 
-    if(intf.result != expected.result) begin
+    if(trans.result != expected.result) begin
       $error("FAIL\nIncorect Result\nExpected: %h",expected.result);
       test_fail = 1;
     end
 
-    if(intf.zero != expected.zero) begin
+    if(trans.zero != expected.zero) begin
       $error("Zero flag incorect\nexpected: %b", expected.zero);
       test_fail = 1;
     end
 
     if(test_fail) begin
       num_fails++;
-      intf.print_state();
+      trans.print();
     end
 
     num_tests++;
+  endtask
+
+  task test(general_trans trans);
+      @(posedge clk);
+      drive(trans);
+      #1;
+      monitor(trans);
+      score(trans);
+      coverage.sample();
   endtask
 
   task print_test_results();
@@ -84,62 +107,39 @@ module tb_alu();
     /*************  TEST AND ***************/
     for(int i = 0; i < 1000; i++) begin
       assert(logical_trans.randomize() with { alu_op == 4'b0000; })
-      drive(logical_trans);
-      #1;
-      coverage.sample();
-      score_test();
-      #49;
+      test(logical_trans);
     end
+
 
     /************   TEST OR *****************/
     for(int i = 0; i < 1000; i++) begin
       assert(logical_trans.randomize() with { alu_op == 4'b0001; });
-      drive(logical_trans);
-      #1;
-      coverage.sample();
-      score_test();
-      #49;
+      test(logical_trans);
     end
 
     /*****************  TEST ADD **************/
     for(int i = 0; i < 1000; i++) begin
       assert(add_trans.randomize());
-      drive(add_trans);
-      #1;
-      coverage.sample();
-      score_test();
-      #49;
+      test(add_trans);
     end
 
     /************ TEST SUB ****************/
     for(int i = 0; i < 1000; i++) begin
       assert(sub_trans.randomize());
-      drive(sub_trans);
-      #1;
-      coverage.sample();
-      score_test();
-      #49;
+      test(sub_trans);
     end
 
     /************ TEST EVERYTHING COMPLETELY RANDOMIZED ****************/
     for(int i = 0; i < 1000; i++) begin
       assert(gen_trans.randomize());
-      drive(gen_trans);
-      #1;
-      coverage.sample();
-      score_test();
-      #49;
+      test(gen_trans);
     end
 
     /************ TEST INVALID OP ****************/
     gen_trans.inc_inv_ops = TRUE;
     for(int i = 0; i < 10; i++) begin
       assert(gen_trans.randomize() with { alu_op inside {4'b1111, 4'b1100, 4'b1010}; });
-      drive(gen_trans);
-      #1;
-      coverage.sample();
-      score_test();
-      #49;
+      test(gen_trans);
     end
 
     print_test_results();
