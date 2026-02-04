@@ -4,7 +4,25 @@ import alu_ref_model_pkg::*;
 // `timescale 1ns / 1ns
 
 module tb_alu();
+  //interface
   alu_intf intf();
+
+  //dut
+  alu dut(.alu_op(intf.alu_op), .in_a(intf.in_a), .in_b(intf.in_b),
+          .result(intf.result), .zero(intf.zero) );
+
+  //bind assertions to the dut
+  bind tb_alu.dut alu_assert dut_assert(intf.assertion);
+
+  //we will be collecting coverage
+  tb_alu_coverage coverage;
+
+  //reference alu to score tests
+  alu_ref_model ref_alu;
+
+  //keep track of how many tests, and how many failed
+  int num_tests = 0;
+  int num_fails = 0;
 
   //Drive transaction into dut
   task drive(general_trans trans);
@@ -12,12 +30,6 @@ module tb_alu();
     intf.in_a = trans.in_a;
     intf.in_b = trans.in_b;
   endtask
-
-  //Score the test
-  int num_tests = 0;
-  int num_fails = 0;
-
-  alu_ref_model ref_alu;
 
   task automatic score_test();
 
@@ -49,20 +61,6 @@ module tb_alu();
     $display("Total tests failed: %d", num_fails);
     $display("----------------");
   endtask
-
-  //connect the dut to interface
-  alu dut(.alu_op(intf.alu_op),
-          .in_a(intf.in_a),
-          .in_b(intf.in_b),
-          .result(intf.result),
-          .zero(intf.zero)
-          );
-
-  //bind assertions to the dut
-  bind tb_alu.dut alu_assert dut_assert(intf.assertion);
-
-  //coverage
-  tb_alu_coverage coverage;
 
   //we are going to need these kinds of transactions for our tests
   logical_op_trans logical_trans;
@@ -123,7 +121,7 @@ module tb_alu();
       #49;
     end
 
-    /************ TEST EVERYTHING WITH COMP RAND ****************/
+    /************ TEST EVERYTHING COMPLETELY RANDOMIZED ****************/
     for(int i = 0; i < 1000; i++) begin
       assert(gen_trans.randomize());
       drive(gen_trans);
