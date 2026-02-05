@@ -1,64 +1,90 @@
-// `timescale 1ns / 1ns
+import tb_alu_coverage_pkg::*;
+import tb_alu_stimulus_pkg::*;
+import alu_ref_model_pkg::*;
 
 module tb_alu();
+  /*********** CLK *************/
+  //alu is purely comb, but I use a clk to sync testing
+  bit clk;
+  initial begin
+    clk = 0;
+    forever #5 clk = ~clk;    //period of #10
+  end
 
-  //clock
-  logic clk;
-  initial clk = 0;
-  always #1 clk = ~clk;
+  /*********** INTERFACE *************/
+  alu_intf intf();
 
-  //control
-  logic [3:0] alu_op;
+  /*********** DUT *************/
+  alu dut(.alu_op(intf.alu_op),
+          .in_a(intf.in_a),
+          .in_b(intf.in_b),
+          .result(intf.result), 
+          .zero(intf.zero) 
+          );
 
-  //input
-  logic [31:0] in_a;
-  logic [31:0] in_b;
+  /*********** BIND ASSERTIONS *************/
+  bind tb_alu.dut alu_assert dut_assert(intf.assertion);
 
-  //output
-  logic [31:0] result;
-  logic zero;
+  /*********** COVERAGE *************/
+  tb_alu_coverage coverage;
 
-  task print_state(string msg = "");
-    $display("-----------------------");
-    $display(msg);
-    $display("time: %t", $time);
-    $display("-----------------------");
-    $display("alu_op: %b", alu_op);
-    $display("-----------------------");
-    $display("in_a: %h", in_a);
-    $display("in_b: %h", in_b);
-    $display("-----------------------");
-    $display("result: %h", result);
-    $display("zero: %b", zero);
-    $display("-----------------------");
+  /*********** TASKS *************/
+  task drive(general_trans trans);
+    intf.alu_op = trans.alu_op;
+    intf.in_a = trans.in_a;
+    intf.in_b = trans.in_b;
   endtask
 
+  task monitor(general_trans trans);
+    trans.result = intf.result;
+    trans.zero = intf.zero;
+  endtask
+
+  //reference alu used to score tests
+  alu_ref_model ref_alu;
+
+  //keep track of how many tests weve scored, and how many failed
   int num_tests = 0;
   int num_fails = 0;
 
-  task automatic score_test(logic [31:0] expected);
-
+  //Use the reference model to score a transaction
+  task automatic score(general_trans trans);
     bit test_fail = 0;
 
-    if(result != expected) begin
-      $error("FAIL\nIncorect Result\nExpected: %h",expected);
+    //use trans inputs to calc expected values
+    expected_output expected = ref_alu.expected(trans.alu_op, trans.in_a, trans.in_b);
+
+    //score out trans outputs
+    if(trans.result != expected.result) begin
+      $error("FAIL\nIncorect Result\nExpected: %h",expected.result);
+      test_fail = 1;
+    end
+    if(trans.zero != expected.zero) begin
+      $error("Zero flag incorect\nexpected: %b", expected.zero);
       test_fail = 1;
     end
 
-    if(zero != (result == '0)) begin
-      $error("Zero flag incorect\nexpected: %b", result == '0);
-      test_fail = 1;
-    end
-
+    //handle failed tests
     if(test_fail) begin
       num_fails++;
-      print_state();
+      trans.print();
     end
 
     num_tests++;
   endtask
 
-  task print_test_results();
+  task test(general_trans trans);
+      @(posedge clk);
+      drive(trans);
+      //wait for the inputs to propogate to the outputs
+      #1;
+      monitor(trans);
+      score(trans);
+      //collect our coverage
+      coverage.sample();
+  endtask
+
+  task print_results();
     $display("----------------");
     $display("Test results:");
     $display("Total tests ran: %d", num_tests);
@@ -66,184 +92,65 @@ module tb_alu();
     $display("----------------");
   endtask
 
-  alu dut(.*);
+  /**************  TESTING ***************************/
+  //we are going to need these kinds of transactions for our tests
+  logical_op_trans logical_trans;
+  add_op_trans add_trans;
+  sub_op_trans sub_trans;
+  general_trans gen_trans;
 
   initial begin
+    //create coverage and connect it to the interface
+    coverage = new(intf.coverage);
+
+    //create the referance alu
+    ref_alu = new();
+
+    //create our transactions
+    logical_trans = new();
+    add_trans = new();
+    sub_trans = new();
+    gen_trans = new();
 
     /*************  TEST AND ***************/
-
-    alu_op = 4'b0000;
-    in_a = 32'hffffffff;
-    in_b = 32'h00000000;
-    #1
-    score_test(32'h00000000);
-    #49
-
-    alu_op = 4'b0000;
-    in_a = 32'hffffffff;
-    in_b = 32'h00ff00ff;
-    #1
-    score_test(32'h00ff00ff);
-    #49
+    repeat(1000) begin
+      assert(logical_trans.randomize() with { alu_op == 4'b0000; })
+      test(logical_trans);
+    end
 
     /************   TEST OR *****************/
-    alu_op = 4'b0001;
-    in_a = 32'hffffffff;
-    in_b = 32'h00000000;
-    #1
-    score_test(32'hffffffff);
-    #49
-
-    alu_op = 4'b0001;
-    in_a = 32'h0f0f0f0f;
-    in_b = 32'hffff0000;
-    #1
-    score_test(32'hffff0f0f);
-    #49
-
-    alu_op = 4'b0001;             //testing zero flag is set with OR op
-    in_a = 32'h00000000;
-    in_b = 32'h00000000;
-    #1
-    score_test(32'h00000000);
-    #49
+    repeat(1000) begin
+      assert(logical_trans.randomize() with { alu_op == 4'b0001; });
+      test(logical_trans);
+    end
 
     /*****************  TEST ADD **************/
-    alu_op = 4'b0010;
-    in_a = 32'd5;
-    in_b = 32'd6;
-    #1
-    score_test(32'd11);
-    #49
-
-    alu_op = 4'b0010;     //test zero flag with ADD op
-    in_a = 32'd0;
-    in_b = 32'd0;
-    #1
-    score_test(32'd0);
-    #49
-    
-    alu_op = 4'b0010;     //test overflow
-    in_a = 32'hffffffff;
-    in_b = 32'd1;
-    #1
-    score_test(32'd0);    //result should overflow back to 0
-    #49
-    
-    alu_op = 4'b0010;     //test overflow
-    in_a = 32'hffffffff;
-    in_b = 32'd400;
-    #1
-    score_test(32'd399);    //result should overflow to 399
-    #49
-    
-    alu_op = 4'b0010;         //test overflow
-    in_a = 32'hffffffff;
-    in_b = 32'hffffffff;
-    #1
-    score_test(32'hfffffffe); //result should overflow to 1 less than max
-    #49
-
-    alu_op = 4'b0010;         //test adding 0
-    in_a = 32'hffffffff;
-    in_b = 32'd0;
-    #1
-    score_test(32'hffffffff); //shouldnt overflow
-    #49
+    repeat(1000) begin
+      assert(add_trans.randomize());
+      test(add_trans);
+    end
 
     /************ TEST SUB ****************/
+    repeat(1000) begin
+      assert(sub_trans.randomize());
+      test(sub_trans);
+    end
 
-    alu_op = 4'b0110;         //test sub, with pos result
-    in_a = 32'd5;
-    in_b = 32'd3;
-    #1
-    score_test(32'd2);
-    #49
-    
-    alu_op = 4'b0110;         //test sub, with neg result
-    in_a = 32'd5;
-    in_b = 32'd6;
-    #1
-    score_test(-32'd1);
-    #49
-    
-    alu_op = 4'b0110;         //test sub, positive from a neg
-    in_a = -32'd5;
-    in_b = 32'd6;
-    #1
-    score_test(-32'd11);
-    #49
-    
-    alu_op = 4'b0110;         //test sub, neg from a neg
-    in_a = -32'd15;
-    in_b = -32'd9;
-    #1
-    score_test(-32'd6);       //result should still be neg
-    #49
-    
-    alu_op = 4'b0110;         //test sub, neg from a neg
-    in_a = -32'd53512;
-    in_b = -32'd53513;
-    #1
-    score_test(32'd1);       //result should now be positive
-    #49
+    /************ TEST EVERYTHING COMPLETELY RANDOMIZED ****************/
+    repeat(1000) begin
+      assert(gen_trans.randomize());
+      test(gen_trans);
+    end
 
-    alu_op = 4'b0110;         //test subtracting from 0
-    in_a = 32'd0;
-    in_b = 32'd500;
-    #1
-    score_test(-32'd500);
-    #49
-    
-    alu_op = 4'b0110;         //test subtracting 0
-    in_a = 32'h80000000;      //in_a = max neg number
-    in_b = 32'd0;             //in_b = 0
-    #1
-    score_test(32'h80000000);   //result should still be max neg number
-    #49
-    
-    alu_op = 4'b0110;         //sub -1 from -1, shouldnt overflow
-    in_a = 32'hffffffff;      //in_a = -1 in 2s compl
-    in_b = 32'hffffffff;      //in_b = -1
-    #1
-    score_test(32'd0);        //result = -1 - -1 = 0
-    #49
-    
-    alu_op = 4'b0110;         //test overflow (max_neg - 1 => overflow)
-    in_a = 32'h80000000;      //in_a = max neg number
-    in_b = 32'd1;             //in_b = 1
-    #1
-    score_test(32'h7fffffff);  //result should overflow to max pos num
-    #49
-
-
-    alu_op = 4'b0110;         //test overflow (max_pos - (-1) => overflow)
-    in_a = 32'h7fffffff;      //in_a = max positive number
-    in_b = -32'd1;            //in_b = -1
-    #1
-    score_test(32'h80000000);  //result should overflow to max neg
-    #49
-
-    alu_op = 4'b0110;         //test zero flag with sub op
-    in_a = 32'd555121;
-    in_b = 32'd555121;
-    #1
-    score_test(-32'd0);     //zero flag should be set
-    #49
-    
     /************ TEST INVALID OP ****************/
-    
-    alu_op = 4'b1110;         //not a valid operation
-    in_a = 32'd5;
-    in_b = 32'd2222;
-    #1
-    score_test(32'd0);     //result should be 0
-    #49
+    gen_trans.inc_inv_ops = TRUE;
+    repeat(10) begin
+      assert(gen_trans.randomize() with { alu_op inside {4'b1111, 4'b1100, 4'b1010}; });
+      test(gen_trans);
+    end
 
-    print_test_results();
+    print_results();
 
     $stop(1);
-
   end
-
 endmodule
