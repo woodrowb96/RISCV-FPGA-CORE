@@ -34,7 +34,6 @@ module tb_register_file();
 
   event drive_done;
   task drive(transaction trans);
-    @(intf.cb_drive)
     intf.cb_drive.wr_en <= trans.wr_en;
     intf.cb_drive.wr_reg <= trans.wr_reg;
     intf.cb_drive.wr_data <= trans.wr_data;
@@ -89,6 +88,14 @@ module tb_register_file();
     num_tests++;
   endtask
 
+  task test(transaction trans);
+    @(intf.cb_drive);
+    drive(trans);
+    #3
+    monitor(trans);
+    score(trans);
+  endtask
+
   task print_test_results();
     $display("----------------");
     $display("Test results:");
@@ -113,10 +120,7 @@ module tb_register_file();
 
     repeat(1000) begin
       trans.randomize();
-      drive(trans);
-      #3
-      monitor(trans);
-      score(trans);
+      test(trans);
     end
 
     //print results and end simulation
