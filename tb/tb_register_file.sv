@@ -1,126 +1,128 @@
+import tb_register_file_stimulus_pkg::*;
+import register_file_ref_model_pkg::*;
 // `timescale 1ns / 10ps
 
 module tb_register_file();
-
   //clock
   logic clk;
   initial begin
     clk = 0;
-    forever #1 clk = ~clk;
+    forever #5 clk = ~clk;
   end
 
+  /************  INTERFACE ************/
   register_file_intf intf(clk);
 
-  //reference reg file to hold expected values
-  class ref_reg_file;
-    logic [31:0] expected [0:31];
+  /************  DUT ************/
+  register_file dut(.clk(clk),
+                    .wr_en(intf.wr_en),
+                    .rd_reg_1(intf.rd_reg_1),
+                    .rd_reg_2(intf.rd_reg_2),
+                    .wr_reg(intf.wr_reg),
+                    .wr_data(intf.wr_data),
+                    .rd_data_1(intf.rd_data_1),
+                    .rd_data_2(intf.rd_data_2)
+                    );
 
-    function void write(logic [4:0] index, logic [31:0] data);
-      //dont overwrite x0
-      if(index != 0) begin
-        expected[index] = data;
-      end
+  /************  BIND ASSERTIONS ************/
+  bind tb_register_file.dut register_file_assert dut_assert(intf.assertion);
 
-      //make sure expected x0 is still 0
-      exp_x0_wr_check: assert(expected[0] === 0)
-        else $fatal(1, "REF_REG_FILE::write(): expected x0 != 0");
-    endfunction
+  /************  COVERAGE ************/
+ //  bind tb_register_file tb_register_file_coverage cov(.*);
 
-    function logic[31:0] read(logic [4:0] index);
-      //reads from x0 should always return 0
-      if(index == 0) begin
-        return 0;
-      end
+  /************  TASKS ************/
 
-      //if we dont read from x0
-      return expected[index];
-    endfunction
-
-    function new();
-      //x0 should always have an exp val of 0
-      expected[0] = 0;
-    endfunction
-  endclass
-
-  task drive(logic wr_en, logic [4:0] wr_reg, logic [31:0] wr_data);
-    intf.wr_en <= wr_en;
-    intf.wr_reg <= wr_reg;
-    intf.wr_data <= wr_data;
-    @(posedge clk)
-    if(wr_en) begin
-      ref_reg(wr_reg, wr_data);
-    end
-    wr_en <= 0;
+  event drive_done;
+  task drive(transaction trans);
+    @(intf.cb)
+    intf.wr_en <= trans.wr_en;
+    intf.wr_reg <= trans.wr_reg;
+    intf.wr_data <= trans.wr_data;
+    intf.rd_reg_1 <= trans.rd_reg_1;
+    intf.rd_reg_2 <= trans.rd_reg_2;
   endtask
-//
-//
-//   //test scoring
-//   int num_tests = 0;
-//   int num_fails = 0;
-//
-//   //score test by making sure rd_data matches expected values
-//   task automatic score_test();
-//     bit test_fail = 0;
-//
-//     //check rd_data_1
-//     if(rd_data_1 != expected[rd_reg_1]) begin
-//       $error(
-//         "FAIL:\n",
-//         "Incorrect rd_data_1\n",
-//         "Expected: %h\n",
-//         "Actual: %h\n", 
-//         expected[rd_reg_1],
-//         rd_data_1
-//       );
-//       test_fail = 1;
-//     end
-//
-//     //check rd_data_2
-//     if(rd_data_2 != expected[rd_reg_2]) begin
-//       $error(
-//         "FAIL:\n",
-//         "Incorrect rd_data_2\n",
-//         "Expected: %h\n",
-//         "Actual: %h\n", 
-//         expected[rd_reg_2],
-//         rd_data_2
-//       );
-//       test_fail = 1;
-//     end
-//
-//     //handle failed test
-//     if(test_fail) begin
-//       num_fails++;
-//     end
-//
-//     num_tests++;
-//   endtask
-//
-//   task print_test_results();
-//     $display("----------------");
-//     $display("Test results:");
-//     $display("Total tests ran: %d", num_tests);
-//     $display("Total tests failed: %d", num_fails);
-//     $display("----------------");
-//   endtask
-//
-//   //dut
-//   register_file dut(.*);
-//
-//   //bind assertions to dut
-//   bind tb_register_file.dut register_file_assert dut_assert(.*);
-//
-//  //instantiate coverage module
-//   bind tb_register_file tb_register_file_coverage cov(.*);
-//
-//   initial begin
-//
-//     //drive initial values
-//     wr_en <= '0;             //start out not writing
-//     rd_reg_1 <= '0;          //reading from x0
-//     rd_reg_2 <= '0;
-//     wr_reg <= 'd0;           //pointing wr_reg to x0
-//     wr_data <= 32'hFFFFFFFF; //driving wr_data to all 1s
+
+  task monitor(transaction trans);
+    trans.rd_data_1 = intf.rd_data_1;
+    trans.rd_data_2 = intf.rd_data_2;
+  endtask
+
+  //test scoring
+  int num_tests = 0;
+  int num_fails = 0;
+
+  //reference reg file, to score tests
+  reg_file_ref_model ref_reg_file;
+
+  //score test by making sure rd_data matches expected values
+  task automatic score(transaction trans);
+    bit test_fail = 0;
+
+    //read out expected rd_data before the wr
+    logic [31:0] rd_data_1_exp = ref_reg_file.read(trans.rd_reg_1);
+    logic [31:0] rd_data_2_exp = ref_reg_file.read(trans.rd_reg_2);
+
+    //if wr then update our expected values
+    if(trans.wr_en) begin
+      ref_reg_file.write(trans.wr_reg, trans.wr_data);
+    end
+
+    //check our reads
+    if(trans.rd_data_1 != rd_data_1_exp) begin
+      $error("FAIL:Incorrect rd_data_1\n",
+              "rd_reg_1: %d, Expected: %h, Actual: %h",
+              trans.rd_reg_1, rd_data_1_exp, trans.rd_data_1);
+      test_fail = 1;
+    end
+    if(trans.rd_data_2 != rd_data_2_exp) begin
+      $error("FAIL:Incorrect rd_data_2\n",
+              "rd_reg_2: %d, Expected: %h, Actual: %h",
+              trans.rd_reg_2, rd_data_2_exp, trans.rd_data_2);
+      test_fail = 1;
+    end
+
+    //handle failed test
+    if(test_fail) begin
+      num_fails++;
+    end
+
+    num_tests++;
+  endtask
+
+  task print_test_results();
+    $display("----------------");
+    $display("Test results:");
+    $display("Total tests ran: %d", num_tests);
+    $display("Total tests failed: %d", num_fails);
+    $display("----------------");
+  endtask
+
+  transaction trans;
+
+  initial begin
+
+    ref_reg_file = new();
+    trans = new();
+
+    //drive initial values
+    intf.wr_en <= '0;             //start out not writing
+    intf.wr_reg <= 'd0;           //pointing wr_reg to x0
+    intf.wr_data <= 32'hFFFFFFFF; //driving wr_data to all 1s
+    intf.rd_reg_1 <= '0;          //reading from x0
+    intf.rd_reg_2 <= '0;
+
+    repeat(1000) begin
+      trans.randomize();
+      drive(trans);
+      #1
+      monitor(trans);
+      score(trans);
+    end
+
+    //print results and end simulation
+    print_test_results();
+    $stop(1);
+  end
 //
 //
 //     /*********************** DIRECTED TESTS ***********************************/
@@ -191,7 +193,6 @@ module tb_register_file();
 //     print_test_results();
 //     $stop(1);
 //   end
-
 
 
 endmodule
