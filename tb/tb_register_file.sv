@@ -34,12 +34,12 @@ module tb_register_file();
 
   event drive_done;
   task drive(transaction trans);
-    @(intf.cb)
-    intf.wr_en <= trans.wr_en;
-    intf.wr_reg <= trans.wr_reg;
-    intf.wr_data <= trans.wr_data;
-    intf.rd_reg_1 <= trans.rd_reg_1;
-    intf.rd_reg_2 <= trans.rd_reg_2;
+    @(intf.cb_drive)
+    intf.cb_drive.wr_en <= trans.wr_en;
+    intf.cb_drive.wr_reg <= trans.wr_reg;
+    intf.cb_drive.wr_data <= trans.wr_data;
+    intf.cb_drive.rd_reg_1 <= trans.rd_reg_1;
+    intf.cb_drive.rd_reg_2 <= trans.rd_reg_2;
   endtask
 
   task monitor(transaction trans);
@@ -114,7 +114,7 @@ module tb_register_file();
     repeat(1000) begin
       trans.randomize();
       drive(trans);
-      #1
+      #3
       monitor(trans);
       score(trans);
     end
