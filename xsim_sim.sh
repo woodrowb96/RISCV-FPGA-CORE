@@ -166,7 +166,7 @@ echo $'\n'
 
 echo "COMPILING INTERFACE FILES:"
 echo $'\n'
-for INTERFACE_FILE in "$PROJECT_ROOT_DIR"/interfaces/*.sv ; do
+for INTERFACE_FILE in "$PROJECT_ROOT_DIR"/interface/*.sv ; do
   [ -f "$INTERFACE_FILE" ] || break
   xvlog -sv "$INTERFACE_FILE"
   echo $'\n'
