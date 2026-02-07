@@ -49,12 +49,17 @@ package tb_register_file_coverage_pkg;
           bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
         }
 
-      //we want to cover reading from a register that is getting written too
+      //we want to cover reading from a register that is getting written to
       //during the same clock cycle
-      cov_read_during_write_reg_1: coverpoint vif.rd_reg_1
-        iff(vif.wr_en && (vif.wr_reg == vif.rd_reg_1));
-      cov_read_during_write_reg_2: coverpoint vif.rd_reg_2
-        iff(vif.wr_en && (vif.wr_reg == vif.rd_reg_2));
+      cov_read_during_write_reg_1: coverpoint (vif.wr_reg == vif.rd_reg_1)
+        iff(vif.wr_en) {
+          bins hit = {1};
+        }
+      cov_read_during_write_reg_2: coverpoint (vif.wr_reg == vif.rd_reg_2)
+        iff(vif.wr_en) {
+          bins hit = {1};
+        }
+
     endgroup
 
     function new(virtual register_file_intf.monitor vif);
