@@ -26,7 +26,7 @@ module tb_register_file();
                     );
 
   /************  BIND ASSERTIONS ************/
-  bind tb_register_file.dut register_file_assert dut_assert(intf.monitor);
+  bind tb_register_file.dut register_file_assert dut_assert(intf.assertion);
 
   /************  COVERAGE ************/
   tb_register_file_coverage coverage;
