@@ -1,5 +1,5 @@
 module register_file_assert(
-  register_file_intf.assertion intf
+  register_file_intf.monitor intf
 );
   /*********   x0 READ CHECK **************/
   //We want to make sure we always read 0 from x0

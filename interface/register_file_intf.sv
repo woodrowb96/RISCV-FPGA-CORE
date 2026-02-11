@@ -7,12 +7,8 @@ interface register_file_intf(input clk);
   logic [31:0] rd_data_1;
   logic [31:0] rd_data_2;
 
-  modport assertion (
-    input clk, wr_en, rd_reg_1, rd_reg_2, wr_reg, wr_data, rd_data_1, rd_data_2
-  );
-
   modport monitor(
-    input wr_en, rd_reg_1, rd_reg_2, wr_reg, wr_data, rd_data_1, rd_data_2
+    input clk, wr_en, rd_reg_1, rd_reg_2, wr_reg, wr_data, rd_data_1, rd_data_2
   );
 
   function print(string msg = "");
