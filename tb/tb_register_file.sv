@@ -58,26 +58,21 @@ module tb_register_file();
   task automatic score(transaction trans);
     bit test_fail = 0;
 
-    //read out expected rd_data before the wr
-    logic [31:0] rd_data_1_exp = ref_reg_file.read(trans.rd_reg_1);
-    logic [31:0] rd_data_2_exp = ref_reg_file.read(trans.rd_reg_2);
-
-    //if wr then update our expected values
-    if(trans.wr_en) begin
-      ref_reg_file.write(trans.wr_reg, trans.wr_data);
-    end
+    //update the reference model, and get the expected output
+    reg_file_output exp;
+    exp = ref_reg_file.process_trans(trans);
 
     //check our reads
-    if(trans.rd_data_1 != rd_data_1_exp) begin
+    if(trans.rd_data_1 != exp.rd_data_1) begin
       $error("FAIL:Incorrect rd_data_1\n",
               "rd_reg_1: %d, Expected: %h, Actual: %h",
-              trans.rd_reg_1, rd_data_1_exp, trans.rd_data_1);
+              trans.rd_reg_1, exp.rd_data_1, trans.rd_data_1);
       test_fail = 1;
     end
-    if(trans.rd_data_2 != rd_data_2_exp) begin
+    if(trans.rd_data_2 != exp.rd_data_2) begin
       $error("FAIL:Incorrect rd_data_2\n",
               "rd_reg_2: %d, Expected: %h, Actual: %h",
-              trans.rd_reg_2, rd_data_2_exp, trans.rd_data_2);
+              trans.rd_reg_2, exp.rd_data_2, trans.rd_data_2);
       test_fail = 1;
     end
 
@@ -92,7 +87,7 @@ module tb_register_file();
   task test(transaction trans);
     @(posedge clk);
     drive(trans);
-    #3
+    #3                    //wait so the combinatorial reads can propogate
     monitor(trans);
     score(trans);
     coverage.sample();
@@ -106,8 +101,8 @@ module tb_register_file();
     $display("----------------");
   endtask
 
+  /*********** TESTING ******************/
   transaction trans;
-
   initial begin
 
     coverage = new(intf.monitor);
@@ -130,76 +125,4 @@ module tb_register_file();
     print_test_results();
     $stop(1);
   end
-//
-//
-//     /*********************** DIRECTED TESTS ***********************************/
-//
-//     //test reading x0
-//     @(posedge clk);
-//     rd_reg_1 <= 5'd0;
-//     rd_reg_2 <= 5'd0;
-//     score_test();      //read regs should output 0
-//
-//     //test read after write using rd_reg_1
-//     write_reg_file(5'd5);
-//     rd_reg_1 <= 5'd5;
-//     rd_reg_2 <= 5'd0;
-//     score_test();
-//
-//     //test read after write using rd_reg_2
-//     write_reg_file(5'd15, 32'hFFFF0000);
-//     rd_reg_1 <= 5'd5;
-//     rd_reg_2 <= 5'd15;
-//     score_test();
-//
-//     //test overwritting data in a register
-//     write_reg_file(5'd15, 32'h0000FFFF);
-//     rd_reg_1 <= 5'd5;
-//     rd_reg_2 <= 5'd15;
-//     score_test();
-//
-//     //test data persistance
-//     @(posedge clk)            //dont write
-//     rd_reg_1 <= 5'd5;         //dont change rd_reg_1 or 2
-//     rd_reg_2 <= 5'd15;
-//     score_test();             //read output should stay constant
-//
-//     //test attempting to write to x0
-//     write_reg_file(5'd0, 32'hFFFFFFFF);  //write should not work
-//     rd_reg_1 <= 5'd0;
-//     rd_reg_2 <= 5'd0;
-//     score_test();                        //should output 0
-//
-//     //test attempting to writting 0 to a register
-//     write_reg_file(5'd3, '0);  //write should not work
-//     rd_reg_1 <= 5'd3;
-//     rd_reg_2 <= 5'd3;
-//     score_test();                        //should output 0
-//
-//     //test reading all 1s out of both registers
-//     write_reg_file(5'd20, 32'hFFFFFFFF);  //write should not work
-//     rd_reg_1 <= 5'd20;
-//     rd_reg_2 <= 5'd20;
-//     score_test();                        //should output 0
-//
-//
-//     /*********************** RANDOM TESTING ***********************************/
-//
-//     for(int i = 0; i < 1000; i++) begin
-//       write_reg_file(
-//         .register($urandom()),         //write to a rand reg
-//         .data_in($urandom()),          //write rand data
-//         .enable($urandom_range(1, 0))  //enable write randomly
-//         );
-//       rd_reg_1 <= $urandom();          //read from random registers
-//       rd_reg_2 <= $urandom();
-//       score_test();
-//     end
-//
-//     //print results and end simulation
-//     print_test_results();
-//     $stop(1);
-//   end
-
-
 endmodule

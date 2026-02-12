@@ -1,5 +1,12 @@
 package register_file_ref_model_pkg;
-  //reference reg file to hold expected values
+  import tb_register_file_stimulus_pkg::*;
+
+  //struct so we can return both outputs at the same time
+  typedef struct {
+    logic [31:0] rd_data_1;
+    logic [31:0] rd_data_2;
+  } reg_file_output;
+
   class reg_file_ref_model;
     logic [31:0] expected [0:31];
 
@@ -23,9 +30,21 @@ package register_file_ref_model_pkg;
       return expected[index];
     endfunction
 
+    function reg_file_output process_trans(transaction trans);
+      reg_file_output expected;
+
+      //make sure we read first to model the fact that reads are combinatorial
+      expected.rd_data_1 = read(trans.rd_reg_1);
+      expected.rd_data_2 = read(trans.rd_reg_2);
+
+      if(trans.wr_en)
+        write(trans.wr_reg, trans.wr_data);
+
+      return expected;
+    endfunction
+
     function new();
-      //initialize x0 to 0
-      expected[0] = 0;
+      expected[0] = 0;  //initialize x0 to 0
     endfunction
   endclass
 endpackage
