@@ -1,5 +1,5 @@
 package tb_register_file_stimulus_pkg;
-  class transaction;
+  class reg_file_trans;
     rand logic wr_en;
     rand logic [4:0] rd_reg_1;
     rand logic [4:0] rd_reg_2;
@@ -21,7 +21,7 @@ package tb_register_file_stimulus_pkg;
 
     function void print(string msg = "");
       $display("-----------------------");
-      $display("transaction:%s\n",msg);
+      $display("REG_FILE_TRANS:%s\n",msg);
       $display("time: %t", $time);
       $display("-----------------------");
       $display("wr_en: %b", wr_en);

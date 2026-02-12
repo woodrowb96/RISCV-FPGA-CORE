@@ -30,7 +30,7 @@ package register_file_ref_model_pkg;
       return expected[index];
     endfunction
 
-    function reg_file_output process_trans(transaction trans);
+    function reg_file_output process_trans(reg_file_trans trans);
       reg_file_output expected;
 
       //make sure we read first to model the fact that reads are combinatorial

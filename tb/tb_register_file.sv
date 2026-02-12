@@ -34,7 +34,7 @@ module tb_register_file();
   /************  TASKS ************/
 
   event drive_done;
-  task drive(transaction trans);
+  task drive(reg_file_trans trans);
     intf.wr_en <= trans.wr_en;
     intf.wr_reg <= trans.wr_reg;
     intf.wr_data <= trans.wr_data;
@@ -42,7 +42,7 @@ module tb_register_file();
     intf.rd_reg_2 <= trans.rd_reg_2;
   endtask
 
-  task monitor(transaction trans);
+  task monitor(reg_file_trans trans);
     trans.rd_data_1 = intf.rd_data_1;
     trans.rd_data_2 = intf.rd_data_2;
   endtask
@@ -55,7 +55,7 @@ module tb_register_file();
   reg_file_ref_model ref_reg_file;
 
   //score test by making sure rd_data matches expected values
-  task automatic score(transaction trans);
+  task automatic score(reg_file_trans trans);
     bit test_fail = 0;
 
     //update the reference model, and get the expected output
@@ -84,7 +84,7 @@ module tb_register_file();
     num_tests++;
   endtask
 
-  task test(transaction trans);
+  task test(reg_file_trans trans);
     @(posedge clk);
     drive(trans);
     #3                    //wait so the combinatorial reads can propogate
@@ -102,7 +102,7 @@ module tb_register_file();
   endtask
 
   /*********** TESTING ******************/
-  transaction trans;
+  reg_file_trans trans;
   initial begin
 
     coverage = new(intf.monitor);
