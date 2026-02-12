@@ -31,16 +31,16 @@ package reg_file_ref_model_pkg;
     endfunction
 
     function reg_file_output process_trans(reg_file_trans trans);
-      reg_file_output expected;
+      reg_file_output expected_out;
 
       //make sure we read first to model the fact that reads are combinatorial
-      expected.rd_data_1 = read(trans.rd_reg_1);
-      expected.rd_data_2 = read(trans.rd_reg_2);
+      expected_out.rd_data_1 = read(trans.rd_reg_1);
+      expected_out.rd_data_2 = read(trans.rd_reg_2);
 
       if(trans.wr_en)
         write(trans.wr_reg, trans.wr_data);
 
-      return expected;
+      return expected_out;
     endfunction
 
     function new();
