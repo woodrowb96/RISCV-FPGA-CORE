@@ -23,16 +23,18 @@ Output:
   zero    : 1'b zero flag
             1 if result == 0, else 0
 */
+import riscv_32i_defs_pkg::*;
+
 module alu(
   //control
-  input logic [3:0] alu_op,     //alu control signal
+  input alu_op_t alu_op,     //alu control signal
 
   //input
-  input logic [31:0] in_a,
-  input logic [31:0] in_b,
+  input word_t in_a,
+  input word_t in_b,
 
   //output
-  output logic [31:0] result,
+  output word_t result,
   output logic zero             // 1 if result == 0, else 0
 );
 
@@ -41,13 +43,13 @@ module alu(
 
   always_comb begin
     case(alu_op)
-      4'b0000:  //and
+      ALU_AND:
         result = in_a & in_b;
-      4'b0001:  //or
+      ALU_OR:
         result = in_a | in_b;
-      4'b0010:  //add
+      ALU_ADD:
         result = in_a + in_b;
-      4'b0110:  //sub
+      ALU_SUB:
         result = in_a - in_b;
       default:
         result = '0;

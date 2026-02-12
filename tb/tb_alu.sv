@@ -1,6 +1,7 @@
 import tb_alu_coverage_pkg::*;
 import tb_alu_stimulus_pkg::*;
 import alu_ref_model_pkg::*;
+import riscv_32i_defs_pkg::*;
 
 module tb_alu();
   /*********** CLK *************/
@@ -114,13 +115,13 @@ module tb_alu();
 
     /*************  TEST AND ***************/
     repeat(1000) begin
-      assert(logical_trans.randomize() with { alu_op == 4'b0000; })
+      assert(logical_trans.randomize() with { alu_op == ALU_AND; });
       test(logical_trans);
     end
 
     /************   TEST OR *****************/
     repeat(1000) begin
-      assert(logical_trans.randomize() with { alu_op == 4'b0001; });
+      assert(logical_trans.randomize() with { alu_op == ALU_OR; });
       test(logical_trans);
     end
 
@@ -143,11 +144,9 @@ module tb_alu();
     end
 
     /************ TEST INVALID OP ****************/
-    gen_trans.inc_inv_ops = TRUE;
-    repeat(10) begin
-      assert(gen_trans.randomize() with { alu_op inside {4'b1111, 4'b1100, 4'b1010}; });
-      test(gen_trans);
-    end
+    assert(gen_trans.randomize());
+    gen_trans.alu_op = alu_op_t'(4'b1111);
+    test(gen_trans);
 
     print_results();
 

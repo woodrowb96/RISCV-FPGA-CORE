@@ -1,8 +1,10 @@
+import riscv_32i_defs_pkg::*;
+
 interface alu_intf;
-  logic [3:0] alu_op;
-  logic [31:0] in_a;
-  logic [31:0] in_b;
-  logic [31:0] result;
+  alu_op_t alu_op;
+  word_t in_a;
+  word_t in_b;
+  word_t result;
   logic zero;
 
   modport coverage(input alu_op, in_a, in_b, result, zero);
