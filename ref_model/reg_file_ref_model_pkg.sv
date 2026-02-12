@@ -1,5 +1,5 @@
-package register_file_ref_model_pkg;
-  import tb_register_file_stimulus_pkg::*;
+package reg_file_ref_model_pkg;
+  import tb_reg_file_stimulus_pkg::*;
 
   //struct so we can return both outputs at the same time
   typedef struct {

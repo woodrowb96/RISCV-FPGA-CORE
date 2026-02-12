@@ -1,9 +1,9 @@
-import tb_register_file_stimulus_pkg::*;
-import register_file_ref_model_pkg::*;
-import tb_register_file_coverage_pkg::*;
+import tb_reg_file_stimulus_pkg::*;
+import reg_file_ref_model_pkg::*;
+import tb_reg_file_coverage_pkg::*;
 // `timescale 1ns / 10ps
 
-module tb_register_file();
+module tb_reg_file();
   //clock
   logic clk;
   initial begin
@@ -12,10 +12,10 @@ module tb_register_file();
   end
 
   /************  INTERFACE ************/
-  register_file_intf intf(clk);
+  reg_file_intf intf(clk);
 
   /************  DUT ************/
-  register_file dut(.clk(clk),
+  reg_file dut(.clk(clk),
                     .wr_en(intf.wr_en),
                     .rd_reg_1(intf.rd_reg_1),
                     .rd_reg_2(intf.rd_reg_2),
@@ -26,10 +26,10 @@ module tb_register_file();
                     );
 
   /************  BIND ASSERTIONS ************/
-  bind tb_register_file.dut register_file_assert dut_assert(tb_register_file.intf);
+  bind tb_reg_file.dut reg_file_assert dut_assert(tb_reg_file.intf);
 
   /************  COVERAGE ************/
-  tb_register_file_coverage coverage;
+  tb_reg_file_coverage coverage;
 
   /************  TASKS ************/
 

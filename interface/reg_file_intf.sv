@@ -1,4 +1,4 @@
-interface register_file_intf(input clk);
+interface reg_file_intf(input clk);
   logic wr_en;
   logic [4:0] rd_reg_1;
   logic [4:0] rd_reg_2;

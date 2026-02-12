@@ -18,7 +18,7 @@ Output:
 Note:
   Register x0 (reg_file[0]) always returns '0
 */
-module register_file (
+module reg_file (
   input logic clk,
 
   //control

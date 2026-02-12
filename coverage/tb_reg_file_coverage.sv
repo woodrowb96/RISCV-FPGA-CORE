@@ -1,6 +1,6 @@
-package tb_register_file_coverage_pkg;
-  class tb_register_file_coverage;
-    virtual register_file_intf.monitor vif;
+package tb_reg_file_coverage_pkg;
+  class tb_reg_file_coverage;
+    virtual reg_file_intf.monitor vif;
 
     covergroup cg_reg_file;
       //cover writting and not writting
@@ -62,7 +62,7 @@ package tb_register_file_coverage_pkg;
 
     endgroup
 
-    function new(virtual register_file_intf.monitor vif);
+    function new(virtual reg_file_intf.monitor vif);
       this.vif = vif;
       this.cg_reg_file = new();
     endfunction

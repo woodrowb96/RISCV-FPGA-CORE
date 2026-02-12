@@ -1,4 +1,4 @@
-package tb_register_file_stimulus_pkg;
+package tb_reg_file_stimulus_pkg;
   class reg_file_trans;
     rand logic wr_en;
     rand logic [4:0] rd_reg_1;

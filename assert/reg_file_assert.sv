@@ -1,5 +1,5 @@
-module register_file_assert(
-  register_file_intf.monitor intf
+module reg_file_assert(
+  reg_file_intf.monitor intf
 );
   /*********   x0 READ CHECK **************/
   //We want to make sure we always read 0 from x0
@@ -19,12 +19,12 @@ module register_file_assert(
   //x0 should always be zero, it should never be overwritten
   property x0_always_zero_prop;
     @(posedge intf.clk)
-    register_file.reg_file[0] == '0;
+    reg_file.reg_file[0] == '0;
   endproperty
 
   x0_always_zero_assert:
     assert property(x0_always_zero_prop) else
-      $error("x0_always_zero_assert: x0=%h", register_file.reg_file[0]);
+      $error("x0_always_zero_assert: x0=%h", reg_file.reg_file[0]);
 
   /******* WRITE CHECK *****************/
   //We want to make sure the wr_data is actually written into the reg_file
@@ -33,7 +33,7 @@ module register_file_assert(
     //then the data should be in the reg_file during the next clk cycle
     @(posedge intf.clk)
     (intf.wr_en && intf.wr_reg != '0) |=>
-      (register_file.reg_file[$past(intf.wr_reg)] == $past(intf.wr_data));
+      (reg_file.reg_file[$past(intf.wr_reg)] == $past(intf.wr_data));
   endproperty
 
   write_assert:
@@ -52,7 +52,7 @@ module register_file_assert(
           //then the data should not have changed
           @(posedge intf.clk)
           !(intf.wr_en && intf.wr_reg == index) |=>
-            register_file.reg_file[index] === $past(register_file.reg_file[index])
+            reg_file.reg_file[index] === $past(reg_file.reg_file[index])
         );
     end
   endgenerate
@@ -63,14 +63,14 @@ module register_file_assert(
   always @(posedge intf.clk) begin
     #0
     if(intf.rd_reg_1 != '0) begin
-      assert (intf.rd_data_1 === register_file.reg_file[intf.rd_reg_1]) else
-        $error("read_rd_reg_1_assert: expected:%h, actual: %h", 
-                register_file.reg_file[intf.rd_reg_1], intf.rd_data_1);
+      assert (intf.rd_data_1 === reg_file.reg_file[intf.rd_reg_1]) else
+        $error("read_rd_reg_1_assert: expected:%h, actual: %h",
+                reg_file.reg_file[intf.rd_reg_1], intf.rd_data_1);
     end
     if(intf.rd_reg_2 != '0) begin
-      assert (intf.rd_data_2 === register_file.reg_file[intf.rd_reg_2]) else
-        $error("read_rd_reg_2_assert: expected:%h, actual: %h", 
-                register_file.reg_file[intf.rd_reg_2], intf.rd_data_2);
+      assert (intf.rd_data_2 === reg_file.reg_file[intf.rd_reg_2]) else
+        $error("read_rd_reg_2_assert: expected:%h, actual: %h",
+                reg_file.reg_file[intf.rd_reg_2], intf.rd_data_2);
     end
 
     /********* NOTE *********/
