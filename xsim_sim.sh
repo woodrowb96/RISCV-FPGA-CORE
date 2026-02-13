@@ -45,10 +45,29 @@ Note:
 EOF
 }
 
-#--------------------  Make sure we are running in projects root directory  -----------
+#--------------------Create some dir path variables -----------
 
-#GET PROJECTS ROOT DIREDCTORY
+#the root directory, where the sim scripts live
 PROJECT_ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+#rtl directories
+RTL_DIR="$PROJECT_ROOT_DIR/rtl"
+RTL_PKG_DIR="$RTL_DIR/package"
+
+#verification directories
+VERIFY_DIR="$PROJECT_ROOT_DIR/verify"
+VERIFY_PKG_DIR="$VERIFY_DIR/package"
+ASSERT_DIR="$VERIFY_DIR/assert"
+COVERAGE_DIR="$VERIFY_DIR/coverage"
+INTERFACE_DIR="$VERIFY_DIR/interface"
+REF_MODEL_DIR="$VERIFY_DIR/ref_model"
+STIMULUS_DIR="$VERIFY_DIR/stimulus"
+TB_DIR="$VERIFY_DIR/tb"
+
+#scripts dir
+SCRIPTS_DIR="$PROJECT_ROOT_DIR/scripts/xsim"
+
+#--------------------  Make sure we are running in projects root directory  -----------
 
 #make sure we are running only from projects root directory
 #if not then exit script
@@ -126,8 +145,8 @@ TEST_BENCH=${TEST_BENCH%.*}   #strip .sv from TEST_BENCH
 
 #get do file
 if [[ ! -n "$TCL_FILE" ]] ; then   #if a tcl file was not set by the -t flag
-  if [[ -f "$PROJECT_ROOT_DIR/scripts/xsim/$TEST_BENCH.tcl" ]] ; then  #if default tcl file exists
-    TCL_FILE="$PROJECT_ROOT_DIR/scripts/xsim/$TEST_BENCH.tcl"   #get abs path to tcl file
+  if [[ -f "$SCRIPTS_DIR/$TEST_BENCH.tcl" ]] ; then  #if default tcl file exists
+    TCL_FILE="$SCRIPTS_DIR/$TEST_BENCH.tcl"   #get abs path to tcl file
   fi
 fi
 
@@ -152,79 +171,109 @@ fi
 cd xsim || exit 1
 #-------------------- compile all rtl packages  ------------------------------
 
-echo "COMPILING RTL PACKAGE FILES:"
-echo $'\n'
-for RTL_PACKAGE_FILE in "$PROJECT_ROOT_DIR"/rtl/package/*.sv ; do
-  [ -f "$RTL_PACKAGE_FILE" ] || break
-  xvlog -sv "$RTL_PACKAGE_FILE"
+if [ -d "$RTL_PKG_DIR" ] ; then           #if we have packages, then compile
+  echo "COMPILING RTL PACKAGE FILES:"
   echo $'\n'
-done
-echo $'\n'
+  for RTL_PACKAGE_FILE in "$RTL_PKG_DIR"/*.sv ; do
+    [ -f "$RTL_PACKAGE_FILE" ] || break
+    xvlog -sv "$RTL_PACKAGE_FILE"
+    echo $'\n'
+  done
+  echo $'\n'
+fi
 
 #-------------------- compile all rtl files ------------------------------
 
-echo "COMPILING RTL FILES:"
-echo $'\n'
-for RTL_FILE in "$PROJECT_ROOT_DIR"/rtl/*.sv ; do
-  [ -f "$RTL_FILE" ] || break
-  xvlog -sv "$RTL_FILE"
+if [ -d "$RTL_DIR" ] ; then
+  echo "COMPILING RTL FILES:"
   echo $'\n'
-done
-echo $'\n'
+  for RTL_FILE in "$RTL_DIR"/*.sv ; do
+    [ -f "$RTL_FILE" ] || break
+    xvlog -sv "$RTL_FILE"
+    echo $'\n'
+  done
+  echo $'\n'
+else
+  echo "WARNING: no rtl directory found at $RTL_DIR"
+fi
+
+#-------------------- compile all verify packages  ------------------------------
+
+if [ -d "$VERIFY_PKG_DIR" ] ; then
+  echo "COMPILING VERIFY PACKAGE FILES:"
+  echo $'\n'
+  for VERIFY_PACKAGE_FILE in "$VERIFY_PKG_DIR"/*.sv ; do
+    [ -f "$VERIFY_PACKAGE_FILE" ] || break
+    xvlog -sv "$VERIFY_PACKAGE_FILE"
+    echo $'\n'
+  done
+  echo $'\n'
+fi
 
 #-------------------- compile all interface files ------------------------------
 
-echo "COMPILING INTERFACE FILES:"
-echo $'\n'
-for INTERFACE_FILE in "$PROJECT_ROOT_DIR"/interface/*.sv ; do
-  [ -f "$INTERFACE_FILE" ] || break
-  xvlog -sv "$INTERFACE_FILE"
+if [ -d "$INTERFACE_DIR" ] ; then
+  echo "COMPILING INTERFACE FILES:"
   echo $'\n'
-done
-echo $'\n'
+  for INTERFACE_FILE in "$INTERFACE_DIR"/*.sv ; do
+    [ -f "$INTERFACE_FILE" ] || break
+    xvlog -sv "$INTERFACE_FILE"
+    echo $'\n'
+  done
+  echo $'\n'
+fi
+
 #-------------------- compile all assertions files ------------------------------
 
-echo "COMPILING ASSERT FILES:"
-echo $'\n'
-for ASSERT_FILE in "$PROJECT_ROOT_DIR"/assert/*.sv ; do
-  [ -f "$ASSERT_FILE" ] || break
-  xvlog -sv "$ASSERT_FILE"
+if [ -d "$ASSERT_DIR" ] ; then
+  echo "COMPILING ASSERT FILES:"
   echo $'\n'
-done
-echo $'\n'
+  for ASSERT_FILE in "$ASSERT_DIR"/*.sv ; do
+    [ -f "$ASSERT_FILE" ] || break
+    xvlog -sv "$ASSERT_FILE"
+    echo $'\n'
+  done
+  echo $'\n'
+fi
 
 #-------------------- compile all coverage files ------------------------------
 
-echo "COMPILING COVERAGE FILES:"
-echo $'\n'
-for COVERAGE_FILE in "$PROJECT_ROOT_DIR"/coverage/*.sv ; do
-  [ -f "$COVERAGE_FILE" ] || break
-  xvlog -sv "$COVERAGE_FILE"
+if [ -d "$COVERAGE_DIR" ] ; then
+  echo "COMPILING COVERAGE FILES:"
   echo $'\n'
-done
-echo $'\n'
+  for COVERAGE_FILE in "$COVERAGE_DIR"/*.sv ; do
+    [ -f "$COVERAGE_FILE" ] || break
+    xvlog -sv "$COVERAGE_FILE"
+    echo $'\n'
+  done
+  echo $'\n'
+fi
 
 #-------------------- compile all stimulus files ------------------------------
 
-echo "COMPILING STIMULUS FILES:"
-echo $'\n'
-for STIMULUS_FILE in "$PROJECT_ROOT_DIR"/stimulus/*.sv ; do
-  [ -f "$STIMULUS_FILE" ] || break
-  xvlog -sv "$STIMULUS_FILE"
+if [ -d "$STIMULUS_DIR" ] ; then
+  echo "COMPILING STIMULUS FILES:"
   echo $'\n'
-done
-echo $'\n'
+  for STIMULUS_FILE in "$STIMULUS_DIR"/*.sv ; do
+    [ -f "$STIMULUS_FILE" ] || break
+    xvlog -sv "$STIMULUS_FILE"
+    echo $'\n'
+  done
+  echo $'\n'
+fi
 
 #-------------------- compile all ref models files ------------------------------
 
-echo "COMPILING REF_MODEL FILES:"
-echo $'\n'
-for REF_MODEL_FILE in "$PROJECT_ROOT_DIR"/ref_model/*.sv ; do
-  [ -f "$REF_MODEL_FILE" ] || break
-  xvlog -sv "$REF_MODEL_FILE"
+if [ -d "$REF_MODEL_DIR" ] ; then
+  echo "COMPILING REF_MODEL FILES:"
   echo $'\n'
-done
-echo $'\n'
+  for REF_MODEL_FILE in "$REF_MODEL_DIR"/*.sv ; do
+    [ -f "$REF_MODEL_FILE" ] || break
+    xvlog -sv "$REF_MODEL_FILE"
+    echo $'\n'
+  done
+  echo $'\n'
+fi
 
 #-------------------- compile test_bench ------------------------------
 
