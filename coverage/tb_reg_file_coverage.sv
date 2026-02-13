@@ -24,9 +24,9 @@ package tb_reg_file_coverage_pkg;
       //ensure write is enabled, and we are not pointing to x0
       cov_wr_data: coverpoint vif.wr_data
         iff(vif.wr_en && vif.wr_reg != X0) {
-          bins zeros = {32'h0000_0000};
-          bins all_ones = {32'hffff_ffff};
-          bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
+          bins zeros      = {WORD_ALL_ZEROS};
+          bins all_ones   = {WORD_ALL_ONES};
+          bins non_corner = {[WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]};
         }
 
       //we want to try and write non_zero data into x0
@@ -34,21 +34,21 @@ package tb_reg_file_coverage_pkg;
       //we want to make sure we tried at least once
       cov_x0_write: coverpoint vif.wr_data
         iff(vif.wr_en && vif.wr_reg == X0) {
-          bins non_zero = {[32'h0000_0001 : 32'hffff_ffff]};
+          bins non_zero = {[WORD_ALL_ZEROS + 1 : WORD_ALL_ONES]};
         }
 
       //We want to cover reading these values out from non x0 read regs
       cov_rd_data_1: coverpoint vif.rd_data_1
         iff(vif.rd_reg_1 != X0) {
-        bins zeros = {32'h0000_0000};
-        bins all_ones = {32'hffff_ffff};
-        bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
+        bins zeros      = {WORD_ALL_ZEROS};
+        bins all_ones   = {WORD_ALL_ONES};
+        bins non_corner = {[WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]};
       }
       cov_rd_data_2: coverpoint vif.rd_data_2
         iff(vif.rd_reg_2 != X0) {
-          bins zeros = {32'h0000_0000};
-          bins all_ones = {32'hffff_ffff};
-          bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
+          bins zeros      = {WORD_ALL_ZEROS};
+          bins all_ones   = {WORD_ALL_ONES};
+          bins non_corner = {[WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]};
         }
 
       //we want to cover reading from a register that is getting written to

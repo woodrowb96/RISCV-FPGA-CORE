@@ -15,9 +15,9 @@ package tb_reg_file_stimulus_pkg;
     //but want to hit non_corners most of the time
     constraint wr_data_corners {
       wr_data dist {
-        32'h0000_0000 := 1,
-        32'hffff_ffff := 1,
-        [32'h0000_0001 : 32'hffff_fffe] :/ 10
+        WORD_ALL_ZEROS                            := 1,
+        WORD_ALL_ONES                             := 1,
+        [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]  :/ 10
       };
     }
 
