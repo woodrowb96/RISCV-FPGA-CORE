@@ -16,19 +16,9 @@ package tb_lut_ram_stimulus_pkg;
               this.rd_data === other.rd_data);
     endfunction
 
-    function print(string msg = "");
-      $display("-----------------------");
-      $display("LUT_RAM_TRANS:%s\n",msg);
-      $display("time: %t", $time);
-      $display("-----------------------");
-      $display("wr_en: %b", wr_en);
-      $display("-----------------------");
-      $display("wr_addr: %d", wr_addr);
-      $display("wr_data: %h", wr_data);
-      $display("-----------------------");
-      $display("rd_addr: %d", rd_addr);
-      $display("rd_data: %h", rd_data);
-      $display("-----------------------");
+    function void print(string msg = "");
+      $display("[%s] t=%0t wr_en:%b wr_addr:%0d rd_addr:%0d wr_data:%h rd_data:%h",
+               msg, $time, wr_en, wr_addr, rd_addr, wr_data, rd_data);
     endfunction
   endclass
 endpackage
