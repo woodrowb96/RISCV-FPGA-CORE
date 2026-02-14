@@ -22,19 +22,8 @@ package tb_reg_file_stimulus_pkg;
     }
 
     function void print(string msg = "");
-      $display("-----------------------");
-      $display("REG_FILE_TRANS:%s\n",msg);
-      $display("time: %t", $time);
-      $display("-----------------------");
-      $display("wr_en: %b", wr_en);
-      $display("wr_reg: %d", wr_reg);
-      $display("wr_data: %h", wr_data);
-      $display("-----------------------");
-      $display("rd_reg_1: %d", rd_reg_1);
-      $display("rd_reg_2: %d", rd_reg_2);
-      $display("rd_data_1: %h", rd_data_1);
-      $display("rd_data_2: %h", rd_data_2);
-      $display("-----------------------");
+      $display("[%s] t=%0t wr_en:%0b wr_reg:%0d wr_data:%0h rd_reg_1:%0d rd_reg_2:%0d rd_data_1:%0h rd_data_2:%0h",
+               msg, $time, wr_en, wr_reg, wr_data, rd_reg_1, rd_reg_2, rd_data_1, rd_data_2);
     endfunction
   endclass
 endpackage

@@ -66,14 +66,12 @@ module tb_reg_file();
 
     //check our reads
     if(trans.rd_data_1 != exp.rd_data_1) begin
-      $error("FAIL:Incorrect rd_data_1\n",
-              "rd_reg_1: %d, Expected: %h, Actual: %h",
+      $error("FAIL: Incorrect rd_data_1 rd_reg_1:%0d expected:%0h actual:%0h",
               trans.rd_reg_1, exp.rd_data_1, trans.rd_data_1);
       test_fail = 1;
     end
     if(trans.rd_data_2 != exp.rd_data_2) begin
-      $error("FAIL:Incorrect rd_data_2\n",
-              "rd_reg_2: %d, Expected: %h, Actual: %h",
+      $error("FAIL: Incorrect rd_data_2 rd_reg_2:%0d expected:%0h actual:%0h",
               trans.rd_reg_2, exp.rd_data_2, trans.rd_data_2);
       test_fail = 1;
     end
@@ -98,8 +96,8 @@ module tb_reg_file();
   task print_test_results();
     $display("----------------");
     $display("Test results:");
-    $display("Total tests ran: %d", num_tests);
-    $display("Total tests failed: %d", num_fails);
+    $display("Total tests ran: %0d", num_tests);
+    $display("Total tests failed: %0d", num_fails);
     $display("----------------");
   endtask
 

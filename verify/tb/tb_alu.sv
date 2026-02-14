@@ -57,11 +57,11 @@ module tb_alu();
 
     //score out trans outputs
     if(trans.result != expected.result) begin
-      $error("FAIL\nIncorect Result\nExpected: %h",expected.result);
+      $error("FAIL: Incorrect Result expected:%0h", expected.result);
       test_fail = 1;
     end
     if(trans.zero != expected.zero) begin
-      $error("Zero flag incorect\nexpected: %b", expected.zero);
+      $error("FAIL: Zero flag incorrect expected:%0b", expected.zero);
       test_fail = 1;
     end
 
@@ -88,8 +88,8 @@ module tb_alu();
   task print_results();
     $display("----------------");
     $display("Test results:");
-    $display("Total tests ran: %d", num_tests);
-    $display("Total tests failed: %d", num_fails);
+    $display("Total tests ran: %0d", num_tests);
+    $display("Total tests failed: %0d", num_fails);
     $display("----------------");
   endtask
 

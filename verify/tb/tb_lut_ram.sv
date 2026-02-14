@@ -26,6 +26,9 @@ module tb_lut_ram();
                                                                 .rd_data(intf.rd_data)
                                                               );
 
+  /*********  LUT REFERENCE MODEL ***************/
+  lut_ram_ref_model #(MEM_WIDTH, MEM_DEPTH) ref_lut_ram;
+
   /********** TASKS ***********/
 
   task drive(trans_t trans);
@@ -42,15 +45,22 @@ module tb_lut_ram();
   int num_tests = 0;
   int num_fails = 0;
 
-  // function automatic score(trans_t trans, string label = "");
-  //   bit test_fail = 0;
-  //
-  //   if(test_fail) begin
-  //     num_fails++;
-  //   end
-  //
-  //   num_tests++;
-  // endfunction
+  function automatic void score(trans_t trans);
+    bit test_fail = 0;
+
+    trans_t expected = ref_lut_ram.process_trans(trans);
+
+    test_fail = trans.compare(expected);
+
+    if(test_fail) begin
+      $error("LUT_RAM_TB: test fail");
+      trans.print("ACTUAL");
+      trans.print("EXPECTED");
+      num_fails++;
+    end
+
+    num_tests++;
+  endfunction
 
   /************  TESTING ********/
   trans_t trans;
@@ -74,7 +84,7 @@ module tb_lut_ram();
       @(posedge intf.clk)
       #1
       monitor(trans);
-      $display("wr_en: %b\n wr_addr: %d, wr_data: %h\nrd_addr: %d, rd_data: %h\n",
+      $display("wr_en:%0b wr_addr:%0d wr_data:%0h rd_addr:%0d rd_data:%0h",
                 trans.wr_en, trans.wr_addr, trans.wr_data, trans.rd_addr, trans.rd_data);
     end
 

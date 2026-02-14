@@ -10,18 +10,8 @@ interface alu_intf;
   modport coverage(input alu_op, in_a, in_b, result, zero);
   modport assertion(input alu_op, in_a, in_b, result, zero);
 
-  function print(string msg = "");
-    $display("-----------------------");
-    $display("ALU INTERFACE:%s\n",msg);
-    $display("time: %t", $time);
-    $display("-----------------------");
-    $display("alu_op: %b", alu_op);
-    $display("-----------------------");
-    $display("in_a: %h", in_a);
-    $display("in_b: %h", in_b);
-    $display("-----------------------");
-    $display("result: %h", result);
-    $display("zero: %b", zero);
-    $display("-----------------------");
+  function void print(string msg = "");
+    $display("[%s] t=%0t alu_op:%0b in_a:%0h in_b:%0h result:%0h zero:%0b",
+             msg, $time, alu_op, in_a, in_b, result, zero);
   endfunction
 endinterface

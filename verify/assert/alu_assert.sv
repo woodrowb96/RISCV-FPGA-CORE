@@ -5,11 +5,11 @@ module alu_assert(
     //zero flag assertion
     if(intf.result == '0) begin
       assert(intf.zero == 1'b1) else
-        $error("ERROR ALU: Zero flag not set, result = %h, zero_flag = %b",
+        $error("ERROR ALU: Zero flag not set, result=%0h, zero_flag=%0b",
               intf.result, intf.zero);
     end else if(intf.result != '0) begin
       assert(intf.zero == 1'b0) else
-        $error("ERROR ALU: Zero flag set incorrectly, result = %h, zero_flag = %b",
+        $error("ERROR ALU: Zero flag set incorrectly, result=%0h, zero_flag=%0b",
               intf.result, intf.zero);
     end
   end

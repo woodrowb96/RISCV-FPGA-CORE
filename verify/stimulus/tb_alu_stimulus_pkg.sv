@@ -59,18 +59,8 @@ package tb_alu_stimulus_pkg;
     endfunction
 
     function void print(string msg = "");
-      $display("-----------------------");
-      $display("ALU TRANS:%s\n",msg);
-      $display("time: %t", $time);
-      $display("-----------------------");
-      $display("alu_op: %b", alu_op);
-      $display("-----------------------");
-      $display("in_a: %h", in_a);
-      $display("in_b: %h", in_b);
-      $display("-----------------------");
-      $display("result: %h", result);
-      $display("zero: %b", zero);
-      $display("-----------------------");
+      $display("[%s] t=%0t alu_op:%0b in_a:%0h in_b:%0h result:%0h zero:%0b",
+               msg, $time, alu_op, in_a, in_b, result, zero);
     endfunction
   endclass
 

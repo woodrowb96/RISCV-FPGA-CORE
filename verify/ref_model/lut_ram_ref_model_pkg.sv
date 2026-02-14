@@ -13,7 +13,7 @@ package lut_ram_ref_model_pkg;
     //read, with an out of bounds warning
     function data_t read(addr_t rd_addr);
       if(rd_addr >= LUT_DEPTH) begin
-        $warning("LUT_REF_MODEL: out of bound read\ndepth: %d ,rd_addr: %d", LUT_DEPTH, rd_addr);
+        $warning("LUT_REF_MODEL: out of bound read depth:%0d rd_addr:%0d", LUT_DEPTH, rd_addr);
       end
       return mem[rd_addr];
     endfunction
@@ -22,7 +22,7 @@ package lut_ram_ref_model_pkg;
     function void write(addr_t wr_addr, data_t wr_data);
       mem[wr_addr] = wr_data;
       if(wr_addr >= LUT_DEPTH) begin
-        $warning("LUT_REF_MODEL: out of bound write\ndepth: %d ,wr_addr: %d", LUT_DEPTH, wr_addr);
+        $warning("LUT_REF_MODEL: out of bound write depth:%0d wr_addr:%0d", LUT_DEPTH, wr_addr);
       end
     endfunction
 

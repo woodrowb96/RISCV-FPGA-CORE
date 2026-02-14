@@ -12,10 +12,10 @@ module reg_file_assert(
 
   x0_rd_zero_rd_reg_1_assert:
     assert property(x0_rd_zero_prop(intf.rd_reg_1, intf.rd_data_1)) else
-      $error("x0_rd_zero_rd_reg_1_assert: rd_data_1=0x%h", intf.rd_data_1);
+      $error("x0_rd_zero_rd_reg_1_assert: rd_data_1=0x%0h", intf.rd_data_1);
   x0_rd_zero_rd_reg_2_assert:
     assert property(x0_rd_zero_prop(intf.rd_reg_2, intf.rd_data_2)) else
-      $error("x0_rd_zero_rd_reg_2_assert: rd_data_2=0x%h", intf.rd_data_2);
+      $error("x0_rd_zero_rd_reg_2_assert: rd_data_2=0x%0h", intf.rd_data_2);
 
   /*********   x0 OVERWRITE CHECK **************/
   //x0 should always be zero, it should never be overwritten
@@ -26,7 +26,7 @@ module reg_file_assert(
 
   x0_always_zero_assert:
     assert property(x0_always_zero_prop) else
-      $error("x0_always_zero_assert: x0=%h", reg_file.reg_file[X0]);
+      $error("x0_always_zero_assert: x0=%0h", reg_file.reg_file[X0]);
 
   /******* WRITE CHECK *****************/
   //We want to make sure the wr_data is actually written into the reg_file
@@ -66,12 +66,12 @@ module reg_file_assert(
     #0
     if(intf.rd_reg_1 != X0) begin
       assert (intf.rd_data_1 === reg_file.reg_file[intf.rd_reg_1]) else
-        $error("read_rd_reg_1_assert: expected:%h, actual: %h",
+        $error("read_rd_reg_1_assert: expected:%0h, actual:%0h",
                 reg_file.reg_file[intf.rd_reg_1], intf.rd_data_1);
     end
     if(intf.rd_reg_2 != X0) begin
       assert (intf.rd_data_2 === reg_file.reg_file[intf.rd_reg_2]) else
-        $error("read_rd_reg_2_assert: expected:%h, actual: %h",
+        $error("read_rd_reg_2_assert: expected:%0h, actual:%0h",
                 reg_file.reg_file[intf.rd_reg_2], intf.rd_data_2);
     end
 
