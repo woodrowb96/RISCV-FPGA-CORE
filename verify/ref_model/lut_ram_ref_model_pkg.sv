@@ -31,7 +31,7 @@ package lut_ram_ref_model_pkg;
     //  update reference memory state
     //  output the prediction
     function trans_t process_trans(trans_t inpt);
-      trans_t expected;
+      trans_t expected = new();
 
       //expected input should match the inpts input
       expected.wr_en = inpt.wr_en;
