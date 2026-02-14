@@ -1,9 +1,11 @@
 import riscv_32i_defs_pkg::*;
-import lut_ram_verify_pkg::*;
 import tb_lut_ram_stimulus_pkg::*;
 
 module tb_lut_ram();
   localparam CLK_PERIOD = 10;
+  localparam MEM_DEPTH = 256;
+  localparam MEM_WIDTH = XLEN;
+  typedef lut_ram_trans #(MEM_WIDTH, MEM_DEPTH) trans_t;
 
   //clk
   logic clk;
@@ -13,32 +15,45 @@ module tb_lut_ram();
   end
 
   /************ INTERFACE ***********/
-  lut_ram_intf intf(clk);
+  lut_ram_intf #(.LUT_WIDTH(MEM_WIDTH), .LUT_DEPTH(MEM_DEPTH)) intf(clk);
 
   /**********  DUT ***************/
-  lut_ram dut(.clk(intf.clk),
-              .wr_en(intf.wr_en),
-              .wr_addr(intf.wr_addr),
-              .rd_addr(intf.rd_addr),
-              .wr_data(intf.wr_data),
-              .rd_data(intf.rd_data)
-              );
+  lut_ram #(.LUT_WIDTH(MEM_WIDTH), .LUT_DEPTH(MEM_DEPTH)) dut (.clk(intf.clk),
+                                                                .wr_en(intf.wr_en),
+                                                                .wr_addr(intf.wr_addr),
+                                                                .rd_addr(intf.rd_addr),
+                                                                .wr_data(intf.wr_data),
+                                                                .rd_data(intf.rd_data)
+                                                              );
 
   /********** TASKS ***********/
 
-  task drive(lut_ram_trans trans);
+  task drive(trans_t trans);
     intf.wr_en <= trans.wr_en;
     intf.wr_addr <= trans.wr_addr;
     intf.rd_addr <= trans.rd_addr;
     intf.wr_data <= trans.wr_data;
   endtask
 
-  task monitor(lut_ram_trans trans);
+  task monitor(trans_t trans);
     trans.rd_data = intf.rd_data;
   endtask
 
+  int num_tests = 0;
+  int num_fails = 0;
+
+  // function automatic score(trans_t trans, string label = "");
+  //   bit test_fail = 0;
+  //
+  //   if(test_fail) begin
+  //     num_fails++;
+  //   end
+  //
+  //   num_tests++;
+  // endfunction
+
   /************  TESTING ********/
-  lut_ram_trans trans;
+  trans_t trans;
   initial begin
 
     trans = new();
