@@ -26,29 +26,11 @@ package lut_ram_ref_model_pkg;
       end
     endfunction
 
-    //process an input transaction:
-    //  predict expected outputs
-    //  update reference memory state
-    //  output the prediction
-    function trans_t process_trans(trans_t inpt);
-      trans_t expected = new();
-
-      //expected input should match the inpts input
-      expected.wr_en = inpt.wr_en;
-      expected.wr_addr = inpt.wr_addr;
-      expected.rd_addr = inpt.rd_addr;
-      expected.wr_data = inpt.wr_data;
-
-      //predict the output
-      //we read before write, because our reads are async
-      expected.rd_data = read(inpt.rd_addr);
-
-      //update the ref_model mem state
+    //look at the transaction and update the ref_models state
+    function void update(trans_t inpt);
       if(inpt.wr_en) begin
         write(inpt.wr_addr, inpt.wr_data);
       end
-
-      return expected;
     endfunction
   endclass
 endpackage
