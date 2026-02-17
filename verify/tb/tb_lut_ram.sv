@@ -1,5 +1,6 @@
 import riscv_32i_defs_pkg::*;
 import tb_lut_ram_transaction_pkg::*;
+import tb_lut_ram_generator_pkg::*;
 import lut_ram_ref_model_pkg::*;
 import tb_lut_ram_coverage_pkg::*;
 
@@ -8,6 +9,7 @@ module tb_lut_ram();
   localparam MEM_DEPTH = 10000;
   localparam MEM_WIDTH = XLEN;
   typedef lut_ram_trans #(MEM_WIDTH, MEM_DEPTH) trans_t;
+  typedef tb_lut_ram_generator #(MEM_WIDTH, MEM_DEPTH) generator_t;
 
   //clk
   logic clk;
@@ -100,18 +102,17 @@ module tb_lut_ram();
   endfunction
 
   /************  TESTING ********/
-  trans_t trans;
+  generator_t gen;
 
   initial begin
     ref_lut_ram = new();
     coverage = new(intf.monitor);
-    trans = new();
+    gen = new();
 
     coverage.start();
 
     for(int i = 0; i < 1000; i++) begin
-      assert(trans.randomize());
-      test_monitor_before_write(trans);
+      test_monitor_before_write(gen.gen_trans());
     end
 
     coverage.stop();

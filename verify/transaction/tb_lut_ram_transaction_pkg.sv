@@ -1,13 +1,11 @@
 package tb_lut_ram_transaction_pkg;
 
   class lut_ram_trans #(parameter int LUT_WIDTH = 32, parameter int LUT_DEPTH = 256);
-    //dut input
     rand logic wr_en;
     rand logic [$clog2(LUT_DEPTH)-1:0] wr_addr;
     rand logic [$clog2(LUT_DEPTH)-1:0] rd_addr;
     rand logic [LUT_WIDTH-1:0] wr_data;
 
-    //dut output
     logic [LUT_WIDTH-1:0] rd_data;
 
     function bit compare(lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) other);
@@ -22,33 +20,6 @@ package tb_lut_ram_transaction_pkg;
       $display("[%s] t=%0t wr_en:%b wr_addr:%0d rd_addr:%0d wr_data:%h rd_data:%h",
                msg, $time, wr_en, wr_addr, rd_addr, wr_data, rd_data);
     endfunction
-
-    /********************** RANDOMIZATION ************************/
-    localparam longint unsigned ALL_ZEROS = {LUT_WIDTH{1'b0}};
-    localparam longint unsigned ALL_ONES = {LUT_WIDTH{1'b1}};
-    localparam int     unsigned MIN_ADDR = 0;
-    localparam int     unsigned MAX_ADDR = LUT_DEPTH - 1;
-
-    constraint addr_corner {
-      wr_addr dist {
-        MIN_ADDR            := 1,
-        MAX_ADDR            := 1,
-        [MIN_ADDR:MAX_ADDR] :/ 5
-      };
-      rd_addr dist {
-        MIN_ADDR            := 1,
-        MAX_ADDR            := 1,
-        [MIN_ADDR:MAX_ADDR] :/ 5
-      };
-    }
-
-    constraint wr_data_corner {
-      wr_data dist {
-        ALL_ZEROS            := 1,
-        ALL_ONES             := 1,
-        [ALL_ZEROS:ALL_ONES] :/ 5
-      };
-    }
 
     /************ NOTE *********************/
     //I use the post_rand function to manually randomize the MSB of wr_data as
@@ -82,6 +53,8 @@ package tb_lut_ram_transaction_pkg;
     //  I think using the post_rand function is probably the cleanest way to
     //  get the MSB to randomize
     /**************************************/
+    localparam longint unsigned ALL_ZEROS = {LUT_WIDTH{1'b0}};
+    localparam longint unsigned ALL_ONES = {LUT_WIDTH{1'b1}};
     function void post_randomize();
       if(!(wr_data inside {ALL_ZEROS, ALL_ONES})) begin
         randcase

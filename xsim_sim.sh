@@ -62,6 +62,8 @@ COVERAGE_DIR="$VERIFY_DIR/coverage"
 INTERFACE_DIR="$VERIFY_DIR/interface"
 REF_MODEL_DIR="$VERIFY_DIR/ref_model"
 STIMULUS_DIR="$VERIFY_DIR/stimulus"
+TRANSACTION_DIR="$VERIFY_DIR/transaction"
+GENERATOR_DIR="$VERIFY_DIR/generator"
 TB_DIR="$VERIFY_DIR/tb"
 
 #scripts dir
@@ -244,6 +246,31 @@ if [ -d "$COVERAGE_DIR" ] ; then
   for COVERAGE_FILE in "$COVERAGE_DIR"/*.sv ; do
     [ -f "$COVERAGE_FILE" ] || break
     xvlog -sv "$COVERAGE_FILE"
+    echo $'\n'
+  done
+  echo $'\n'
+fi
+
+#-------------------- compile all TRANSACTION files ------------------------------
+
+if [ -d "$TRANSACTION_DIR" ] ; then
+  echo "COMPILING TRANSACTION FILES:"
+  echo $'\n'
+  for TRANSACTION_FILE in "$TRANSACTION_DIR"/*.sv ; do
+    [ -f "$TRANSACTION_FILE" ] || break
+    xvlog -sv "$TRANSACTION_FILE"
+    echo $'\n'
+  done
+  echo $'\n'
+fi
+#-------------------- compile all GENERATOR files ------------------------------
+
+if [ -d "$GENERATOR_DIR" ] ; then
+  echo "COMPILING GENERATOR FILES:"
+  echo $'\n'
+  for GENERATOR_FILE in "$GENERATOR_DIR"/*.sv ; do
+    [ -f "$GENERATOR_FILE" ] || break
+    xvlog -sv "$GENERATOR_FILE"
     echo $'\n'
   done
   echo $'\n'
