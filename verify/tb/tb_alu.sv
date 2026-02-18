@@ -1,4 +1,5 @@
 import tb_alu_coverage_pkg::*;
+import tb_alu_transaction_pkg::*;
 import tb_alu_stimulus_pkg::*;
 import alu_ref_model_pkg::*;
 import riscv_32i_defs_pkg::*;
