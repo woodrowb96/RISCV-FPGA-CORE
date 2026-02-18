@@ -53,7 +53,7 @@ module tb_alu();
     bit test_fail = 0;
 
     //use trans inputs to calc expected values
-    expected_output expected = ref_alu.expected(trans.alu_op, trans.in_a, trans.in_b);
+    alu_ref_output expected = ref_alu.predict(trans);
 
     //score out trans outputs
     if(trans.result != expected.result) begin
