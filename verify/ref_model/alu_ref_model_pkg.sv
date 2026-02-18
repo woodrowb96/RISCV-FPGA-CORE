@@ -10,7 +10,7 @@ package alu_ref_model_pkg;
 
   class alu_ref_model;
 
-    function alu_ref_output predict(alu_general_trans trans);
+    function alu_ref_output predict(alu_trans trans);
       logic [XLEN:0] in_a_wide = {1'b0, trans.in_a};
       logic [XLEN:0] in_b_wide = {1'b0, trans.in_b};
       logic [XLEN:0] result_wide = '0;

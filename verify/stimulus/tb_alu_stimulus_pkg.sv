@@ -3,7 +3,7 @@ package tb_alu_stimulus_pkg;
   import tb_alu_transaction_pkg::*;
 
   //transaction for logical operations (and, or ...)
-  class alu_logical_op_trans extends alu_general_trans;
+  class alu_logical_op_trans extends alu_trans;
     constraint logical_op_inputs {
       /******* NOTE **********/
       //I think this might be another case of a bug in xsim.
@@ -52,7 +52,7 @@ package tb_alu_stimulus_pkg;
   endclass
 
   //transaction for ADD ops
-  class alu_add_op_trans extends alu_general_trans;
+  class alu_add_op_trans extends alu_trans;
     constraint add_op { alu_op == ALU_ADD; }
 
     constraint add_op_inputs {
@@ -72,7 +72,7 @@ package tb_alu_stimulus_pkg;
   endclass
 
   //transaction for SUB ops
-  class alu_sub_op_trans extends alu_general_trans;
+  class alu_sub_op_trans extends alu_trans;
     constraint sub_op { alu_op == ALU_SUB; }
 
     constraint sub_op_inputs {

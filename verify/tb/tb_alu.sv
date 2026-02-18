@@ -31,13 +31,13 @@ module tb_alu();
   tb_alu_coverage coverage;
 
   /*********** TASKS *************/
-  task drive(alu_general_trans trans);
+  task drive(alu_trans trans);
     intf.alu_op = trans.alu_op;
     intf.in_a = trans.in_a;
     intf.in_b = trans.in_b;
   endtask
 
-  task monitor(alu_general_trans trans);
+  task monitor(alu_trans trans);
     trans.result = intf.result;
     trans.zero = intf.zero;
   endtask
@@ -50,7 +50,7 @@ module tb_alu();
   int num_fails = 0;
 
   //Use the reference model to score a transaction
-  task automatic score(alu_general_trans trans);
+  task automatic score(alu_trans trans);
     bit test_fail = 0;
 
     //use trans inputs to calc expected values
@@ -75,7 +75,7 @@ module tb_alu();
     num_tests++;
   endtask
 
-  task test(alu_general_trans trans);
+  task test(alu_trans trans);
       @(posedge clk);
       drive(trans);
       //wait for the inputs to propogate to the outputs
@@ -99,7 +99,7 @@ module tb_alu();
   alu_logical_op_trans logical_trans;
   alu_add_op_trans add_trans;
   alu_sub_op_trans sub_trans;
-  alu_general_trans unconstrained_trans;
+  alu_trans unconstrained_trans;
 
   initial begin
     //create coverage and connect it to the interface
