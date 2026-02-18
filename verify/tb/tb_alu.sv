@@ -1,6 +1,6 @@
 import tb_alu_coverage_pkg::*;
 import tb_alu_transaction_pkg::*;
-import tb_alu_stimulus_pkg::*;
+import tb_alu_generator_pkg::*;
 import alu_ref_model_pkg::*;
 import riscv_32i_defs_pkg::*;
 
@@ -92,55 +92,30 @@ module tb_alu();
   endtask
 
   /**************  TESTING ***************************/
-  //we are going to need these kinds of transactions for our tests
-  alu_logical_op_trans logical_trans;
-  alu_add_op_trans add_trans;
-  alu_sub_op_trans sub_trans;
-  alu_trans unconstrained_trans;
+  tb_alu_generator generator;
+  alu_trans trans;
 
   initial begin
     coverage = new(intf.coverage);
     ref_alu = new();
+    generator = new();
+    trans = new();
 
-    logical_trans = new();
-    add_trans = new();
-    sub_trans = new();
-    unconstrained_trans = new();
-
-    /*************  TEST AND ***************/
-    repeat(1000) begin
-      assert(logical_trans.randomize() with { alu_op == ALU_AND; });
-      test(logical_trans);
-    end
-
-    /************   TEST OR *****************/
-    repeat(1000) begin
-      assert(logical_trans.randomize() with { alu_op == ALU_OR; });
-      test(logical_trans);
-    end
-
-    /*****************  TEST ADD **************/
-    repeat(1000) begin
-      assert(add_trans.randomize());
-      test(add_trans);
-    end
-
-    /************ TEST SUB ****************/
     repeat(1500) begin
-      assert(sub_trans.randomize());
-      test(sub_trans);
+      test(generator.gen_trans());
     end
 
-    /************ TEST EVERYTHING COMPLETELY RANDOMIZED ****************/
-    repeat(1000) begin
-      assert(unconstrained_trans.randomize());
-      test(unconstrained_trans);
+    //sub has alot of corner cases to hit
+    //so we just loop and gen only sub transactions
+    repeat(3500) begin
+      test(generator.gen_sub_trans());
     end
 
-    /************ TEST INVALID OP ****************/
-    assert(unconstrained_trans.randomize());
-    unconstrained_trans.alu_op = alu_op_t'(4'b1111);
-    test(unconstrained_trans);
+    //test the ouput of an invalid trans is correct (result == 0, and zero ==0)
+    assert(trans.randomize()) else
+      $fatal(1, "ALU_TB: trans randomization failed");
+    trans.alu_op = alu_op_t'(4'b1111);
+    test(trans);
 
     print_results();
 

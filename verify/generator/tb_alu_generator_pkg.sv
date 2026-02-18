@@ -68,7 +68,7 @@ package tb_alu_generator_pkg;
         WORD_SIGNED_NEG_ONE                       := 4,
         WORD_MAX_SIGNED_POS                       := 4,
         WORD_MIN_SIGNED_NEG                       := 4,
-        [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]  :/ 2
+        [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]  :/ 3
       };
       in_b dist {
         WORD_SIGNED_ZERO                          := 4,
@@ -76,7 +76,7 @@ package tb_alu_generator_pkg;
         WORD_SIGNED_NEG_ONE                       := 4,
         WORD_MAX_SIGNED_POS                       := 4,
         WORD_MIN_SIGNED_NEG                       := 4,
-        [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]  :/ 2
+        [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]  :/ 3
       };
     };
   endclass
@@ -121,6 +121,17 @@ package tb_alu_generator_pkg;
       endcase
 
       return trans;
+    endfunction
+
+    //Sub has alot of corners so, this just generates sub transactions so we
+    //can hit coverage
+    function alu_trans gen_sub_trans();
+      alu_trans_sub_op trans_sub = new();
+
+      assert(trans_sub.randomize()) else
+        $fatal(1, "TB_ALU_GENERATOR: gen_directed_sub_trans() randomization failed");
+
+      return trans_sub;
     endfunction
   endclass
 endpackage
