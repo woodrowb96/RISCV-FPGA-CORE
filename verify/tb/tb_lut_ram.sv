@@ -6,7 +6,7 @@ import tb_lut_ram_coverage_pkg::*;
 
 module tb_lut_ram();
   localparam CLK_PERIOD = 10;
-  localparam MEM_DEPTH = 10000;
+  localparam MEM_DEPTH = 1000;
   localparam MEM_WIDTH = XLEN;
   typedef lut_ram_trans #(MEM_WIDTH, MEM_DEPTH) trans_t;
   typedef tb_lut_ram_generator #(MEM_WIDTH, MEM_DEPTH) generator_t;
@@ -29,6 +29,9 @@ module tb_lut_ram();
                                                                 .wr_data(intf.wr_data),
                                                                 .rd_data(intf.rd_data)
                                                               );
+  /**********  BIND ASSERTIONS *****************/
+  bind tb_lut_ram.dut lut_ram_assert dut_assert(tb_lut_ram.intf);
+
   /********  COVERAGE **************************/
   tb_lut_ram_coverage #(MEM_WIDTH, MEM_DEPTH) coverage;
 
