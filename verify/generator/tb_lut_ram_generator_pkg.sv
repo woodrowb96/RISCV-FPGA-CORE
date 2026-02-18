@@ -93,7 +93,6 @@ package tb_lut_ram_generator_pkg;
     };
   endclass
 
-
   /************************** GENERATOR ************************************/
   class tb_lut_ram_generator #(parameter int LUT_WIDTH = 32, parameter int LUT_DEPTH = 256);
     typedef lut_ram_trans_prev_written #(LUT_WIDTH, LUT_DEPTH)    trans_prev_written_t;
@@ -105,13 +104,11 @@ package tb_lut_ram_generator_pkg;
     //generator needs to keep track of generated transactions
     addr_t prev_written_addr [$] = {0};
 
-    //if the testbench ever needs to reset our history of previously generated
-    //addresses it can use this funct
+    //the tb can call this to clear the generated wr_addr history if it needs to
     function void reset_prev_written_addr();
       prev_written_addr = {0};
     endfunction
 
-    //generate transactions for out tests
     function base_trans_t gen_trans();
       base_trans_t trans;
 
@@ -148,7 +145,9 @@ package tb_lut_ram_generator_pkg;
       endcase
 
       //update the set of previously written addresses
-      prev_written_addr.push_back(trans.wr_addr);
+      if(trans.wr_en) begin
+        prev_written_addr.push_back(trans.wr_addr);
+      end
 
       return trans;
     endfunction
