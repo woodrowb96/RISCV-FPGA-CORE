@@ -32,16 +32,16 @@ module lut_ram #(
   //output
   output logic [LUT_WIDTH-1:0] rd_data
 );
-  //our ram array
-  reg [LUT_WIDTH-1:0] ram [0:LUT_DEPTH-1];
+  //our mem array
+  reg [LUT_WIDTH-1:0] mem [0:LUT_DEPTH-1];
 
   //syncronous writes
   always_ff @(posedge clk) begin
     if(wr_en) begin
-      ram[wr_addr] <= wr_data;
+      mem[wr_addr] <= wr_data;
     end
   end
 
   //asyncronous reads
-  assign rd_data = ram[rd_addr];
+  assign rd_data = mem[rd_addr];
 endmodule

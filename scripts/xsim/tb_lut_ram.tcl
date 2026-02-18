@@ -8,7 +8,7 @@ add_wave_divider
 add_wave -radix unsigned tb_lut_ram/intf/rd_addr
 add_wave -radix hex tb_lut_ram/intf/rd_data
 add_wave_divider
-add_wave -radix hex tb_lut_ram/dut/ram
+add_wave -radix hex tb_lut_ram/dut/mem
 
 run all
 
