@@ -8,8 +8,9 @@ module tb_lut_ram();
   localparam CLK_PERIOD = 10;
   localparam MEM_DEPTH = 1000;
   localparam MEM_WIDTH = XLEN;
-  typedef lut_ram_trans #(MEM_WIDTH, MEM_DEPTH) trans_t;
+
   typedef tb_lut_ram_generator #(MEM_WIDTH, MEM_DEPTH) generator_t;
+  typedef lut_ram_trans #(MEM_WIDTH, MEM_DEPTH) trans_t;
 
   //clk
   logic clk;
