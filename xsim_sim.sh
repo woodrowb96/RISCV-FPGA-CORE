@@ -61,7 +61,6 @@ ASSERT_DIR="$VERIFY_DIR/assert"
 COVERAGE_DIR="$VERIFY_DIR/coverage"
 INTERFACE_DIR="$VERIFY_DIR/interface"
 REF_MODEL_DIR="$VERIFY_DIR/ref_model"
-STIMULUS_DIR="$VERIFY_DIR/stimulus"
 TRANSACTION_DIR="$VERIFY_DIR/transaction"
 GENERATOR_DIR="$VERIFY_DIR/generator"
 TB_DIR="$VERIFY_DIR/tb"
@@ -271,19 +270,6 @@ if [ -d "$GENERATOR_DIR" ] ; then
   for GENERATOR_FILE in "$GENERATOR_DIR"/*.sv ; do
     [ -f "$GENERATOR_FILE" ] || break
     xvlog -sv "$GENERATOR_FILE"
-    echo $'\n'
-  done
-  echo $'\n'
-fi
-
-#-------------------- compile all stimulus files ------------------------------
-
-if [ -d "$STIMULUS_DIR" ] ; then
-  echo "COMPILING STIMULUS FILES:"
-  echo $'\n'
-  for STIMULUS_FILE in "$STIMULUS_DIR"/*.sv ; do
-    [ -f "$STIMULUS_FILE" ] || break
-    xvlog -sv "$STIMULUS_FILE"
     echo $'\n'
   done
   echo $'\n'
