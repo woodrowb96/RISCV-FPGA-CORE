@@ -1,4 +1,5 @@
 import tb_reg_file_transaction_pkg::*;
+import tb_reg_file_generator_pkg::*;
 import reg_file_ref_model_pkg::*;
 import tb_reg_file_coverage_pkg::*;
 import riscv_32i_defs_pkg::*;
@@ -99,20 +100,19 @@ module tb_reg_file();
   endtask
 
   /*********** TESTING ******************/
-  reg_file_trans trans;
+  tb_reg_file_generator generator;
   initial begin
 
     coverage = new(intf.monitor);
     ref_reg_file = new();
-    trans = new();
+    generator = new();
 
     repeat(1000) begin
-      assert(trans.randomize());
-      test(trans);
+      test(generator.gen_trans());
     end
 
-    //print results and end simulation
     print_test_results();
+
     $stop(1);
   end
 endmodule
