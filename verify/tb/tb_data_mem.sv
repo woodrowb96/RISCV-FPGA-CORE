@@ -24,6 +24,8 @@ module tb_data_mem();
                 .wr_data(intf.wr_data),
                 .rd_data(intf.rd_data)
               );
+  /********* DATA MEM REFERENCE MODEL *********/
+  data_mem_ref_model ref_data_mem;
 
   /*************  TASKS *********************/
   task drive(data_mem_trans trans);
