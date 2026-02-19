@@ -50,20 +50,10 @@ EOF
 #the root directory, where the sim scripts live
 PROJECT_ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-#rtl directories
-RTL_DIR="$PROJECT_ROOT_DIR/rtl"
-RTL_PKG_DIR="$RTL_DIR/package"
-
-#verification directories
-VERIFY_DIR="$PROJECT_ROOT_DIR/verify"
-VERIFY_PKG_DIR="$VERIFY_DIR/package"
-ASSERT_DIR="$VERIFY_DIR/assert"
-COVERAGE_DIR="$VERIFY_DIR/coverage"
-INTERFACE_DIR="$VERIFY_DIR/interface"
-REF_MODEL_DIR="$VERIFY_DIR/ref_model"
-TRANSACTION_DIR="$VERIFY_DIR/transaction"
-GENERATOR_DIR="$VERIFY_DIR/generator"
-TB_DIR="$VERIFY_DIR/tb"
+#sim directories for xsim
+SIM_DIR="$PROJECT_ROOT_DIR/sim"
+XSIM_DIR="$SIM_DIR/xsim"
+XSIM_WORKING_DIR="$XSIM_DIR/xsim.dir/work"
 
 #scripts dir
 SCRIPTS_DIR="$PROJECT_ROOT_DIR/scripts/xsim"
@@ -151,151 +141,66 @@ if [[ ! -n "$TCL_FILE" ]] ; then   #if a tcl file was not set by the -t flag
   fi
 fi
 
+#----------------  get correct filelist file ---------------------------------------
+
+#make sure we have a filelist
+if [[ -f "$SCRIPTS_DIR/filelist/$TEST_BENCH.f" ]] ; then
+  FILE_LIST="$SCRIPTS_DIR/filelist/$TEST_BENCH.f"
+else
+  echo $'\n'
+  echo "ERROR MISSING FILELIST: $TEST_BENCH.f"
+  exit 1
+fi
+
 #-------------------- ensure sim directory exists      ------------------------------
 
 #Check if sim directory exists at project root, if not the create it
-if [ ! -d "$PROJECT_ROOT_DIR/sim" ] ; then 
+if [ ! -d "$SIM_DIR" ] ; then 
   echo "no simulation directory found"
   echo $'creating ./sim directory\n'
-  mkdir -p "$PROJECT_ROOT_DIR/sim"
+  mkdir -p "$SIM_DIR"
 fi
 
-cd "$PROJECT_ROOT_DIR/sim"  || exit 1
 
 #Check if xsim directory exists in sim dir, if not create it
-if [ ! -d 'xsim' ] ; then 
+if [ ! -d "$XSIM_DIR" ] ; then
   echo "no xsim directory found"
   echo $'creating ./sim/xsim directory\n'
-  mkdir -p xsim
+  mkdir -p "$XSIM_DIR"
 fi
 
-cd xsim || exit 1
-#-------------------- compile all rtl packages  ------------------------------
+#-------------------- compile filelist dependencies ----------------
 
-if [ -d "$RTL_PKG_DIR" ] ; then           #if we have packages, then compile
-  echo "COMPILING RTL PACKAGE FILES:"
+echo "COMPILING FILELIST DEPENDENCIES: $FILE_LIST"
+echo $'\n'
+xvlog -sv --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" -f "$FILE_LIST"
+
+#If we failed to compile the dependencies, then dont run the sim
+if [ $? -ne 0 ] ; then
   echo $'\n'
-  for RTL_PACKAGE_FILE in "$RTL_PKG_DIR"/*.sv ; do
-    [ -f "$RTL_PACKAGE_FILE" ] || break
-    xvlog -sv "$RTL_PACKAGE_FILE"
-    echo $'\n'
-  done
-  echo $'\n'
+  echo "ERROR $SCRIPT_NAME: $FILE_LIST compilation failed"
+  exit 1
 fi
+echo $'\n'
 
-#-------------------- compile all rtl files ------------------------------
-
-if [ -d "$RTL_DIR" ] ; then
-  echo "COMPILING RTL FILES:"
-  echo $'\n'
-  for RTL_FILE in "$RTL_DIR"/*.sv ; do
-    [ -f "$RTL_FILE" ] || break
-    xvlog -sv "$RTL_FILE"
-    echo $'\n'
-  done
-  echo $'\n'
-else
-  echo "WARNING: no rtl directory found at $RTL_DIR"
-fi
-
-#-------------------- compile all verify packages  ------------------------------
-
-if [ -d "$VERIFY_PKG_DIR" ] ; then
-  echo "COMPILING VERIFY PACKAGE FILES:"
-  echo $'\n'
-  for VERIFY_PACKAGE_FILE in "$VERIFY_PKG_DIR"/*.sv ; do
-    [ -f "$VERIFY_PACKAGE_FILE" ] || break
-    xvlog -sv "$VERIFY_PACKAGE_FILE"
-    echo $'\n'
-  done
-  echo $'\n'
-fi
-
-#-------------------- compile all interface files ------------------------------
-
-if [ -d "$INTERFACE_DIR" ] ; then
-  echo "COMPILING INTERFACE FILES:"
-  echo $'\n'
-  for INTERFACE_FILE in "$INTERFACE_DIR"/*.sv ; do
-    [ -f "$INTERFACE_FILE" ] || break
-    xvlog -sv "$INTERFACE_FILE"
-    echo $'\n'
-  done
-  echo $'\n'
-fi
-
-#-------------------- compile all assertions files ------------------------------
-
-if [ -d "$ASSERT_DIR" ] ; then
-  echo "COMPILING ASSERT FILES:"
-  echo $'\n'
-  for ASSERT_FILE in "$ASSERT_DIR"/*.sv ; do
-    [ -f "$ASSERT_FILE" ] || break
-    xvlog -sv "$ASSERT_FILE"
-    echo $'\n'
-  done
-  echo $'\n'
-fi
-
-#-------------------- compile all coverage files ------------------------------
-
-if [ -d "$COVERAGE_DIR" ] ; then
-  echo "COMPILING COVERAGE FILES:"
-  echo $'\n'
-  for COVERAGE_FILE in "$COVERAGE_DIR"/*.sv ; do
-    [ -f "$COVERAGE_FILE" ] || break
-    xvlog -sv "$COVERAGE_FILE"
-    echo $'\n'
-  done
-  echo $'\n'
-fi
-
-#-------------------- compile all TRANSACTION files ------------------------------
-
-if [ -d "$TRANSACTION_DIR" ] ; then
-  echo "COMPILING TRANSACTION FILES:"
-  echo $'\n'
-  for TRANSACTION_FILE in "$TRANSACTION_DIR"/*.sv ; do
-    [ -f "$TRANSACTION_FILE" ] || break
-    xvlog -sv "$TRANSACTION_FILE"
-    echo $'\n'
-  done
-  echo $'\n'
-fi
-#-------------------- compile all GENERATOR files ------------------------------
-
-if [ -d "$GENERATOR_DIR" ] ; then
-  echo "COMPILING GENERATOR FILES:"
-  echo $'\n'
-  for GENERATOR_FILE in "$GENERATOR_DIR"/*.sv ; do
-    [ -f "$GENERATOR_FILE" ] || break
-    xvlog -sv "$GENERATOR_FILE"
-    echo $'\n'
-  done
-  echo $'\n'
-fi
-
-#-------------------- compile all ref models files ------------------------------
-
-if [ -d "$REF_MODEL_DIR" ] ; then
-  echo "COMPILING REF_MODEL FILES:"
-  echo $'\n'
-  for REF_MODEL_FILE in "$REF_MODEL_DIR"/*.sv ; do
-    [ -f "$REF_MODEL_FILE" ] || break
-    xvlog -sv "$REF_MODEL_FILE"
-    echo $'\n'
-  done
-  echo $'\n'
-fi
 
 #-------------------- compile test_bench ------------------------------
 
 echo "COMPILING TEST BENCH: $TEST_BENCH"
 echo $'\n'
-xvlog -sv "$PROJECT_ROOT_DIR/$TEST_BENCH_PATH"
+xvlog -sv --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" "$PROJECT_ROOT_DIR/$TEST_BENCH_PATH"
+
+#If we failed to compile the tb, then dont run the sim
+if [ $? -ne 0 ] ; then
+  echo $'\n'
+  echo "ERROR $SCRIPT_NAME: $TEST_BENCH compilation failed"
+  exit 1
+fi
 echo $'\n'
 
 #-------------------- elaborate test_bench ------------------------------
+
+cd "$XSIM_DIR" || exit 1
 
 echo "ELABORATING TEST BENCH: $TEST_BENCH"
 echo $'\n'
@@ -304,7 +209,7 @@ xelab $TEST_BENCH -debug typical
 #If we failed the elaboration, then dont run the sim
 if [ $? -ne 0 ] ; then
   echo $'\n'
-  echo "ERROR $SCRIPT_NAME: elaboration exit 0"
+  echo "ERROR $SCRIPT_NAME: elaboration failed"
   exit 1
 fi
 echo $'\n'
