@@ -4,14 +4,13 @@ package tb_reg_file_coverage_pkg;
   class tb_reg_file_coverage;
     virtual reg_file_intf.monitor vif;
 
-    covergroup cg_reg_file;
+    covergroup cg @(posedge vif.clk);
       //cover writting and not writting
       cov_wr_en: coverpoint vif.wr_en{
         bins write = {1'b1};
         bins no_write = {1'b0};
       }
 
-      //cover all our registers
       cov_wr_reg: coverpoint vif.wr_reg;
       cov_rd_reg_1: coverpoint vif.rd_reg_1;
       cov_rd_reg_2: coverpoint vif.rd_reg_2;
@@ -66,11 +65,15 @@ package tb_reg_file_coverage_pkg;
 
     function new(virtual reg_file_intf.monitor vif);
       this.vif = vif;
-      this.cg_reg_file = new();
+      this.cg = new();
     endfunction
 
-    function void sample();
-      cg_reg_file.sample();
+    function void start();
+      cg.start();
+    endfunction
+
+    function void stop();
+      cg.stop();
     endfunction
   endclass
 endpackage

@@ -83,7 +83,6 @@ module tb_reg_file();
     drive(trans);
     #PROPOGATION_DELAY      //let the combinatorial reads propogate
     monitor(trans);
-    coverage.sample();
     score(trans);
 
     //clk the writes in and update the ref_model
@@ -107,9 +106,12 @@ module tb_reg_file();
     ref_reg_file = new();
     generator = new();
 
+    coverage.start();
+
     repeat(1000) begin
       test(generator.gen_trans());
     end
+    coverage.start();
 
     print_test_results();
 
