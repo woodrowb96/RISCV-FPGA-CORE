@@ -19,13 +19,18 @@ package tb_data_mem_coverage_pkg;
         bins others   = default;
       }
 
-      //want to hit the corners and inbetween
+      //want to hit the following interesting addr corners
+      // - the first address in mem (it points to both the first word, and first byte)
+      // - the address of each byte in the last word in memory
+      //NOTE: byte_3 of the last word, is the last address in our byte
+      //      addressable memory
       addr: coverpoint vif.addr {
-        bins first_addr = {DATA_MEM_FIRST_ADDR};
-        bins last_addr  = {DATA_MEM_LAST_ADDR};
-        bins last_word  = {DATA_MEM_LAST_WORD_ADDR};
-        bins non_corner = {[DATA_MEM_FIRST_ADDR + 1     : DATA_MEM_LAST_WORD_ADDR - 1],
-                           [DATA_MEM_LAST_WORD_ADDR + 1 : DATA_MEM_LAST_ADDR - 1]};
+        bins first_addr       = {DATA_MEM_FIRST_ADDR};
+        bins last_word_byte_0 = {DATA_MEM_LAST_WORD_ADDR};
+        bins last_word_byte_1 = {DATA_MEM_LAST_WORD_ADDR + 1};
+        bins last_word_byte_2 = {DATA_MEM_LAST_WORD_ADDR + 2};
+        bins last_word_byte_3 = {DATA_MEM_LAST_ADDR};
+        bins non_corner       = {[DATA_MEM_FIRST_ADDR + 1     : DATA_MEM_LAST_WORD_ADDR - 1]};
       }
 
       //we want to do each type of write, and no_write from all the
