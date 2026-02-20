@@ -4,6 +4,7 @@ import riscv_32i_control_pkg::*;
 import tb_data_mem_transaction_pkg::*;
 import data_mem_ref_model_pkg::*;
 import tb_data_mem_coverage_pkg::*;
+import tb_data_mem_generator_pkg::*;
 
 module tb_data_mem();
   localparam int CLK_PERIOD = 10;
@@ -87,19 +88,17 @@ module tb_data_mem();
   endfunction
 
   /************* TESTING ***************/
-  data_mem_trans trans;
+  tb_data_mem_generator generator;
 
   initial begin
     coverage = new(intf.monitor);
     ref_data_mem = new();
-    trans = new();
+    generator = new();
 
     coverage.start();
 
     repeat(1000) begin
-      assert(trans.randomize()) else
-        $fatal(1, "DATA_MEM_TB: trans.randomize() failed");
-      test(trans);
+      test(generator.gen_trans());
     end
 
     coverage.stop();

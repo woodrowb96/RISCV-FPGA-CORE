@@ -24,6 +24,10 @@ Output:
             - No sub byte control (so no rd_sel like we do for writes).
               We always read out a whole word of data and
               leave the sub byte selection to the datapath.
+
+NOTE:  OUT_OF_BOUND ACCESS
+  I let out of bounds addresses silently wrap around to the start of memory.
+  I dont handle that or prevent it in this module, and leave that to other parts of the implementation
 */
 import riscv_32i_defs_pkg::*;
 import riscv_32i_config_pkg::*;
