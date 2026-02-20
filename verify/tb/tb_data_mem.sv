@@ -3,6 +3,7 @@ import riscv_32i_config_pkg::*;
 import riscv_32i_control_pkg::*;
 import tb_data_mem_transaction_pkg::*;
 import data_mem_ref_model_pkg::*;
+import tb_data_mem_coverage_pkg::*;
 
 module tb_data_mem();
   localparam int CLK_PERIOD = 10;
@@ -25,6 +26,10 @@ module tb_data_mem();
                 .wr_data(intf.wr_data),
                 .rd_data(intf.rd_data)
               );
+
+  /***********  COVERAGE *********************/
+  tb_data_mem_coverage coverage;
+
   /********* DATA MEM REFERENCE MODEL *********/
   data_mem_ref_model ref_data_mem;
 
@@ -85,14 +90,19 @@ module tb_data_mem();
   data_mem_trans trans;
 
   initial begin
+    coverage = new(intf.monitor);
     ref_data_mem = new();
     trans = new();
+
+    coverage.start();
 
     repeat(1000) begin
       assert(trans.randomize()) else
         $fatal(1, "DATA_MEM_TB: trans.randomize() failed");
       test(trans);
     end
+
+    coverage.stop();
 
     print_test_results();
 

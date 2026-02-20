@@ -11,7 +11,7 @@ package tb_data_mem_transaction_pkg;
     word_t rd_data;
 
     constraint legal_addr_range {
-      addr inside { [DATA_MEM_MIN_ADDR : DATA_MEM_MAX_ADDR] };
+      addr inside { [DATA_MEM_FIRST_ADDR : DATA_MEM_LAST_ADDR] };
     }
 
     function bit compare(data_mem_trans other);
