@@ -3,7 +3,7 @@ class alu_base_test extends uvm_test;
 
   virtual alu_intf vif;
   alu_env      env;
-  ale_base_seq seq;
+  alu_base_seq seq;
 
   function new(string name = "alu_base_test", uvm_component parent = null);
     super.new(name, parent);

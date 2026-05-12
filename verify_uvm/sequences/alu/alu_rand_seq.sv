@@ -13,7 +13,7 @@ class alu_rand_seq extends alu_base_seq;
       start_item(item);
 
       if(item.randomize()) begin
-        `uvm_info("SEQ", $sformatf("Generate new item: %s", item.convert2str()), UVM_HIGH);
+        `uvm_info("SEQ", $sformatf("Generate new item: %s", item.convert2string()), UVM_HIGH);
       end
       else begin
         `uvm_fatal("SEQ", "Failed item.randomize().")
