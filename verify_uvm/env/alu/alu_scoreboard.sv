@@ -17,20 +17,33 @@ class alu_scoreboard extends uvm_scoreboard;
 
   //score our item using the ref model
   virtual function void write(alu_seq_item actual);
-    alu_out_t expected;
+    alu_seq_item expected;
+    alu_out_t expected_output;
+
     `uvm_info("SCB" , $sformatf("actual:%s", actual.convert2string()), UVM_HIGH)
 
+    expected = alu_seq_item::type_id::create("expected");
+    expected.alu_op = actual.alu_op;
+    expected.in_a   = actual.in_a;
+    expected.in_b   = actual.in_b;
+
     //predict the output
-    expected = ref_model.compute(actual.alu_op, actual.in_a, actual.in_b);
+    expected_output = ref_model.compute(expected.alu_op, expected.in_a, expected.in_b);
+    expected.result = expected_output.result;
+    expected.zero   = expected_output.zero;
 
     if(expected.result != actual.result) begin
-      `uvm_fatal("SCB", $sformatf("Error! wrong result | expected: %s | actual: result=%0d, zero=%0d",
-        actual.convert2string(), expected.result, actual.result));
+      `uvm_fatal("SCB", $sformatf("Error! wrong result\n
+                                  (expected) %s\n
+                                  (actual)   %s",
+        actual.convert2string(), expected.convert2string()));
     end
 
     if(expected.zero != actual.zero) begin
-      `uvm_fatal("SCB", $sformatf("Error! wrong zero: expected: %0d, actual: %0d",
-        expected.zero, actual.zero));
+      // `uvm_fatal("SCB", $sformatf("Error! wrong result\n",
+      //                             "(expected) %s\n",
+      //                             "(actual)   %s",
+      //   actual.convert2string(), expected.convert2string()));
     end
 
   endfunction

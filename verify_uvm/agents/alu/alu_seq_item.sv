@@ -17,8 +17,8 @@ class alu_seq_item extends uvm_sequence_item;
 
   virtual function string convert2string();
     return $sformatf(
-      "ctrl: alu_op:%s | in: in_a=%0h in_b=%0h | out: result=%0h zero=%0b",
-       alu_op,
+      "alu_op:%s | in_a=%0h in_b=%0h | result=%0h zero=%0b",
+       alu_op.name(),
        in_a, in_b,
        result, zero);
   endfunction
