@@ -14,6 +14,7 @@ package tb_if_stage_monitor_pkg;
       if_stage_trans trans;
 
       @(vif.cb_mon)
+      $display("[MON_DEBUG] t=%0t valid=%0b reset_n=%0b pc=%0d", $time, vif.cb_mon.valid, vif.cb_mon.reset_n, vif.cb_mon.pc);
       if(vif.cb_mon.valid && vif.cb_mon.reset_n) begin
         trans = new();
 

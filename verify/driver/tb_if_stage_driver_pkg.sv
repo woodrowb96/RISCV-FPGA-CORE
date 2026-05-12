@@ -35,13 +35,14 @@ package tb_if_stage_driver_pkg;
     task run();
       if_stage_trans trans;
 
-      @(vif.cb_drv)
       if(gen_to_drv_mbx.try_get(trans)) begin
+        @(vif.cb_drv)
         vif.cb_drv.valid         <= 1;                    //If we are driving a new trans from the mailbox, then its valid
         vif.cb_drv.branch        <= trans.branch;
         vif.cb_drv.branch_target <= trans.branch_target;
       end
       else begin
+        @(vif.cb_drv)
         vif.cb_drv.valid         <= 0;                    //If mbx was empty, then we are driving old data which is not valid
       end
     endtask

@@ -22,7 +22,8 @@ package tb_if_stage_predictor_pkg;
       if_stage_trans trans;
 
       @(vif.cb_mon)
-      if(vif.cb_mon.valid && vif.cb_mon.reset_n) begin
+      $display("[PRED_DEBUG] t=%0t valid=%0b reset_n=%0b ref_pc=%0d dut_pc=%0d", $time, vif.cb_mon.valid, vif.cb_mon.reset_n, ref_if_stage.pc, vif.cb_mon.pc);
+      if(vif.cb_mon.reset_n) begin
         trans = new();
 
         //sample the DUT input
@@ -36,9 +37,12 @@ package tb_if_stage_predictor_pkg;
         //update the ref_model
         ref_if_stage.update(trans);
 
-        //send the transaction to the scoreboard
-        pred_to_scb_mbx.put(trans);
+        if(vif.cb_mon.valid) begin
+          //send the transaction to the scoreboard
+          pred_to_scb_mbx.put(trans);
+        end
       end
+
     endtask
   endclass
 

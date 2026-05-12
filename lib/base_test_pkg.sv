@@ -279,18 +279,23 @@ package base_test_pkg;
 
     protected task rst_aware_test(int num_tests = -1);
       while(test_running) begin   //Repeat the following until the test is done:
+        $display("[RST_AWARE_DBG] t=%0t top of while, test_running=%0b, scb.num_tests=%0d, gen.num_trans=%0d", $time, test_running, scb.num_tests, gen.num_transactions);
 
         fork begin                      //Fork the main testing loop and the resetting to run concurrently
           fork
             begin
               test(num_tests);          //If test returns first -> then testing is done
               test_running = 0;
+              $display("[RST_AWARE_DBG] t=%0t test() returned, test_running=%0b", $time, test_running);
             end
             begin
               rst.assert_rst();         //If we asserted a reset first -> then test is still running
+              $display("[RST_AWARE_DBG] t=%0t assert_rst() returned, test_running=%0b", $time, test_running);
             end
           join_any
+          $display("[RST_AWARE_DBG] t=%0t after join_any, test_running=%0b", $time, test_running);
           disable fork;                 //Regardless of which it is, kill all currently running forks
+          $display("[RST_AWARE_DBG] t=%0t after disable fork, test_running=%0b", $time, test_running);
         end join
 
         if(test_running) begin          //If test is still running, then a reset was detected
