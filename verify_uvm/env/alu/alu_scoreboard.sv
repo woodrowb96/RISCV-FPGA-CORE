@@ -32,19 +32,11 @@ class alu_scoreboard extends uvm_scoreboard;
     expected.result = expected_output.result;
     expected.zero   = expected_output.zero;
 
-    if(expected.result != actual.result) begin
-      `uvm_fatal("SCB", $sformatf("Error! wrong result\n
+    if(!actual.compare(expected)) begin
+      `uvm_fatal("SCB", $sformatf("Error! expected != actual\n
                                   (expected) %s\n
                                   (actual)   %s",
         actual.convert2string(), expected.convert2string()));
     end
-
-    if(expected.zero != actual.zero) begin
-      // `uvm_fatal("SCB", $sformatf("Error! wrong result\n",
-      //                             "(expected) %s\n",
-      //                             "(actual)   %s",
-      //   actual.convert2string(), expected.convert2string()));
-    end
-
   endfunction
 endclass

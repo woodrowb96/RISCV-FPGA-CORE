@@ -23,6 +23,16 @@ class alu_seq_item extends uvm_sequence_item;
        result, zero);
   endfunction
 
+  function bit do_compare(uvm_object rhs, uvm_comparer comparer);
+    alu_seq_item rhs_;
+
+    if (!$cast(rhs_, rhs))
+      return 0;
+
+    return (result == rhs_.result &&
+            zero   == rhs_.zero);
+  endfunction
+
   /******** NOTE ********/
   //Post_randomizing the MSB is a workaround for a Vivado bug.
   //
