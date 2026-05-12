@@ -2,7 +2,7 @@ class alu_monitor extends uvm_monitor;
   `uvm_component_utils(alu_monitor)
 
   virtual alu_intf vif;
-  uvm_analysis_port #(alu_seq_item) mon_analysis_port;
+  uvm_analysis_port #(alu_seq_item) observed_ap;
 
   function new(string name = "alu_monitor", uvm_component parent=null);
     super.new(name, parent);
@@ -15,7 +15,7 @@ class alu_monitor extends uvm_monitor;
       `uvm_fatal("MON", "could not get vif");
     end
 
-    mon_analysis_port = new("mon_analysis_port", this);
+    observed_ap = new("observed_ap", this);
   endfunction
 
   virtual task run_phase(uvm_phase phase);
@@ -34,7 +34,7 @@ class alu_monitor extends uvm_monitor;
       item.result = vif.cb_mon.result;
       item.zero   = vif.cb_mon.zero;
 
-      mon_analysis_port.write(item);
+      observed_ap.write(item);
       `uvm_info("MON", $sformatf("Saw item %s", item.convert2string()), UVM_HIGH)
     end
   endtask
