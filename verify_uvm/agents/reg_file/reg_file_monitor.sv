@@ -1,0 +1,38 @@
+class reg_file_monitor extends uvm_monitor;
+  `uvm_component_utils(reg_file_monitor)
+
+  virtual reg_file_intf vif;
+  uvm_analysis_port #(reg_file_seq_item) observed_ap;
+
+  function new(string name = "reg_file_monitor", uvm_component parent=null);
+    super.new(name, parent);
+  endfunction
+
+  virtual function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+
+    if(!uvm_config_db#(virtual reg_file_intf)::get(this, "", "reg_file_vif", vif)) begin
+      `uvm_fatal("MON", "could not get vif");
+    end
+
+    observed_ap = new("observed_ap", this);
+  endfunction
+
+  virtual task run_phase(uvm_phase phase);
+    reg_file_seq_item item;
+    super.run_phase(phase);
+
+    forever begin
+      @(vif.cb_mon);
+      item = reg_file_seq_item::type_id::create("item");
+
+      item.wr_en     = vif.cb_drv.wr_en;
+      item.wr_reg    = vif.cb_drv.wr_reg;
+      item.wr_data   = vif.cb_drv.wr_data;
+      item.rd_reg_1  = vif.cb_drv.rd_reg_1;
+      item.rd_reg_2  = vif.cb_drv.rd_reg_2;
+      item.rd_data_1 = vif.cb_drv.rd_data_1;
+      item.rd_data_2 = vif.cb_drv.rd_data_2;
+    end
+  endtask
+endclass
