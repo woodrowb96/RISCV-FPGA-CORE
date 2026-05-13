@@ -26,13 +26,13 @@ class reg_file_monitor extends uvm_monitor;
       @(vif.cb_mon);
       item = reg_file_seq_item::type_id::create("item");
 
-      item.wr_en     = vif.cb_drv.wr_en;
-      item.wr_reg    = vif.cb_drv.wr_reg;
-      item.wr_data   = vif.cb_drv.wr_data;
-      item.rd_reg_1  = vif.cb_drv.rd_reg_1;
-      item.rd_reg_2  = vif.cb_drv.rd_reg_2;
-      item.rd_data_1 = vif.cb_drv.rd_data_1;
-      item.rd_data_2 = vif.cb_drv.rd_data_2;
+      item.wr_en     = vif.cb_mon.wr_en;
+      item.wr_reg    = vif.cb_mon.wr_reg;
+      item.wr_data   = vif.cb_mon.wr_data;
+      item.rd_reg_1  = vif.cb_mon.rd_reg_1;
+      item.rd_reg_2  = vif.cb_mon.rd_reg_2;
+      item.rd_data_1 = vif.cb_mon.rd_data_1;
+      item.rd_data_2 = vif.cb_mon.rd_data_2;
     end
   endtask
 endclass
