@@ -3,7 +3,8 @@ class alu_scoreboard extends uvm_scoreboard;
 
   alu_ref_model ref_model;
 
-  uvm_analysis_imp #(alu_seq_item, alu_scoreboard) observed_imp;
+  uvm_analysis_imp  #(alu_seq_item, alu_scoreboard) observed_imp; //get observed items from mon
+  uvm_analysis_port #(alu_seq_item)                 coverage_ap;  //send passing items to coverage
 
   function new(string name = "alu_scoreboard", uvm_component parent = null);
     super.new(name, parent);
@@ -12,7 +13,8 @@ class alu_scoreboard extends uvm_scoreboard;
   virtual function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     observed_imp = new("observed_imp", this);
-    ref_model = alu_ref_model::type_id::create("ref_model");
+    coverage_ap  = new("coverage_ap", this);
+    ref_model    = alu_ref_model::type_id::create("ref_model");
   endfunction
 
   //score our item using the ref model
@@ -32,7 +34,11 @@ class alu_scoreboard extends uvm_scoreboard;
     expected.result = expected_output.result;
     expected.zero   = expected_output.zero;
 
-    if(!actual.compare(expected)) begin
+    //If we pass send the item to coverage, else report error
+    if(actual.compare(expected)) begin
+      coverage_ap.write(actual);
+    end
+    else begin
       `uvm_error("SCB", $sformatf("Mismatch!\n  (actual)   %s\n  (expected) %s",
                                   actual.convert2string(), expected.convert2string()))
     end

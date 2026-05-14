@@ -4,6 +4,7 @@ package alu_env_pkg;
 
   import alu_agent_pkg::*;
   import alu_ref_model_pkg::*;
+  import alu_coverage_pkg::*;
 
   `include "alu_scoreboard.sv"
   `include "alu_env.sv"
