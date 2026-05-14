@@ -5,10 +5,10 @@ interface alu_intf
   input logic clk
 );
   //DUT control
-  alu_op_t alu_op = ALU_AND;
+  alu_op_t alu_op;
   //DUT input
-  word_t in_a     = '0;
-  word_t in_b     = '0;
+  word_t in_a;
+  word_t in_b;
   //DUT output
   word_t result;
   logic zero;

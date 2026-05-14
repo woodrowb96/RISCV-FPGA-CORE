@@ -22,6 +22,8 @@ class alu_monitor extends uvm_monitor;
     alu_seq_item item;
     super.run_phase(phase);
 
+    @(vif.cb_mon); //Dont sample the first cycle, nothings been driven yet
+
     forever begin
       @(vif.cb_mon);
       item = alu_seq_item::type_id::create("item");

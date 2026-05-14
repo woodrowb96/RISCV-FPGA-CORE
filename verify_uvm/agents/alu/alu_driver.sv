@@ -19,6 +19,11 @@ class alu_driver extends uvm_driver #(alu_seq_item);
     alu_seq_item item;
     super.run_phase(phase);
 
+    @(vif.cb_drv);
+    vif.cb_drv.alu_op <= ALU_AND;
+    vif.cb_drv.in_a   <= '0;
+    vif.cb_drv.in_b   <= '0;
+
     forever begin
       seq_item_port.get_next_item(item);
 
