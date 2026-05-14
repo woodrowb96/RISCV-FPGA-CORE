@@ -22,10 +22,11 @@ class reg_file_monitor extends uvm_monitor;
     reg_file_seq_item item;
     super.run_phase(phase);
 
+    @(vif.cb_mon); //Dont sample the first cycle, nothings been driven yet
+
     forever begin
       @(vif.cb_mon);
       item = reg_file_seq_item::type_id::create("item");
-
       item.wr_en     = vif.cb_mon.wr_en;
       item.wr_reg    = vif.cb_mon.wr_reg;
       item.wr_data   = vif.cb_mon.wr_data;
@@ -33,6 +34,9 @@ class reg_file_monitor extends uvm_monitor;
       item.rd_reg_2  = vif.cb_mon.rd_reg_2;
       item.rd_data_1 = vif.cb_mon.rd_data_1;
       item.rd_data_2 = vif.cb_mon.rd_data_2;
+
+      observed_ap.write(item);
+      `uvm_info("MON", $sformatf("Saw item %s", item.convert2string()), UVM_HIGH)
     end
   endtask
 endclass

@@ -19,6 +19,13 @@ class reg_file_driver extends uvm_driver #(reg_file_seq_item);
     reg_file_seq_item item;
     super.run_phase(phase);
 
+    @(vif.cb_drv);
+    vif.cb_drv.wr_en    <= 1'b0;
+    vif.cb_drv.wr_reg   <= X0;
+    vif.cb_drv.rd_reg_1 <= X0;
+    vif.cb_drv.rd_reg_2 <= X0;
+    vif.cb_drv.wr_data  <= '0;
+
     forever begin
       seq_item_port.get_next_item(item);
 

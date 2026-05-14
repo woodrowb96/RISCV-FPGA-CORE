@@ -15,7 +15,7 @@ class reg_file_seq_item extends uvm_sequence_item;
 
   virtual function string convert2string();
     return $sformatf(
-      "wr_en:%0b | wr_reg=%0d wr_data=%0h | rd_reg_1=%0d rd_reg_2=%0d | rd_data_1=%0h rd_data_2=%0h",
+      "wr_en:%b | wr_reg=%d wr_data=%h | rd_reg_1=%d rd_reg_2=%d | rd_data_1=%h rd_data_2=%h",
         wr_en,
         wr_reg, wr_data,
         rd_reg_1, rd_reg_2,
@@ -28,8 +28,8 @@ class reg_file_seq_item extends uvm_sequence_item;
     if (!$cast(rhs_, rhs))
       return 0;
 
-    return (rd_data_1 == rhs_.rd_data_1 &&
-            rd_data_2 == rhs_.rd_data_2);
+    return (rd_data_1 === rhs_.rd_data_1 &&
+            rd_data_2 === rhs_.rd_data_2);
   endfunction
 
   /****************** NOTE *********************************/

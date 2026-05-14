@@ -4,12 +4,12 @@ interface reg_file_intf
   input clk
 );
   //DUT control
-  logic wr_en = 1'b0;
+  logic wr_en;
   //DUT input
-  rf_addr_t rd_reg_1 = X0;
-  rf_addr_t rd_reg_2 = X0;
-  rf_addr_t wr_reg   = X0;
-  word_t wr_data     = '0;
+  rf_addr_t rd_reg_1;
+  rf_addr_t rd_reg_2;
+  rf_addr_t wr_reg;
+  word_t wr_data;
   //DUT output
   word_t rd_data_1;
   word_t rd_data_2;
