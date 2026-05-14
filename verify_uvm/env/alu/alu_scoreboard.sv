@@ -33,10 +33,8 @@ class alu_scoreboard extends uvm_scoreboard;
     expected.zero   = expected_output.zero;
 
     if(!actual.compare(expected)) begin
-      `uvm_fatal("SCB", $sformatf("Error! expected != actual\n
-                                  (expected) %s\n
-                                  (actual)   %s",
-        actual.convert2string(), expected.convert2string()));
+      `uvm_error("SCB", $sformatf("Mismatch!\n  (actual)   %s\n  (expected) %s",
+                                  actual.convert2string(), expected.convert2string()))
     end
   endfunction
 endclass

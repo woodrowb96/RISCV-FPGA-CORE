@@ -39,4 +39,18 @@ class alu_base_test extends uvm_test;
     //ALU is purely comb with no reset, but we will still wait a bit to start testing
     repeat(DEFAULT_RESET_CYCLES) @(vif.cb_drv);
   endtask
+
+  virtual function void final_phase(uvm_phase phase);
+    super.final_phase(phase);
+    if (uvm_report_server::get_server().get_severity_count(UVM_ERROR) == 0 &&
+        uvm_report_server::get_server().get_severity_count(UVM_FATAL) == 0) begin
+      $display("\n========================================");
+      $display("***        TEST PASSED              ***");
+      $display("========================================\n");
+    end else begin
+      $display("\n========================================");
+      $display("***        TEST FAILED              ***");
+      $display("========================================\n");
+    end
+  endfunction
 endclass

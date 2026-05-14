@@ -53,5 +53,4 @@ class reg_file_base_test extends uvm_test;
       $display("========================================\n");
     end
   endfunction
-
 endclass
