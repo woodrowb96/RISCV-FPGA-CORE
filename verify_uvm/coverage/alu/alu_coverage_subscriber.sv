@@ -18,4 +18,9 @@ class alu_coverage_subscriber extends uvm_subscriber #(alu_seq_item);
 
     coverage.sample(item);
   endfunction
+
+  virtual function void final_phase(uvm_phase phase);
+    super.final_phase(phase);
+    coverage.print_coverage_report();
+  endfunction
 endclass

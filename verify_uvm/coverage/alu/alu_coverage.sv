@@ -13,6 +13,34 @@ class alu_coverage extends uvm_object;
     cg.sample();
   endfunction
 
+  function void print_coverage_report();
+    real total = cg.get_inst_coverage();
+    $display("\n========================================");
+    $display("***   alu_coverage: %6.2f%%        ***", total);
+    $display("========================================");
+    if (total < 100.0) begin
+      $display("  alu_op:               %6.2f%%", cg.alu_op.get_coverage());
+      $display("  zero_flag:            %6.2f%%", cg.zero_flag.get_coverage());
+      $display("  alu_op_x_zero_flag:   %6.2f%%", cg.alu_op_x_zero_flag.get_coverage());
+      $display("  in_a_log_op:          %6.2f%%", cg.in_a_log_op.get_coverage());
+      $display("  in_b_log_op:          %6.2f%%", cg.in_b_log_op.get_coverage());
+      $display("  in_a_x_in_b_and:      %6.2f%%", cg.in_a_x_in_b_and.get_coverage());
+      $display("  in_a_x_in_b_or:       %6.2f%%", cg.in_a_x_in_b_or.get_coverage());
+      $display("  in_a_add_op:          %6.2f%%", cg.in_a_add_op.get_coverage());
+      $display("  in_b_add_op:          %6.2f%%", cg.in_b_add_op.get_coverage());
+      $display("  in_a_x_in_b_add:      %6.2f%%", cg.in_a_x_in_b_add.get_coverage());
+      $display("  add_overflow:         %6.2f%%", cg.add_overflow.get_coverage());
+      $display("  in_a_sub_op:          %6.2f%%", cg.in_a_sub_op.get_coverage());
+      $display("  in_b_sub_op:          %6.2f%%", cg.in_b_sub_op.get_coverage());
+      $display("  in_a_x_in_b_sub:      %6.2f%%", cg.in_a_x_in_b_sub.get_coverage());
+      $display("  sub_overflow:         %6.2f%%", cg.sub_overflow.get_coverage());
+      $display("========================================\n");
+    end
+    else begin
+      $display("");
+    end
+  endfunction
+
   //Treating in_a and in_b as unsigned 32 bit nums,
   //compute a wide result, check if the wide msb is set
   function automatic bit detect_add_overflow(word_t in_a, word_t in_b);
