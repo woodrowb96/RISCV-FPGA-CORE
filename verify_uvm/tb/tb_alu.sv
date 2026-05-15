@@ -40,7 +40,7 @@ module tb_alu
   initial begin
     // coverage = new();
     uvm_config_db#(virtual alu_intf)::set(null, "uvm_test_top", "alu_vif", intf);
-    run_test("alu_rand_test");
+    run_test();
     $stop(1);
   end
 endmodule

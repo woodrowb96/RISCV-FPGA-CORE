@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 
-#------------------------------   Help Messages  ----------------------------
-
-#get script name
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
-#Print usage message
-print_usage() 
+#TODO: get this all fleshed out later
+print_usage()
 {
   cat <<EOF
-Usage: $SCRIPT_NAME [options] <tb_file>
+Usage: $SCRIPT_NAME <tb_file> [options]
+
+Run '$SCRIPT_NAME -h' for help
 
 EOF
 }
@@ -19,14 +18,14 @@ print_options()
 {
   cat <<EOF
 Options:
-  -h                    Display help message
-  -g                    Run simulation using the gui
-  -t  <tcl_file>         Specify a non-default tcl script to run simulation with
-
+  -t <test_name>      Run a single UVM test
+  -r <testlist_file>  Run UVM regression
+  -g                  Run simulation using the gui (only works in -t mode)
+  -h                  Print help
 EOF
 }
 
-#Print help message
+#TODO: rewrite at the end
 print_help() 
 {
   print_usage
@@ -45,126 +44,147 @@ Note:
 EOF
 }
 
-#--------------------Create some dir path variables -----------
+#-----------------------------------------------------------------------#
+#--------------------------- Directory Vars ----------------------------#
+#-----------------------------------------------------------------------#
 
-#the root directory, where the sim scripts live
 PROJECT_ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-#sim directories for xsim
 SIM_DIR="$PROJECT_ROOT_DIR/sim"
 XSIM_DIR="$SIM_DIR/xsim"
 XSIM_WORKING_DIR="$XSIM_DIR/xsim.dir/work"
-
-#scripts dir
 SCRIPTS_DIR="$PROJECT_ROOT_DIR/scripts/xsim"
 
-#--------------------  Make sure we are running in projects root directory  -----------
 
-#make sure we are running only from projects root directory
-#if not then exit script
+#-----------------------------------------------------------------------#
+#------------- Make sure we are running in proj root dit ---------------#
+#-----------------------------------------------------------------------#
+
 if [ "$(pwd)" != "$PROJECT_ROOT_DIR" ] ; then
   echo "Error: Please run script from project root directory"
   print_usage
   exit 1
 fi
 
-#--------------------  Parse options -------------------------------------------
+#-----------------------------------------------------------------------#
+#--------------------------- Parse Options -----------------------------#
+#-----------------------------------------------------------------------#
 
-GUI_MODE="false"    #by default we dont run in CLI mode
-TCL_FILE=""          #if -t flag isnt set, this will stay empty
+TB_PATH=""
+UVM_TEST_NAME=""
+UVM_TESTLIST=""
+GUI_MODE="false"
 
-while getopts ":hgt:" FLAG; do
+if [[ $# == 0 ]] ; then
+  print_usage
+  exit 1
+fi
+
+case "$1" in
+  -h|--help)
+    print_help
+    exit 0
+    ;;
+  -*)
+    echo "Error: TB name required as first argument"
+    print_usage
+    exit 1
+    ;;
+  *)
+    TB_PATH="$1"
+    shift
+    ;;
+esac
+
+while getopts ":t:r:gh" FLAG; do
   case "$FLAG" in
-    g)
-      GUI_MODE="true"
-      ;;
-    t)
-      #check for valid do file
-      if [[ "$OPTARG" == -* ]] ; then   #if arg is a flag, then we didnt pass a .tcl file
-        echo "Error: -t missing tcl file"
-        exit 1
-      elif [[ "$OPTARG" != *.tcl ]] ; then   #make sure arg is a .tcl file
-        echo "Error: -t invalid tcl file"
-        exit 1
-      fi
-
-      #get absolute path to tcl file
-      TCL_FILE="$(cd "$(dirname "$OPTARG")" && pwd)/$(basename "$OPTARG")"
-      ;;
-    h)
-      print_help
-      exit 0
-      ;;
-    :)
-      echo "Error: missing option argument -$OPTARG"
-      exit 1
-      ;;
-    \?)
-      echo "Error: unknown option -$OPTARG"
-      exit 1
-      ;;
+    t) UVM_TEST_NAME="$OPTARG" ;;
+    r) UVM_TESTLIST="$OPTARG" ;;
+    g) GUI_MODE="true" ;;
+    h) print_help; exit 0 ;;
+    :) echo "Error: -$OPTARG missing argument"; exit 1 ;;
+    \?) echo "Error: unknown option -$OPTARG"; exit 1 ;;
   esac
 done
 
-#shift to the remaining arguments
 shift $((OPTIND-1))
 
-
-#-------------------- process test_bench argument  -----------------------------------
-
-#check for too many arguments
-if [ $# -gt 1 ] ; then
-  echo 'Error: too many arguments'
+if [ $# -gt 0 ] ; then
+  echo "Error: unexpected arguments: $@"
   print_usage
   exit 1
 fi
 
-#check if file testbench file was given
-if [ -z "$1" ] ; then
-  echo 'Error: no testbench file specified'
+#We cant run it -t and -r modes at the same time
+if [[ -n "$UVM_TEST_NAME" && -n "$UVM_TESTLIST" ]] ; then
+  echo "Error: -t and -r are mutually exclusive"
+  echo "(cannot run single test and regression together)"
   print_usage
   exit 1
 fi
 
-#get test bench from passed arg, and strip its path and file extension
-TEST_BENCH_PATH="$1"
-TEST_BENCH=${TEST_BENCH_PATH##*/}  #strip path from TEST_BENCH
-TEST_BENCH=${TEST_BENCH%.*}   #strip .sv from TEST_BENCH
-
-
-#-------------------- get correct do file ------------------------------------------
-
-#get do file
-if [[ ! -n "$TCL_FILE" ]] ; then   #if a tcl file was not set by the -t flag
-  if [[ -f "$SCRIPTS_DIR/$TEST_BENCH.tcl" ]] ; then  #if default tcl file exists
-    TCL_FILE="$SCRIPTS_DIR/$TEST_BENCH.tcl"   #get abs path to tcl file
-  fi
+#We cant run gui in FILELIST MODE
+if [[ -n "$UVM_TESTLIST" && "$GUI_MODE" == "true" ]] ; then
+  echo "Error: cant have -g set in -r mode"
+  echo "(Cant run the gui when running in regression mode)"
+  print_usage
+  print_options
+  exit 1
 fi
 
-#----------------  get correct filelist file ---------------------------------------
+#----------------------------------------------------------------------------------#
+#-------------------------- Derive TB arguments -----------------------------------#
+#----------------------------------------------------------------------------------#
 
-#make sure we have a filelist
-if [[ -f "$SCRIPTS_DIR/filelist/$TEST_BENCH.f" ]] ; then
-  FILE_LIST="$SCRIPTS_DIR/filelist/$TEST_BENCH.f"
+TB_NAME=${TB_PATH##*/}  #strip path from TB_NAME
+TB_NAME=${TB_NAME%.*}   #strip .sv from TB_NAME
+
+#----------------------------------------------------------------------------------#
+#-------------------------- Find default TCL script -------------------------------#
+#----------------------------------------------------------------------------------#
+
+TCL_FILE=""
+if [[ -f "$SCRIPTS_DIR/$TB_NAME.tcl" ]] ; then  #if default tcl file exists
+  TCL_FILE="$SCRIPTS_DIR/$TB_NAME.tcl"
 else
+  echo "#----------------------------------------------------------------------#"
+  echo "WARNING:  Default TCL file ($TB_NAME.tcl) not found."
+  echo "          Running sim with no tcl file"
+  echo "#----------------------------------------------------------------------#"
   echo $'\n'
-  echo "ERROR MISSING FILELIST: $TEST_BENCH.f"
+fi
+
+#----------------------------------------------------------------------------------#
+#-------------------------------- Find filelist -----------------------------------#
+#----------------------------------------------------------------------------------#
+
+if [[ -f "$SCRIPTS_DIR/filelist/$TB_NAME.f" ]] ; then #If filelist exists
+  FILELIST="$SCRIPTS_DIR/filelist/$TB_NAME.f"
+else
+  echo "#----------------------------------------------------------------------#"
+  echo "ERROR: Missing filelist $TB_NAME.f"
+  echo "#----------------------------------------------------------------------#"
+  echo $'\n'
   exit 1
 fi
 
-#-----------  split out the .cpp and .sv files ---------------
-SV_FILE_LIST="/tmp/${TEST_BENCH}_sv_files.f"
-CPP_FILE_LIST="/tmp/${TEST_BENCH}_cpp_files.f"
+#----------------------------------------------------------------------------------#
+#---------- Split out cpp and sv files dependencies into sep filelists ------------#
+#----------------------------------------------------------------------------------#
+
+FILELIST_SV="/tmp/${TB_NAME}_files_sv.f"
+FILELIST_CPP="/tmp/${TB_NAME}_files_cpp.f"
 
 #cleanup any stale temp files
-rm -f "$SV_FILE_LIST" "$CPP_FILE_LIST"
+trap 'rm -f "$FILELIST_SV" "$FILELIST_CPP"' EXIT
 
-if [ -f "$FILE_LIST" ] ; then
-  grep '\.sv' "$FILE_LIST" > "$SV_FILE_LIST"
-  grep '\.cpp' "$FILE_LIST" > "$CPP_FILE_LIST"
+if [ -f "$FILELIST" ] ; then
+  grep '\.sv' "$FILELIST" > "$FILELIST_SV"
+  grep '\.cpp' "$FILELIST" > "$FILELIST_CPP"
 fi
 
-#-------------------- ensure sim directory exists      ------------------------------
+#----------------------------------------------------------------------------------#
+#----------------------- Ensure the sim directory exists --------------------------#
+#----------------------------------------------------------------------------------#
 
 #Check if sim directory exists at project root, if not the create it
 if [ ! -d "$SIM_DIR" ] ; then 
@@ -173,7 +193,6 @@ if [ ! -d "$SIM_DIR" ] ; then
   mkdir -p "$SIM_DIR"
 fi
 
-
 #Check if xsim directory exists in sim dir, if not create it
 if [ ! -d "$XSIM_DIR" ] ; then
   echo "no xsim directory found"
@@ -181,10 +200,14 @@ if [ ! -d "$XSIM_DIR" ] ; then
   mkdir -p "$XSIM_DIR"
 fi
 
-#-------------------  compile cpp Dependencies ------------------
-if [ -s "$CPP_FILE_LIST" ] ; then  #if the cpp filelist is not empty
-  echo $'\n'
-  echo "COMPILING FILELIST: $TEST_BENCH.f .cpp dependencies"
+#----------------------------------------------------------------------------------#
+#--------------------------- Compile CPP files ------------------------------------#
+#----------------------------------------------------------------------------------#
+
+if [ -s "$FILELIST_CPP" ] ; then  #if the cpp filelist is not empty
+  echo "#----------------------------------------------------------------------#"
+  echo "COMPILING FILELIST: $TB_NAME.f .cpp dependencies"
+  echo "#----------------------------------------------------------------------#"
   echo $'\n'
 
   #move into the xsim dir
@@ -193,12 +216,12 @@ if [ -s "$CPP_FILE_LIST" ] ; then  #if the cpp filelist is not empty
   cd "$XSIM_DIR"
 
   #prepend the absolute path to each cpp file, then compile
-  xsc $(cat "$CPP_FILE_LIST" | sed "s|^|$PROJECT_ROOT_DIR/|")
+  xsc $(cat "$FILELIST_CPP" | sed "s|^|$PROJECT_ROOT_DIR/|")
 
   #exit if the comp failed
   if [ $? -ne 0 ] ; then
     echo $'\n'
-    echo "ERROR $SCRIPT_NAME: $FILE_LIST CPP compilation failed"
+    echo "ERROR $SCRIPT_NAME: $FILELIST CPP compilation failed"
     exit 1
   fi
 
@@ -208,86 +231,102 @@ if [ -s "$CPP_FILE_LIST" ] ; then  #if the cpp filelist is not empty
   echo $'\n'
 fi
 
-#-------------------- compile SV dependencies ----------------
+#----------------------------------------------------------------------------------#
+#--------------------------- Compile SV files ------------------------------------#
+#----------------------------------------------------------------------------------#
 
-if [ -s "$SV_FILE_LIST" ] ; then  #if the sv filelist is not empty
-  echo "COMPILING FILELIST: $FILE_LIST sv dependencies"
+if [ -s "$FILELIST_SV" ] ; then  #if the sv filelist is not empty
+  echo "#----------------------------------------------------------------------#"
+  echo "COMPILING FILELIST: $FILELIST sv dependencies"
+  echo "#----------------------------------------------------------------------#"
   echo $'\n'
-  xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" -f "$SV_FILE_LIST"
+  xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" -f "$FILELIST_SV"
 
   #If we failed to compile the dependencies, then dont run the sim
   if [ $? -ne 0 ] ; then
+    echo "#----------------------------------------------------------------------#"
+    echo "ERROR $SCRIPT_NAME: $FILELIST SV compilation failed"
+    echo "#----------------------------------------------------------------------#"
     echo $'\n'
-    echo "ERROR $SCRIPT_NAME: $FILE_LIST SV compilation failed"
     exit 1
   fi
   echo $'\n'
 fi
 
+#----------------------------------------------------------------------------------#
+#--------------------------- Compile TB_NAME  ----------------------------------#
+#----------------------------------------------------------------------------------#
 
-#-------------------- compile test_bench ------------------------------
-
-echo "COMPILING TEST BENCH: $TEST_BENCH"
+echo "COMPILING TEST BENCH: $TB_NAME"
 echo $'\n'
-xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" "$PROJECT_ROOT_DIR/$TEST_BENCH_PATH"
+xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" "$PROJECT_ROOT_DIR/$TB_PATH"
 
 #If we failed to compile the tb, then dont run the sim
 if [ $? -ne 0 ] ; then
+  echo "#----------------------------------------------------------------------#"
+  echo "ERROR $SCRIPT_NAME: $TB_NAME compilation failed"
+  echo "#----------------------------------------------------------------------#"
   echo $'\n'
-  echo "ERROR $SCRIPT_NAME: $TEST_BENCH compilation failed"
   exit 1
 fi
 echo $'\n'
 
-#-------------------- elaborate test_bench ------------------------------
+#----------------------------------------------------------------------------------#
+#--------------------------- Elaborate TB_NAME  --------------------------------#
+#----------------------------------------------------------------------------------#
 
 cd "$XSIM_DIR" || exit 1
 
-echo "ELABORATING TEST BENCH: $TEST_BENCH"
+echo "#----------------------------------------------------------------------#"
+echo "ELABORATING TEST BENCH: $TB_NAME"
+echo "#----------------------------------------------------------------------#"
 echo $'\n'
 
 #if we have cpp files, elab with dpi else just do normal elab
-if [ -s "$CPP_FILE_LIST" ] ; then 
-  xelab -L uvm $TEST_BENCH -debug typical -sv_lib "xsim.dir/work/xsc/dpi"
+if [ -s "$FILELIST_CPP" ] ; then 
+  xelab -L uvm $TB_NAME -debug typical -sv_lib "xsim.dir/work/xsc/dpi"
 else
-  xelab -L uvm $TEST_BENCH -debug typical 
+  xelab -L uvm $TB_NAME -debug typical
 fi
 
 #If we failed the elaboration, then dont run the sim
 if [ $? -ne 0 ] ; then
-  echo $'\n'
+  echo "#----------------------------------------------------------------------#"
   echo "ERROR $SCRIPT_NAME: elaboration failed"
+  echo "#----------------------------------------------------------------------#"
+  echo $'\n'
   exit 1
 fi
 echo $'\n'
 
-# #-------------------- run the simulation    ------------------------------
+#----------------------------------------------------------------------------------#
+#------------------------------ Run Simulation ------------------------------------#
+#----------------------------------------------------------------------------------#
 
-echo "SIMULATING TEST BENCH: $TEST_BENCH"
+echo "#----------------------------------------------------------------------#"
+echo "SIMULATING TEST BENCH: $TB_NAME"
+echo "#----------------------------------------------------------------------#"
 echo $'\n'
 
-#create do command
-TCL="$TCL_FILE"               #by default use the TCL file
-if [[ ! -n "$TCL" ]] ; then  #but if there is none, then just run -all
-  echo "WARNING:  Default TCL file ($TEST_BENCH.tcl) not found."
-  echo "          Running sim with no tcl file"
-  echo $'\n'
+XSIM_ARGS=("$TB_NAME")
+
+if [ "$GUI_MODE" = "true" ] ; then
+  XSIM_ARGS+=(-gui)
 fi
 
-#run in cli or in gui
-if [ "$GUI_MODE" = "true" ] ; then        #if we are in gui mode
-  if [ -n "$TCL" ] ; then
-    xsim $TEST_BENCH -gui -tclbatch "$TCL"
-  else
-    xsim $TEST_BENCH -gui
-  fi
-else                                      #else we are in CLI mode
-  if [ -n "$TCL" ] ; then
-    xsim $TEST_BENCH -tclbatch "$TCL"
-  else
-    xsim $TEST_BENCH -runall
-  fi
+if [ -n "$TCL_FILE" ] ; then
+  XSIM_ARGS+=(-tclbatch "$TCL_FILE")
+elif [ "$GUI_MODE" = "false" ] ; then
+  XSIM_ARGS+=(-runall)
 fi
 
-#-------------------  cleanup temp files -------------------
-rm -f "$SV_FILE_LIST" "$CPP_FILE_LIST"
+if [ -n "$UVM_TEST_NAME" ] ; then
+  XSIM_ARGS+=(-testplusarg "UVM_TESTNAME=$UVM_TEST_NAME")
+fi
+
+if [ -n "$UVM_TESTLIST" ]; then
+    echo "Regression mode not yet implemented"
+    exit 0
+fi
+
+xsim "${XSIM_ARGS[@]}"
