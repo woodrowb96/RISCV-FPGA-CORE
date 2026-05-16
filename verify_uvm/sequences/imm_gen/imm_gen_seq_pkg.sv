@@ -4,6 +4,7 @@ package imm_gen_seq_pkg;
 
   import rv32i_defs_pkg::*;
   import rv32i_control_pkg::*;
+  import rv32i_verify_pkg::*;
 
   import imm_gen_agent_pkg::*;
 
