@@ -16,6 +16,14 @@ package rv32i_verify_pkg;
   localparam ALU_LATENCY      = 0; //alu is purely combinatorial so it takes 0 clk cycles
   localparam REG_FILE_LATENCY = 1; //output is combinatorial, but writes are sequentially written in
   localparam IMM_GEN_LATENCY  = 0; //imm_gen is purely combinatorial so it takes 0 clk cycles
+  localparam LUT_RAM_LATENCY  = 1; //reads are combinatorial, but writes are sequentially written in
+
+  /*********************** LUT_RAM *********************************/
+  //fixed config for the lut_ram UVM testbench
+  localparam int unsigned LUT_RAM_WIDTH = XLEN;
+  localparam int unsigned LUT_RAM_DEPTH = 1000;
+  typedef logic [LUT_RAM_WIDTH-1:0]         lut_ram_data_t;
+  typedef logic [$clog2(LUT_RAM_DEPTH)-1:0] lut_ram_addr_t;
 
   /*********************** DATA_MEM *******************************/
   parameter int unsigned DATA_MEM_FIRST_ADDR = 0;                          //first address in mem (also the first byte and first word)
