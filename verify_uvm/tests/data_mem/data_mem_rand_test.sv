@@ -9,6 +9,6 @@ class data_mem_rand_test extends data_mem_base_test;
     super.build_phase(phase);
 
     seq = data_mem_rand_seq::type_id::create("seq");
-    seq.seq_length = 1500;
+    seq.seq_length = 4000;
   endfunction
 endclass
