@@ -3,7 +3,8 @@ class imm_gen_scoreboard extends uvm_scoreboard;
 
   imm_gen_ref_model ref_model;
 
-  uvm_analysis_imp #(imm_gen_seq_item, imm_gen_scoreboard) observed_imp; //get observed items from mon
+  uvm_analysis_imp  #(imm_gen_seq_item, imm_gen_scoreboard) observed_imp; //get observed items from mon
+  uvm_analysis_port #(imm_gen_seq_item)                     coverage_ap;  //send passing items to coverage
 
   function new(string name = "imm_gen_scoreboard", uvm_component parent = null);
     super.new(name, parent);
@@ -12,6 +13,7 @@ class imm_gen_scoreboard extends uvm_scoreboard;
   virtual function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     observed_imp = new("observed_imp", this);
+    coverage_ap  = new("coverage_ap", this);
     ref_model    = imm_gen_ref_model::type_id::create("ref_model");
   endfunction
 
@@ -27,7 +29,11 @@ class imm_gen_scoreboard extends uvm_scoreboard;
     //predict the output
     expected.imm = ref_model.compute(expected.inst);
 
-    if(!actual.compare(expected)) begin
+    //If we pass send the item to coverage, else report error
+    if(actual.compare(expected)) begin
+      coverage_ap.write(actual);
+    end
+    else begin
       `uvm_error("SCB", $sformatf("Mismatch!\n  (actual)   %s\n  (expected) %s",
                                   actual.convert2string(), expected.convert2string()))
     end

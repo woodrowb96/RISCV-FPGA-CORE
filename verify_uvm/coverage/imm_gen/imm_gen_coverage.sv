@@ -1,0 +1,146 @@
+class imm_gen_coverage extends uvm_object;
+  `uvm_object_utils(imm_gen_coverage);
+
+  imm_gen_seq_item item;
+
+  function new(string name = "imm_gen_coverage");
+    super.new(name);
+    this.cg = new();
+  endfunction
+
+  function void sample(imm_gen_seq_item item);
+    this.item = item;
+    cg.sample();
+  endfunction
+
+  function void print_coverage_report();
+    real total = cg.get_inst_coverage();
+    $display("\n========================================");
+    $display("***   imm_gen_coverage: %6.2f%%        ***", total);
+    $display("========================================");
+    if (total < 100.0) begin
+      $display("  opcode:                 %6.2f%%", cg.opcode.get_coverage());
+      $display("  sign:                   %6.2f%%", cg.sign.get_coverage());
+      $display("  i_type_corners:         %6.2f%%", cg.i_type_corners.get_coverage());
+      $display("  s_type_corners:         %6.2f%%", cg.s_type_corners.get_coverage());
+      $display("  b_type_corners:         %6.2f%%", cg.b_type_corners.get_coverage());
+      $display("  u_type_corners:         %6.2f%%", cg.u_type_corners.get_coverage());
+      $display("  j_type_corners:         %6.2f%%", cg.j_type_corners.get_coverage());
+      $display("  sign_x_i_type_corners:  %6.2f%%", cg.sign_x_i_type_corners.get_coverage());
+      $display("  sign_x_s_type_corners:  %6.2f%%", cg.sign_x_s_type_corners.get_coverage());
+      $display("  sign_x_b_type_corners:  %6.2f%%", cg.sign_x_b_type_corners.get_coverage());
+      $display("  sign_x_j_type_corners:  %6.2f%%", cg.sign_x_j_type_corners.get_coverage());
+      $display("========================================\n");
+    end
+    else begin
+      $display("");
+    end
+  endfunction
+
+  /*==============================  COVERGROUP  =================================*/
+  covergroup cg;
+    /********************* OPCODE COVERAGE **************************/
+
+    //we want to cover each opcode
+    opcode: coverpoint item.inst[6:0] {
+      bins op_reg    = {OP_REG};
+      bins op_imm    = {OP_IMM};
+      bins op_load   = {OP_LOAD};
+      bins op_store  = {OP_STORE};
+      bins op_branch = {OP_BRANCH};
+      bins op_lui    = {OP_LUI};
+      bins op_auipc  = {OP_AUIPC};
+      bins op_jal    = {OP_JAL};
+      bins op_jalr   = {OP_JALR};
+      illegal_bins invalid = default; //just to help debugging
+    }
+
+
+    /********************** SIGN COVERAGE ****************************/
+
+    //inst[31] is the sign bit for all immediate formats.
+    sign: coverpoint item.inst[31] {
+      bins pos = {1'b0};
+      bins neg = {1'b1};
+    }
+
+
+    /**************** ENCODED IMMEDIATE CORNERS *************************/
+    //Note: I cover the sign bit separately, so each encoded imm corner is 1 bit
+    //      less than the actual length. Later in coverage I cross the
+    //      corners with the sign separately.
+    //
+    //Note: I dont cover R-type corners since it has no encoded immediate.
+    //      Covering it once in the opcode coverpoint is sufficient.
+
+    //I-type encoded immediate (inst[30:20]), excluding the sign bit (inst[31])
+    i_type_corners: coverpoint item.inst[30:20]
+      iff(item.inst[6:0] inside {OP_IMM, OP_LOAD, OP_JALR}) {
+        bins all_zeros = {IMM_11_ALL_ZEROS};
+        bins all_ones  = {IMM_11_ALL_ONES};
+        bins other = default;
+
+        //Note: I dont cover the alternating bit patterns (AAA/555) since
+        //      the I-type imm is stored across 1 big chunk in the instruction.
+        //      Those patterns are more useful for the S/B/J-types where the
+        //      encoded bits are split up inside the instruction and need
+        //      to be reassembled.
+    }
+
+    //S-type encoded immediate {inst[30:25],inst[11:7]} excluding sign bit inst[31]
+    s_type_corners: coverpoint {item.inst[30:25], item.inst[11:7]}
+      iff(item.inst[6:0] inside {OP_STORE}) {
+        bins all_zeros = {IMM_11_ALL_ZEROS};
+        bins all_ones  = {IMM_11_ALL_ONES};
+        bins alt_55    = {IMM_11_ALT_55};     //the pattern 0101 repeated
+        bins alt_aa    = {IMM_11_ALT_AA};     //the pattern 1010 repeated
+        bins other = default;
+    }
+
+    //B-type encoded immediate {inst[7],inst[30:25],inst[11:8]} excluding the sign bit
+    b_type_corners: coverpoint {item.inst[7], item.inst[30:25], item.inst[11:8]}
+      iff(item.inst[6:0] inside {OP_BRANCH}) {
+        bins all_zeros = {IMM_11_ALL_ZEROS};
+        bins all_ones  = {IMM_11_ALL_ONES};
+        bins alt_55    = {IMM_11_ALT_55};     //the pattern 0101 repeated
+        bins alt_aa    = {IMM_11_ALT_AA};     //the pattern 1010 repeated
+        bins other = default;
+    }
+
+    //U-type encoded immediate {inst[31:12]}
+    //NOTE: U-types dont sign extend so im including the sign bit here and
+    //      wont cross it later.
+    u_type_corners: coverpoint item.inst[31:12]
+      iff(item.inst[6:0] inside {OP_LUI, OP_AUIPC}) {
+        bins all_zeros = {IMM_20_ALL_ZEROS};
+        bins all_ones  = {IMM_20_ALL_ONES};
+        bins other = default;
+    }
+
+    //J-type encoded immediate {inst[19:12],inst[20], inst[30:21]}, excluding sign bit
+    j_type_corners: coverpoint {item.inst[19:12], item.inst[20], item.inst[30:21]}
+      iff(item.inst[6:0] inside {OP_JAL}) {
+        bins all_zeros = {IMM_19_ALL_ZEROS};
+        bins all_ones  = {IMM_19_ALL_ONES};
+        bins alt_55    = {IMM_19_ALT_55};     //the pattern 0101 repeated
+        bins alt_aa    = {IMM_19_ALT_AA};     //the pattern 1010 repeated
+        bins other = default;
+    }
+
+
+    /************* SIGN EXTENSION X ENCODED IMMEDIATE CORNERS *****************/
+    //we want to cover pos and neg sign extension for each corner
+
+    //I-type
+    sign_x_i_type_corners: cross sign, i_type_corners;
+
+    //S-type
+    sign_x_s_type_corners: cross sign, s_type_corners;
+
+    //B-type
+    sign_x_b_type_corners: cross sign, b_type_corners;
+
+    //J-type
+    sign_x_j_type_corners: cross sign, j_type_corners;
+  endgroup
+endclass

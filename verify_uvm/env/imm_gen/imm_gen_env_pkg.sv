@@ -7,6 +7,7 @@ package imm_gen_env_pkg;
 
   import imm_gen_agent_pkg::*;
   import imm_gen_ref_model_pkg::*;
+  import imm_gen_coverage_pkg::*;
 
   `include "imm_gen_scoreboard.sv"
   `include "imm_gen_env.sv"
