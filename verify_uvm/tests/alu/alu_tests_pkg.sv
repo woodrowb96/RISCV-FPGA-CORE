@@ -11,4 +11,5 @@ package alu_tests_pkg;
   `include "alu_base_test.sv"
   `include "alu_rand_test.sv"
   `include "alu_add_corner_walk_test.sv"
+  `include "alu_sub_corner_walk_test.sv"
 endpackage

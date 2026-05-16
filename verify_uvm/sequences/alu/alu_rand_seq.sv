@@ -14,7 +14,7 @@ class alu_rand_seq extends alu_base_seq;
       start_item(item);
       randcase
         //logical operations: AND, OR
-        1: begin
+        2: begin
           if (!item.randomize() with {
             alu_op inside {ALU_AND, ALU_OR};
             in_a dist {
