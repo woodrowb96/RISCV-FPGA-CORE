@@ -37,12 +37,12 @@ class reg_file_seq_item extends uvm_sequence_item;
   //  - 32 bit signals do not get their MSB randomized by the
   //    constraint solver.
   /*********************************************************/
-  // function void post_randomize();
-  //   if(!(wr_data inside {WORD_ALL_ZEROS, WORD_ALL_ONES})) begin
-  //     randcase
-  //       1: wr_data[XLEN-1] = 1'b0;
-  //       1: wr_data[XLEN-1] = 1'b1;
-  //     endcase
-  //   end
-  // endfunction
+  function void post_randomize();
+    if(!(wr_data inside {WORD_ALL_ZEROS, WORD_ALL_ONES})) begin
+      randcase
+        1: wr_data[XLEN-1] = 1'b0;
+        1: wr_data[XLEN-1] = 1'b1;
+      endcase
+    end
+  endfunction
 endclass
