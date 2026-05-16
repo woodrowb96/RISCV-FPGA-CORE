@@ -15,6 +15,7 @@ package rv32i_verify_pkg;
   /*************************************************************/
   localparam ALU_LATENCY      = 0; //alu is purely combinatorial so it takes 0 clk cycles
   localparam REG_FILE_LATENCY = 1; //output is combinatorial, but writes are sequentially written in
+  localparam IMM_GEN_LATENCY  = 0; //imm_gen is purely combinatorial so it takes 0 clk cycles
 
   /*********************** DATA_MEM *******************************/
   parameter int unsigned DATA_MEM_FIRST_ADDR = 0;                          //first address in mem (also the first byte and first word)
