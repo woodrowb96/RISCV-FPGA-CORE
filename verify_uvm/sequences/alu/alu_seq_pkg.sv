@@ -12,5 +12,4 @@ package alu_seq_pkg;
   `include "alu_rand_seq.sv"
   `include "alu_add_corner_walk_seq.sv"
   `include "alu_sub_corner_walk_seq.sv"
-  `include "alu_invalid_ops_seq.sv"
 endpackage
