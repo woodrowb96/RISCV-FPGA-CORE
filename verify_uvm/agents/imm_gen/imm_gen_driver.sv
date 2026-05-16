@@ -20,7 +20,7 @@ class imm_gen_driver extends uvm_driver #(imm_gen_seq_item);
     super.run_phase(phase);
 
     @(vif.cb_drv);
-    vif.cb_drv.inst <= '0;
+    vif.cb_drv.inst <= {25'b0, OP_REG};  //R-type, imm=0 -- safe valid-opcode initial value
 
     forever begin
       seq_item_port.get_next_item(item);
