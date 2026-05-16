@@ -122,6 +122,18 @@ if [[ -n "$UVM_TEST_NAME" && -n "$UVM_TESTLIST" ]] ; then
   exit 1
 fi
 
+#If we in regression mode make sure the testlist actually exists
+#and get the real path so we can use the path when we cd later
+if [ -n "$UVM_TESTLIST" ] ; then
+  if [ ! -f "$UVM_TESTLIST" ] ; then
+    echo "#----------------------------------------------------------------------#"
+    echo "ERROR: testlist not found: $UVM_TESTLIST"
+    echo "#----------------------------------------------------------------------#"
+    exit 1
+  fi
+  UVM_TESTLIST="$(realpath "$UVM_TESTLIST")"
+fi
+
 #We cant run gui in FILELIST MODE
 if [[ -n "$UVM_TESTLIST" && "$GUI_MODE" == "true" ]] ; then
   echo "Error: cant have -g set in -r mode"
@@ -137,6 +149,9 @@ fi
 
 TB_NAME=${TB_PATH##*/}  #strip path from TB_NAME
 TB_NAME=${TB_NAME%.*}   #strip .sv from TB_NAME
+
+#all outputs for this TB live under here
+TB_OUTPUT_DIR="$XSIM_DIR/$TB_NAME"
 
 #----------------------------------------------------------------------------------#
 #-------------------------- Find default TCL script -------------------------------#
@@ -300,8 +315,127 @@ fi
 echo $'\n'
 
 #----------------------------------------------------------------------------------#
-#------------------------------ Run Simulation ------------------------------------#
+#--------------------- Run Simulation: regression (-r) ----------------------------#
 #----------------------------------------------------------------------------------#
+
+if [ -n "$UVM_TESTLIST" ] ; then
+
+  #Strip the path from the testlist so we have just the name
+  TESTLIST_NAME=${UVM_TESTLIST##*/}
+  TESTLIST_NAME=${TESTLIST_NAME%.*}
+
+  #build directory names for regression testing
+  REGRESSION_OUTPUT_DIR="$TB_OUTPUT_DIR/regression/$TESTLIST_NAME"
+  LOG_DIR="$REGRESSION_OUTPUT_DIR/logs"
+  COV_DB_DIR="$REGRESSION_OUTPUT_DIR/cov_db"
+  COV_REPORT_DIR="$REGRESSION_OUTPUT_DIR/cov_report_merged"
+
+  #clean up anything from previous runs
+  rm -rf "$REGRESSION_OUTPUT_DIR"
+  mkdir -p "$LOG_DIR" "$COV_DB_DIR"
+
+  #parse testlist
+  TESTS=()
+  while IFS= read -r line ; do
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue #skip blank lines and comments
+    TESTS+=("$line")
+  done < "$UVM_TESTLIST"
+
+  if [ ${#TESTS[@]} -eq 0 ] ; then
+    echo "ERROR: testlist is empty: $UVM_TESTLIST"
+    exit 1
+  fi
+
+  PASS=0
+  FAIL=0
+  FAILED_TESTS=()
+
+  for test in "${TESTS[@]}" ; do
+    echo "--- Running $test ---"
+
+    #remove any prevous coverage runs
+    rm -rf "$XSIM_DIR/xsim.covdb"
+
+    XSIM_ARGS=("$TB_NAME" -testplusarg "UVM_TESTNAME=$test")
+    if [ -n "$TCL_FILE" ] ; then
+      XSIM_ARGS+=(-tclbatch "$TCL_FILE")
+    else
+      XSIM_ARGS+=(-runall)  #if now tcl file, just runall
+    fi
+
+    #run the test and dump the outputs to the log directory
+    xsim "${XSIM_ARGS[@]}" 2>&1 | tee "$LOG_DIR/${test}.log"
+
+    if grep -q "TEST PASSED" "$LOG_DIR/${test}.log" ; then
+      PASS=$((PASS+1))
+    else
+      FAIL=$((FAIL+1))
+      FAILED_TESTS+=("$test")
+    fi
+
+    #move coverage for this test run into its own directory
+    if [ -d "$XSIM_DIR/xsim.covdb" ] ; then
+      mv "$XSIM_DIR/xsim.covdb" "$COV_DB_DIR/${test}.covdb"
+    fi
+  done
+
+  #merge coverage once after all tests complete
+  if compgen -G "$COV_DB_DIR"/*.covdb > /dev/null ; then
+    echo "#----------------------------------------------------------------------#"
+    echo "MERGING COVERAGE"
+    echo "#----------------------------------------------------------------------#"
+
+    XCRG_ARGS=()
+    for covdb in "$COV_DB_DIR"/*.covdb ; do
+        XCRG_ARGS+=(-dir "$covdb")
+    done
+    XCRG_ARGS+=(-report_dir "$COV_REPORT_DIR" -report_format all)
+
+    xcrg "${XCRG_ARGS[@]}"
+  fi
+
+  echo "#----------------------------------------------------------------------#"
+  echo "REGRESSION SUMMARY"
+  echo "#----------------------------------------------------------------------#"
+  echo "PASSED: $PASS"
+  echo "FAILED: $FAIL"
+  if [ $FAIL -gt 0 ] ; then
+    echo "Failed tests:"
+    for t in "${FAILED_TESTS[@]}" ; do
+      echo "  - $t"
+    done
+  fi
+  echo "#----------------------------------------------------------------------#"
+
+  if [ $FAIL -gt 0 ] ; then
+    exit 1
+  else
+    exit 0
+  fi
+fi
+
+#----------------------------------------------------------------------------------#
+#--------------------- Run Simulation: single (-t or no-arg) ----------------------#
+#----------------------------------------------------------------------------------#
+
+#get the testname so we can build its directory
+if [ -n "$UVM_TEST_NAME" ] ; then
+  SINGLE_RUN_NAME="$UVM_TEST_NAME"
+else
+  SINGLE_RUN_NAME="default" #if its not a uvm_test then just use the default dir
+fi
+
+SINGLE_OUTPUT_DIR="$TB_OUTPUT_DIR/single/$SINGLE_RUN_NAME"
+LOG_FILE="$SINGLE_OUTPUT_DIR/xsim.log"
+COV_DB_PATH="$SINGLE_OUTPUT_DIR/cov.covdb"
+COV_REPORT_DIR="$SINGLE_OUTPUT_DIR/cov_report"
+
+#fresh slate for this single run
+rm -rf "$SINGLE_OUTPUT_DIR"
+mkdir -p "$SINGLE_OUTPUT_DIR"
+
+#clean any stale covdb so the move below picks up only this run's
+rm -rf "$XSIM_DIR/xsim.covdb"
 
 echo "#----------------------------------------------------------------------#"
 echo "SIMULATING TEST BENCH: $TB_NAME"
@@ -324,9 +458,14 @@ if [ -n "$UVM_TEST_NAME" ] ; then
   XSIM_ARGS+=(-testplusarg "UVM_TESTNAME=$UVM_TEST_NAME")
 fi
 
-if [ -n "$UVM_TESTLIST" ]; then
-    echo "Regression mode not yet implemented"
-    exit 0
+xsim "${XSIM_ARGS[@]}" 2>&1 | tee "$LOG_FILE"
+
+#move covdb to the per-run slot
+if [ -d "$XSIM_DIR/xsim.covdb" ] ; then
+  mv "$XSIM_DIR/xsim.covdb" "$COV_DB_PATH"
 fi
 
-xsim "${XSIM_ARGS[@]}"
+#generate human-readable coverage report
+if [ -d "$COV_DB_PATH" ] ; then
+  xcrg -dir "$COV_DB_PATH" -report_dir "$COV_REPORT_DIR"
+fi

@@ -9,4 +9,5 @@ add_wave tb_alu/intf/zero
 run all
 
 write_xsim_coverage
-export_xsim_coverage -output_dir ./coverage_reports/tb_alu
+
+exit
