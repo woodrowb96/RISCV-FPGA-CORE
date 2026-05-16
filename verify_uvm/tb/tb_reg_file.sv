@@ -37,7 +37,7 @@ module tb_reg_file
   initial begin
     // coverage = new();
     uvm_config_db#(virtual reg_file_intf)::set(null, "uvm_test_top", "reg_file_vif", intf);
-    run_test("reg_file_rand_test");
+    run_test();
     $stop(1);
   end
 endmodule
