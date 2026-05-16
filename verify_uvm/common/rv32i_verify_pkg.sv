@@ -17,6 +17,7 @@ package rv32i_verify_pkg;
   localparam REG_FILE_LATENCY = 1; //output is combinatorial, but writes are sequentially written in
   localparam IMM_GEN_LATENCY  = 0; //imm_gen is purely combinatorial so it takes 0 clk cycles
   localparam LUT_RAM_LATENCY  = 1; //reads are combinatorial, but writes are sequentially written in
+  localparam DATA_MEM_LATENCY = 1; //reads are combinatorial, but writes are sequentially written in
 
   /*********************** LUT_RAM *********************************/
   //fixed config for the lut_ram UVM testbench
