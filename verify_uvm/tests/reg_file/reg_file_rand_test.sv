@@ -9,6 +9,6 @@ class reg_file_rand_test extends reg_file_base_test;
     super.build_phase(phase);
 
     seq = reg_file_rand_seq::type_id::create("seq");
-    seq.seq_length = 1000;
+    seq.seq_length = 1250;
   endfunction
 endclass
