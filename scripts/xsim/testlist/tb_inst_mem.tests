@@ -1,0 +1,3 @@
+inst_mem_rand_test
+inst_mem_misaligned_test
+inst_mem_oob_test
