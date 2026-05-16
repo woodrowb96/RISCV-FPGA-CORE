@@ -405,6 +405,13 @@ if [ -n "$UVM_TESTLIST" ] ; then
       echo "  - $t"
     done
   fi
+
+  #merged coverage summary from xcrg text report
+  COV_TEXT_REPORT="$COV_REPORT_DIR/functionalCoverageReport/xcrg_func_cov_report.txt"
+  if [ -f "$COV_TEXT_REPORT" ] ; then
+    awk -F',' '/Coverage Score/ {gsub(/^ *| *$/, "", $2); print "MERGED COVERAGE: " $2 "%"}' "$COV_TEXT_REPORT"
+    echo "Full report: $COV_REPORT_DIR/functionalCoverageReport/dashboard.html"
+  fi
   echo "#----------------------------------------------------------------------#"
 
   if [ $FAIL -gt 0 ] ; then
