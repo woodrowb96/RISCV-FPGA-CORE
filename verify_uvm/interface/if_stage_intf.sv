@@ -3,7 +3,6 @@ interface if_stage_intf
 (
   input logic clk
 );
-  logic  reset_n;
   logic  branch;        //DUT Control
   word_t branch_target; //DUT input
   word_t pc;            //DUT output
@@ -11,11 +10,11 @@ interface if_stage_intf
 
   clocking cb_drv @(posedge clk);
     default output #1;
-    output branch, branch_target, reset_n;
+    output branch, branch_target;
   endclocking
 
   clocking cb_mon @(posedge clk);
     default input #1step;
-    input branch, branch_target, pc, inst, reset_n;
+    input branch, branch_target, pc, inst;
   endclocking
 endinterface
