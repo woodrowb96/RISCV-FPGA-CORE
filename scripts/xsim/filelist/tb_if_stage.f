@@ -13,6 +13,7 @@ verify_uvm/interface/reset_intf.sv
 verify_uvm/agents/if_stage/if_stage_agent_pkg.sv
 verify_uvm/ref_model/inst_mem/inst_mem_ref_model_pkg.sv
 verify_uvm/ref_model/if_stage/if_stage_ref_model_pkg.sv
+verify_uvm/coverage/if_stage/if_stage_coverage_pkg.sv
 verify_uvm/env/if_stage/if_stage_env_pkg.sv
 verify_uvm/sequences/if_stage/if_stage_seq_pkg.sv
 verify_uvm/tests/if_stage/if_stage_tests_pkg.sv

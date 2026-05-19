@@ -3,7 +3,7 @@ class if_stage_env extends uvm_env;
 
   if_stage_agent               agn;
   if_stage_scoreboard          scb;
-  // if_stage_coverage_subscriber cov_sub;
+  if_stage_coverage_subscriber cov_sub;
 
   function new(string name = "if_stage_env", uvm_component parent = null);
     super.new(name, parent);
@@ -13,12 +13,12 @@ class if_stage_env extends uvm_env;
     super.build_phase(phase);
     agn     = if_stage_agent::type_id::create("agn", this);
     scb     = if_stage_scoreboard::type_id::create("scb", this);
-    // cov_sub = if_stage_coverage_subscriber::type_id::create("cov_sub", this);
+    cov_sub = if_stage_coverage_subscriber::type_id::create("cov_sub", this);
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);
     super.connect_phase(phase);
     agn.mon.observed_ap.connect(scb.observed_imp);
-    // scb.coverage_ap.connect(cov_sub.analysis_export);
+    scb.coverage_ap.connect(cov_sub.analysis_export);
   endfunction
 endclass
