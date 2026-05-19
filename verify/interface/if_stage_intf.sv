@@ -1,30 +1,20 @@
-import rv32i_defs_pkg::*;
-
-interface if_stage_intf (input logic clk);
-  //DUT reset (synchronous)
-  logic reset_n;
-  //DUT control
-  logic branch;
-  //DUT input
-  word_t branch_target;
-  //DUT output
-  word_t pc;
+interface if_stage_intf
+  import rv32i_defs_pkg::*;
+(
+  input logic clk
+);
+  logic  branch;        //DUT Control
+  word_t branch_target; //DUT input
+  word_t pc;            //DUT output
   word_t inst;
-
-  bit valid; //sim only
 
   clocking cb_drv @(posedge clk);
     default output #1;
-    output branch, branch_target, valid, reset_n;
+    output branch, branch_target;
   endclocking
 
   clocking cb_mon @(posedge clk);
     default input #1step;
-    input branch, branch_target, pc, inst, valid, reset_n;
+    input branch, branch_target, pc, inst;
   endclocking
-
-  function void print(string msg = "");
-    $display("[%s] t=%0t branch:%b branch_target:%0d pc:%0d inst:%h",
-             msg, $time, branch, branch_target, pc, inst);
-  endfunction
 endinterface

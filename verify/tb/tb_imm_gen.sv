@@ -1,22 +1,25 @@
-import rv32i_defs_pkg::*;
-import tb_imm_gen_tests_pkg::*;
-import tb_imm_gen_coverage_pkg::*;
+module tb_imm_gen
+  import uvm_pkg::*;
+  `include "uvm_macros.svh"
 
-module tb_imm_gen();
-  localparam CLK_PERIOD = 10;
+  import rv32i_verify_pkg::*;
+  import imm_gen_tests_pkg::*;
+();
 
   /*********** CLK *************/
   bit clk;
   initial begin
     clk = 0;
-    forever #(CLK_PERIOD/2) clk = ~clk;
+    forever #(CLK_PERIOD / 2) clk = ~clk;
   end
 
   /*********** INTERFACE *************/
   imm_gen_intf intf(.clk);
 
   /*********** DUT *************/
-  imm_gen dut(.inst(intf.inst), .imm(intf.imm));
+  imm_gen dut(.inst(intf.inst),
+              .imm(intf.imm)
+              );
 
   /*********** BIND ASSERTIONS *************/
   bind tb_imm_gen.dut imm_gen_assert dut_assert(.tb_clk(tb_imm_gen.clk),
@@ -24,23 +27,10 @@ module tb_imm_gen();
                                                 .imm(imm)
                                                 );
 
-  /************ COVERAGE *******************/
-  tb_imm_gen_coverage coverage;
-
   /**************  TESTING ***************************/
-  imm_gen_default_test test_default;
-
   initial begin
-    coverage = new();
-
-    test_default = new(intf, coverage);
-
-    //run tests
-    test_default.run(1000);
-
-    //print results
-    test_default.print_results();
-
+    uvm_config_db#(virtual imm_gen_intf)::set(null, "uvm_test_top", "imm_gen_vif", intf);
+    run_test();
     $stop(1);
   end
 endmodule

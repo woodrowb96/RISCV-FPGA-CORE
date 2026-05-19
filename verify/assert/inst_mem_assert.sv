@@ -1,7 +1,7 @@
-import rv32i_defs_pkg::*;
-import rv32i_config_pkg::*;
-
-module inst_mem_assert(
+module inst_mem_assert
+  import rv32i_defs_pkg::*;
+  import rv32i_config_pkg::*;
+(
   input logic tb_clk, //inst mem doesnt have a clock, but we will sync assertions to the tb clock
 
   input word_t inst_addr,

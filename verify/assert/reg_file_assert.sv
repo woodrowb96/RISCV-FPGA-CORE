@@ -1,6 +1,6 @@
-import rv32i_defs_pkg::*;
-
-module reg_file_assert(
+module reg_file_assert
+  import rv32i_defs_pkg::*;
+(
   input logic clk,
 
   //DUT input

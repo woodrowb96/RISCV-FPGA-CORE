@@ -1,22 +1,20 @@
-interface imm_gen_intf(input logic clk);
+interface imm_gen_intf
+  import rv32i_defs_pkg::*;
+(
+  input logic clk
+);
+  //DUT input
   word_t inst;
+  //DUT output
   word_t imm;
-
-  bit valid; //sim only
 
   clocking cb_drv @(posedge clk);
     default output #1;
-    output inst, valid;
+    output inst;
   endclocking
 
   clocking cb_mon @(posedge clk);
     default input #1step;
-    input inst, imm, valid;
+    input inst, imm;
   endclocking
-
-  modport monitor(input clk, inst, imm);
-
-  function void print(string msg = "");
-    $display("[%s] t=%0t inst:%0h imm:%0h", msg, $time, inst, imm);
-  endfunction
 endinterface

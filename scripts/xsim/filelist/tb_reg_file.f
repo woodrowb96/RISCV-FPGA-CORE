@@ -5,12 +5,12 @@ rtl/common/rv32i_config_pkg.sv
 rtl/reg_file.sv
 
 #Verification
-verify_uvm/common/rv32i_verify_pkg.sv
-verify_uvm/assert/reg_file_assert.sv
-verify_uvm/interface/reg_file_intf.sv
-verify_uvm/agents/reg_file/reg_file_agent_pkg.sv
-verify_uvm/ref_model/reg_file/reg_file_ref_model_pkg.sv
-verify_uvm/coverage/reg_file/reg_file_coverage_pkg.sv
-verify_uvm/env/reg_file/reg_file_env_pkg.sv
-verify_uvm/sequences/reg_file/reg_file_seq_pkg.sv
-verify_uvm/tests/reg_file/reg_file_tests_pkg.sv
+verify/common/rv32i_verify_pkg.sv
+verify/assert/reg_file_assert.sv
+verify/interface/reg_file_intf.sv
+verify/agents/reg_file/reg_file_agent_pkg.sv
+verify/ref_model/reg_file/reg_file_ref_model_pkg.sv
+verify/coverage/reg_file/reg_file_coverage_pkg.sv
+verify/env/reg_file/reg_file_env_pkg.sv
+verify/sequences/reg_file/reg_file_seq_pkg.sv
+verify/tests/reg_file/reg_file_tests_pkg.sv

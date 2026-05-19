@@ -1,6 +1,6 @@
-import rv32i_defs_pkg::*;
-
-module imm_gen_assert(
+module imm_gen_assert
+  import rv32i_defs_pkg::*;
+(
   //rtl has no clk, but we'll use the tb's clock to sync assertions
   input logic tb_clk,
 

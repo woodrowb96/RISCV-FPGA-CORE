@@ -1,17 +1,16 @@
-import rv32i_defs_pkg::*;
-import rv32i_config_pkg::*;
-import rv32i_control_pkg::*;
-import tb_data_mem_tests_pkg::*;
-import tb_data_mem_coverage_pkg::*;
+module tb_data_mem
+  import uvm_pkg::*;
+  `include "uvm_macros.svh"
 
-module tb_data_mem();
-  localparam CLK_PERIOD = 10;
+  import rv32i_verify_pkg::*;
+  import data_mem_tests_pkg::*;
+();
 
   /*********** CLK *************/
   bit clk;
   initial begin
     clk = 0;
-    forever #(CLK_PERIOD/2) clk = ~clk;
+    forever #(CLK_PERIOD / 2) clk = ~clk;
   end
 
   /*********** INTERFACE *************/
@@ -28,23 +27,10 @@ module tb_data_mem();
   /*********** BIND ASSERTIONS *************/
   bind tb_data_mem.dut data_mem_assert dut_assert(.*);
 
-  /************ COVERAGE *******************/
-  tb_data_mem_coverage coverage;
-
   /**************  TESTING ***************************/
-  data_mem_default_test test_default;
-
   initial begin
-    coverage = new();
-
-    test_default = new(intf, coverage);
-
-    //run tests
-    test_default.run(4000);
-
-    //print results
-    test_default.print_results();
-
+    uvm_config_db#(virtual data_mem_intf)::set(null, "uvm_test_top", "data_mem_vif", intf);
+    run_test();
     $stop(1);
   end
 endmodule

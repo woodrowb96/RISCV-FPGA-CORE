@@ -6,13 +6,13 @@ rtl/lut_ram.sv
 rtl/data_mem.sv
 
 #Verification
-verify_uvm/common/rv32i_verify_pkg.sv
-verify_uvm/assert/lut_ram_assert.sv
-verify_uvm/assert/data_mem_assert.sv
-verify_uvm/interface/data_mem_intf.sv
-verify_uvm/agents/data_mem/data_mem_agent_pkg.sv
-verify_uvm/ref_model/data_mem/data_mem_ref_model_pkg.sv
-verify_uvm/coverage/data_mem/data_mem_coverage_pkg.sv
-verify_uvm/env/data_mem/data_mem_env_pkg.sv
-verify_uvm/sequences/data_mem/data_mem_seq_pkg.sv
-verify_uvm/tests/data_mem/data_mem_tests_pkg.sv
+verify/common/rv32i_verify_pkg.sv
+verify/assert/lut_ram_assert.sv
+verify/assert/data_mem_assert.sv
+verify/interface/data_mem_intf.sv
+verify/agents/data_mem/data_mem_agent_pkg.sv
+verify/ref_model/data_mem/data_mem_ref_model_pkg.sv
+verify/coverage/data_mem/data_mem_coverage_pkg.sv
+verify/env/data_mem/data_mem_env_pkg.sv
+verify/sequences/data_mem/data_mem_seq_pkg.sv
+verify/tests/data_mem/data_mem_tests_pkg.sv

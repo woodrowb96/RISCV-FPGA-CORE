@@ -5,15 +5,15 @@ rtl/common/rv32i_config_pkg.sv
 rtl/alu.sv
 
 #CPP
-verify_uvm/ref_model/alu/alu_ref_model.cpp
+verify/ref_model/alu/alu_ref_model.cpp
 
 #Verification
-verify_uvm/common/rv32i_verify_pkg.sv
-verify_uvm/assert/alu_assert.sv
-verify_uvm/interface/alu_intf.sv
-verify_uvm/agents/alu/alu_agent_pkg.sv
-verify_uvm/ref_model/alu/alu_ref_model_pkg.sv
-verify_uvm/coverage/alu/alu_coverage_pkg.sv
-verify_uvm/env/alu/alu_env_pkg.sv
-verify_uvm/sequences/alu/alu_seq_pkg.sv
-verify_uvm/tests/alu/alu_tests_pkg.sv
+verify/common/rv32i_verify_pkg.sv
+verify/assert/alu_assert.sv
+verify/interface/alu_intf.sv
+verify/agents/alu/alu_agent_pkg.sv
+verify/ref_model/alu/alu_ref_model_pkg.sv
+verify/coverage/alu/alu_coverage_pkg.sv
+verify/env/alu/alu_env_pkg.sv
+verify/sequences/alu/alu_seq_pkg.sv
+verify/tests/alu/alu_tests_pkg.sv

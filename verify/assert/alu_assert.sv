@@ -1,7 +1,7 @@
-import rv32i_defs_pkg::*;
-import rv32i_control_pkg::*;
-
-module alu_assert(
+module alu_assert
+  import rv32i_defs_pkg::*;
+  import rv32i_control_pkg::*;
+(
   //rtl has no clk, but we'll use the tb's clock to sync assertions
   input logic tb_clk,
 

@@ -5,12 +5,12 @@ rtl/common/rv32i_config_pkg.sv
 rtl/inst_mem.sv
 
 #Verification
-verify_uvm/common/rv32i_verify_pkg.sv
-verify_uvm/assert/inst_mem_assert.sv
-verify_uvm/interface/inst_mem_intf.sv
-verify_uvm/agents/inst_mem/inst_mem_agent_pkg.sv
-verify_uvm/ref_model/inst_mem/inst_mem_ref_model_pkg.sv
-verify_uvm/coverage/inst_mem/inst_mem_coverage_pkg.sv
-verify_uvm/env/inst_mem/inst_mem_env_pkg.sv
-verify_uvm/sequences/inst_mem/inst_mem_seq_pkg.sv
-verify_uvm/tests/inst_mem/inst_mem_tests_pkg.sv
+verify/common/rv32i_verify_pkg.sv
+verify/assert/inst_mem_assert.sv
+verify/interface/inst_mem_intf.sv
+verify/agents/inst_mem/inst_mem_agent_pkg.sv
+verify/ref_model/inst_mem/inst_mem_ref_model_pkg.sv
+verify/coverage/inst_mem/inst_mem_coverage_pkg.sv
+verify/env/inst_mem/inst_mem_env_pkg.sv
+verify/sequences/inst_mem/inst_mem_seq_pkg.sv
+verify/tests/inst_mem/inst_mem_tests_pkg.sv

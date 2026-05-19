@@ -1,24 +1,30 @@
-import rv32i_defs_pkg::*;
-import verify_config_pkg::*;
-import tb_inst_mem_tests_pkg::*;
-import tb_inst_mem_coverage_pkg::*;
+module tb_inst_mem
+  import uvm_pkg::*;
+  `include "uvm_macros.svh"
 
-module tb_inst_mem();
-  localparam CLK_PERIOD = 10;
-  localparam DUT_TEST_MEM = INST_MEM_TEST_1;
+  import rv32i_verify_pkg::*;
+  import inst_mem_tests_pkg::*;
+();
+  //pick the program the DUT and ref_model both load
+  localparam string DUT_PROGRAM = INST_MEM_TEST_1;
 
   /*********** CLK *************/
   bit clk;
   initial begin
     clk = 0;
-    forever #(CLK_PERIOD/2) clk = ~clk;
+    forever #(CLK_PERIOD / 2) clk = ~clk;
   end
 
   /*********** INTERFACE *************/
   inst_mem_intf intf(.clk);
 
   /*********** DUT *************/
-  inst_mem #(DUT_TEST_MEM) dut(.inst_addr(intf.inst_addr), .inst(intf.inst));
+  //DUT is parameterized by program file path; ref_model loads the same
+  //file via config_db (set below) so both stay in sync.
+  inst_mem #(.PROGRAM(DUT_PROGRAM)) dut (
+    .inst_addr(intf.inst_addr),
+    .inst(intf.inst)
+  );
 
   /*********** BIND ASSERTIONS *************/
   bind tb_inst_mem.dut inst_mem_assert dut_assert(.tb_clk(tb_inst_mem.clk),
@@ -26,31 +32,11 @@ module tb_inst_mem();
                                                   .inst(inst)
                                                   );
 
-  /************ COVERAGE *******************/
-  tb_inst_mem_coverage coverage;
-
   /**************  TESTING ***************************/
-  inst_mem_default_test    test_default;    //randomized inst_addr with constraints to hit coverage
-  inst_mem_misaligned_test test_misaligned; //test misaligned addresses
-  inst_mem_oob_test        test_oob;        //test out of bounds addresses
-
   initial begin
-    coverage = new();
-
-    test_default    = new(intf, coverage, DUT_TEST_MEM);
-    test_misaligned = new(intf, coverage, DUT_TEST_MEM);
-    test_oob        = new(intf, coverage, DUT_TEST_MEM);
-
-    //run tests
-    test_default.run(1000);
-    test_misaligned.run(10);
-    test_oob.run(10);
-
-    //print results
-    test_default.print_results();
-    test_misaligned.print_results();
-    test_oob.print_results();
-
+    uvm_config_db#(virtual inst_mem_intf)::set(null, "uvm_test_top", "inst_mem_vif", intf);
+    uvm_config_db#(string)::set(null, "uvm_test_top.*", "inst_mem_program", DUT_PROGRAM);
+    run_test();
     $stop(1);
   end
 endmodule
