@@ -7,6 +7,8 @@ rtl/data_mem.sv
 
 #Verification
 verify_uvm/common/rv32i_verify_pkg.sv
+verify_uvm/assert/lut_ram_assert.sv
+verify_uvm/assert/data_mem_assert.sv
 verify_uvm/interface/data_mem_intf.sv
 verify_uvm/agents/data_mem/data_mem_agent_pkg.sv
 verify_uvm/ref_model/data_mem/data_mem_ref_model_pkg.sv

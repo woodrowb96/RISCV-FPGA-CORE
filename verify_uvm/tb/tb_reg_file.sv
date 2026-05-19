@@ -27,7 +27,7 @@ module tb_reg_file
               .rd_data_2(intf.rd_data_2));
 
   /*********** BIND ASSERTIONS *************/
-  // bind tb_reg_file.dut reg_file_assert dut_assert(.*);
+  bind tb_reg_file.dut reg_file_assert dut_assert(.*);
 
   /************ COVERAGE *******************/
   // tb_reg_file_coverage coverage;

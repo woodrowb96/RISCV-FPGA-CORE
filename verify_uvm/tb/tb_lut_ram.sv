@@ -28,6 +28,9 @@ module tb_lut_ram
     .rd_data(intf.rd_data)
   );
 
+  /*********** BIND ASSERTIONS *************/
+  bind tb_lut_ram.dut lut_ram_assert #(.LUT_WIDTH(LUT_WIDTH), .LUT_DEPTH(LUT_DEPTH)) dut_assert(.*);
+
   /**************  TESTING ***************************/
   initial begin
     uvm_config_db#(virtual lut_ram_intf)::set(null, "uvm_test_top", "lut_ram_vif", intf);

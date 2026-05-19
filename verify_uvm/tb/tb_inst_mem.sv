@@ -26,6 +26,12 @@ module tb_inst_mem
     .inst(intf.inst)
   );
 
+  /*********** BIND ASSERTIONS *************/
+  bind tb_inst_mem.dut inst_mem_assert dut_assert(.tb_clk(tb_inst_mem.clk),
+                                                  .inst_addr(inst_addr),
+                                                  .inst(inst)
+                                                  );
+
   /**************  TESTING ***************************/
   initial begin
     uvm_config_db#(virtual inst_mem_intf)::set(null, "uvm_test_top", "inst_mem_vif", intf);

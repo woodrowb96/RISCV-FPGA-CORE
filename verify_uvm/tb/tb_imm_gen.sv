@@ -21,6 +21,12 @@ module tb_imm_gen
               .imm(intf.imm)
               );
 
+  /*********** BIND ASSERTIONS *************/
+  bind tb_imm_gen.dut imm_gen_assert dut_assert(.tb_clk(tb_imm_gen.clk),
+                                                .inst(inst),
+                                                .imm(imm)
+                                                );
+
   /**************  TESTING ***************************/
   initial begin
     uvm_config_db#(virtual imm_gen_intf)::set(null, "uvm_test_top", "imm_gen_vif", intf);

@@ -24,6 +24,9 @@ module tb_data_mem
                .rd_data(intf.rd_data)
                );
 
+  /*********** BIND ASSERTIONS *************/
+  bind tb_data_mem.dut data_mem_assert dut_assert(.*);
+
   /**************  TESTING ***************************/
   initial begin
     uvm_config_db#(virtual data_mem_intf)::set(null, "uvm_test_top", "data_mem_vif", intf);

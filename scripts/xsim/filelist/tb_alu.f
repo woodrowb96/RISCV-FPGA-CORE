@@ -9,6 +9,7 @@ verify_uvm/ref_model/alu/alu_ref_model.cpp
 
 #Verification
 verify_uvm/common/rv32i_verify_pkg.sv
+verify_uvm/assert/alu_assert.sv
 verify_uvm/interface/alu_intf.sv
 verify_uvm/agents/alu/alu_agent_pkg.sv
 verify_uvm/ref_model/alu/alu_ref_model_pkg.sv

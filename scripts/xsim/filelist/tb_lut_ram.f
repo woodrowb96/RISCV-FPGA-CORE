@@ -6,6 +6,7 @@ rtl/lut_ram.sv
 
 #Verification
 verify_uvm/common/rv32i_verify_pkg.sv
+verify_uvm/assert/lut_ram_assert.sv
 verify_uvm/interface/lut_ram_intf.sv
 verify_uvm/agents/lut_ram/lut_ram_agent_pkg.sv
 verify_uvm/ref_model/lut_ram/lut_ram_ref_model_pkg.sv

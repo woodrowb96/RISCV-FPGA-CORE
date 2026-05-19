@@ -6,6 +6,7 @@ rtl/reg_file.sv
 
 #Verification
 verify_uvm/common/rv32i_verify_pkg.sv
+verify_uvm/assert/reg_file_assert.sv
 verify_uvm/interface/reg_file_intf.sv
 verify_uvm/agents/reg_file/reg_file_agent_pkg.sv
 verify_uvm/ref_model/reg_file/reg_file_ref_model_pkg.sv
