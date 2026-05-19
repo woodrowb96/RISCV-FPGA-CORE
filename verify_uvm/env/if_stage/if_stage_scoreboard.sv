@@ -18,8 +18,8 @@ class if_stage_scoreboard extends uvm_scoreboard;
     ref_model    = if_stage_ref_model::type_id::create("ref_model");
 
     //get the program file from config_db and load it into the ref_model rom
-    if(!uvm_config_db#(string)::get(this, "", "inst_mem_program", program_file))
-      `uvm_fatal("SCB", "Could not get inst_mem_program from config_db")
+    if(!uvm_config_db#(string)::get(this, "", "if_stage_program", program_file))
+      `uvm_fatal("SCB", "Could not get if_stage_program from config_db")
     //load data into ref_inst mem
     ref_model.load_program(program_file);
   endfunction
