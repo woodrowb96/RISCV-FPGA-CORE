@@ -11,4 +11,5 @@ package if_stage_tests_pkg;
   `include "if_stage_base_test.sv"
   `include "if_stage_rand_test.sv"
   `include "if_stage_branch_corners_test.sv"
+  `include "if_stage_misaligned_oob_test.sv"
 endpackage

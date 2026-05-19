@@ -12,4 +12,5 @@ package if_stage_seq_pkg;
   `include "if_stage_base_seq.sv"
   `include "if_stage_rand_seq.sv"
   `include "if_stage_branch_corners_seq.sv"
+  `include "if_stage_misaligned_oob_seq.sv"
 endpackage
