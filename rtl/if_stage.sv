@@ -1,6 +1,5 @@
 /*
       The Instruction Fetch Stage for a riscv rv32i implementation.
-      (currently a single cycle implementation)
 
 CLK:
   - synchronous operations are synced to the posedge of the clk
