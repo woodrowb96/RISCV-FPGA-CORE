@@ -3,18 +3,18 @@ interface if_stage_intf
 (
   input logic clk
 );
-  logic  branch;        //DUT Control
-  word_t branch_target; //DUT input
-  word_t pc;            //DUT output
-  word_t inst;
+  logic  branch_ex;        //DUT Control (back-edge from EX)
+  word_t branch_target_ex; //DUT input  (back-edge from EX)
+  word_t pc_if;            //DUT output
+  word_t inst_if;
 
   clocking cb_drv @(posedge clk);
     default output #1;
-    output branch, branch_target;
+    output branch_ex, branch_target_ex;
   endclocking
 
   clocking cb_mon @(posedge clk);
     default input #1step;
-    input branch, branch_target, pc, inst;
+    input branch_ex, branch_target_ex, pc_if, inst_if;
   endclocking
 endinterface

@@ -31,12 +31,12 @@ class if_stage_scoreboard extends uvm_scoreboard;
     `uvm_info("SCB" , $sformatf("actual:%s", actual.convert2string()), UVM_HIGH)
 
     expected = if_stage_seq_item::type_id::create("expected");
-    expected.branch        = actual.branch;
-    expected.branch_target = actual.branch_target;
+    expected.branch_ex        = actual.branch_ex;
+    expected.branch_target_ex = actual.branch_target_ex;
 
     //Predict expected output
-    expected.pc   = ref_model.ref_pc;
-    expected.inst = ref_model.fetch_inst();
+    expected.pc_if   = ref_model.ref_pc;
+    expected.inst_if = ref_model.fetch_inst();
 
     //If we pass send the item to coverage, else report error
     if(actual.compare(expected)) begin

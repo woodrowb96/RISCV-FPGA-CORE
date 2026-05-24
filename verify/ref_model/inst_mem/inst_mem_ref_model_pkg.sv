@@ -5,7 +5,5 @@ package inst_mem_ref_model_pkg;
   import rv32i_defs_pkg::*;
   import rv32i_config_pkg::*;
 
-  import inst_mem_agent_pkg::*;
-
   `include "inst_mem_ref_model.sv"
 endpackage

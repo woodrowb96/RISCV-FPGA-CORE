@@ -40,10 +40,10 @@ class if_stage_monitor extends uvm_monitor;
           forever begin
             @(if_vif.cb_mon);
             item = if_stage_seq_item::type_id::create("item");
-            item.pc            = if_vif.cb_mon.pc;
-            item.inst          = if_vif.cb_mon.inst;
-            item.branch        = if_vif.cb_mon.branch;
-            item.branch_target = if_vif.cb_mon.branch_target;
+            item.pc_if            = if_vif.cb_mon.pc_if;
+            item.inst_if          = if_vif.cb_mon.inst_if;
+            item.branch_ex        = if_vif.cb_mon.branch_ex;
+            item.branch_target_ex = if_vif.cb_mon.branch_target_ex;
             observed_ap.write(item);
             `uvm_info("MON", $sformatf("Saw item %s", item.convert2string()), UVM_HIGH)
           end

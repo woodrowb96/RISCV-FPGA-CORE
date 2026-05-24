@@ -1,16 +1,16 @@
 class if_stage_seq_item extends uvm_sequence_item;
   `uvm_object_utils(if_stage_seq_item)
 
-  rand logic branch;          //control
-  rand word_t branch_target;  //input
-  word_t pc;                  //output
-  word_t inst;
+  rand logic branch_ex;          //control (back-edge from EX)
+  rand word_t branch_target_ex;  //input   (back-edge from EX)
+  word_t pc_if;                  //output
+  word_t inst_if;
 
   constraint word_aligned_branch_target {
-    branch_target[1:0] == 2'b00;
+    branch_target_ex[1:0] == 2'b00;
   }
   constraint legal_branch_target_range {
-    branch_target inside { [INST_MEM_FIRST_ADDR : INST_MEM_LAST_ADDR] };
+    branch_target_ex inside { [INST_MEM_FIRST_ADDR : INST_MEM_LAST_ADDR] };
   }
 
   function new(string name = "if_stage_seq_item");
@@ -19,8 +19,8 @@ class if_stage_seq_item extends uvm_sequence_item;
 
   virtual function string convert2string();
     return $sformatf(
-      "branch:%b | branch_target=%d | pc=%d inst=%h",
-       branch, branch_target, pc, inst);
+      "branch_ex:%b | branch_target_ex=%d | pc_if=%d inst_if=%h",
+       branch_ex, branch_target_ex, pc_if, inst_if);
   endfunction
 
   virtual function bit do_compare(uvm_object rhs, uvm_comparer comparer);
@@ -29,7 +29,7 @@ class if_stage_seq_item extends uvm_sequence_item;
     if (!$cast(rhs_, rhs))
       return 0;
 
-    return (pc   === rhs_.pc &&
-            inst === rhs_.inst);
+    return (pc_if   === rhs_.pc_if &&
+            inst_if === rhs_.inst_if);
   endfunction
 endclass

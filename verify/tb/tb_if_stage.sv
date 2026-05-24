@@ -25,10 +25,10 @@ module tb_if_stage
   if_stage #(.PROGRAM(DUT_PROGRAM)) dut (
     .clk(clk),
     .reset_n(rst_intf.reset_n),
-    .branch(if_intf.branch),
-    .branch_target(if_intf.branch_target),
-    .pc(if_intf.pc),
-    .inst(if_intf.inst)
+    .branch_ex(if_intf.branch_ex),
+    .branch_target_ex(if_intf.branch_target_ex),
+    .pc_if(if_intf.pc_if),
+    .inst_if(if_intf.inst_if)
   );
 
   /**************  TESTING ***************************/

@@ -8,24 +8,24 @@ RESET:
   - reset_n: synchronous reset signal
       - resets the following signals:
           - PC <= 0
-CONTROL
-  - branch: 1 bit branch select
+CONTROL (back-edge from EX)
+  - branch_ex: 1 bit branch select
       - determines whether we continue incrementing PC or take the jump to the branch_target
       - The next PC is set according to the following:
-          - 1 : pc <= branch_target
-          - 0 : pc <= pc + 4
-INPUT
-  - branch_target: 32bit unsigned address of the branch target
+          - 1 : pc_if <= branch_target_ex
+          - 0 : pc_if <= pc_if + 4
+INPUT (back-edge from EX)
+  - branch_target_ex: 32bit unsigned address of the branch target
       - branch_targets are word aligned in this implementation
       - NOTE: The branch target has already been calculated in the EX stage.
               This module doesnt need to do any extra-processing on it.
 
 OUTPUT
-  - PC: 32bit unsigned address currently in the Program Counter
+  - pc_if: 32bit unsigned address currently in the Program Counter
       - The current address in the inst_mem we are reading out of
-      - PC is sent to the EX stage to aid in branch_target calculation
-  - inst: 32bit instruction
-      - The instruction that PC is currently pointing to in instruction memory
+      - pc_if is sent to the EX stage to aid in branch_target calculation
+  - inst_if: 32bit instruction
+      - The instruction that pc_if is currently pointing to in instruction memory
       - sent to the ID stage and Control Unit to be decoded
 
 
@@ -56,42 +56,42 @@ module if_stage #(parameter string PROGRAM = NO_PROGRAM) (
   input logic clk,
   input logic reset_n,
 
-  //control
-  input logic branch,
+  //control (back-edge from EX)
+  input logic branch_ex,
 
-  //input
-  input word_t branch_target,
+  //input (back-edge from EX)
+  input word_t branch_target_ex,
 
-  //output
-  output word_t pc,
-  output word_t inst
+  //output (lives in IF)
+  output word_t pc_if,
+  output word_t inst_if
 );
   word_t pc_next;
 
   /************ CALC NEXT PC *******************/
   always_comb begin
-    if(branch) begin
-      pc_next = branch_target;
+    if(branch_ex) begin
+      pc_next = branch_target_ex;
     end
     else begin
-      pc_next = pc + word_t'(4);
+      pc_next = pc_if + word_t'(4);
     end
   end
 
   /************ PROGRAM COUNTER ***************/
   always_ff @(posedge clk) begin
     if(~reset_n) begin
-      pc <= PC_RESET;
+      pc_if <= PC_RESET;
     end
     else begin
-      pc <= pc_next;
+      pc_if <= pc_next;
     end
   end
 
   /***********  INSTRUCTION ACCESS ****************/
   inst_mem #(.PROGRAM(PROGRAM)) u_inst_mem (
-    .inst_addr(pc),
-    .inst(inst)
+    .inst_addr(pc_if),
+    .inst(inst_if)
   );
 
 endmodule

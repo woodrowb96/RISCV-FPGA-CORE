@@ -25,13 +25,13 @@ class if_stage_coverage extends uvm_object;
     $display("***   if_stage_coverage: %6.2f%%        ***", total);
     $display("========================================");
     if (total < 100.0) begin
-      $display("  branch:                                  %6.2f%%", cg.branch.get_coverage());
+      $display("  branch_ex:                               %6.2f%%", cg.branch_ex.get_coverage());
       $display("  branch_transitions:                      %6.2f%%", cg.branch_transitions.get_coverage());
-      $display("  branch_target:                           %6.2f%%", cg.branch_target.get_coverage());
+      $display("  branch_target_ex:                        %6.2f%%", cg.branch_target_ex.get_coverage());
       $display("  branch_distance:                         %6.2f%%", cg.branch_distance.get_coverage());
-      $display("  pc:                                      %6.2f%%", cg.pc.get_coverage());
+      $display("  pc_if:                                   %6.2f%%", cg.pc_if.get_coverage());
       $display("  pc_x_branch:                             %6.2f%%", cg.pc_x_branch.get_coverage());
-      $display("  inst:                                    %6.2f%%", cg.inst.get_coverage());
+      $display("  inst_if:                                 %6.2f%%", cg.inst_if.get_coverage());
       $display("  misaligned_branch:                       %6.2f%%", cg.misaligned_branch.get_coverage());
       $display("  increment_misaligned_pc:                 %6.2f%%", cg.increment_misaligned_pc.get_coverage());
       $display("  branch_to_oob_pc:                        %6.2f%%", cg.branch_to_oob_pc.get_coverage());
@@ -50,14 +50,14 @@ class if_stage_coverage extends uvm_object;
 
     /*************** BRANCH COVERAGE ***************/
 
-    branch: coverpoint item.branch {
+    branch_ex: coverpoint item.branch_ex {
       bins taken     = {1};
       bins not_taken = {0};
     }
 
     //These should get ignored in crosses, but Vivado is crossing them so
     //I'll just split them out
-    branch_transitions: coverpoint item.branch {
+    branch_transitions: coverpoint item.branch_ex {
       bins back_to_back_take          = (1[*2]);
       bins back_to_back_not_take      = (0[*2]);
       bins take_not_taken_taken       = (1 => 0 => 1);
@@ -66,8 +66,8 @@ class if_stage_coverage extends uvm_object;
 
     //We want to branch to the following corner addresses in memory
     //(we will cover the branch distance from pc in a separate coverpoint)
-    branch_target: coverpoint item.branch_target
-      iff(item.branch) { //only cover on branch takens
+    branch_target_ex: coverpoint item.branch_target_ex
+      iff(item.branch_ex) { //only cover on branch takens
         bins first_addr          = {INST_MEM_FIRST_ADDR};
         bins second_addr         = {INST_MEM_FIRST_ADDR + 'd4};
         bins second_to_last_addr = {INST_MEM_LAST_ADDR  - 'd4};
@@ -87,8 +87,8 @@ class if_stage_coverage extends uvm_object;
     //  possible for my implementation (1024 bytes). If in the future the full
     //  range for B-type and J-types are available we will cover those
     //  distances.
-    branch_distance: coverpoint $signed(item.branch_target - item.pc)
-      iff(item.branch) {  //only cover when we are actually branching
+    branch_distance: coverpoint $signed(item.branch_target_ex - item.pc_if)
+      iff(item.branch_ex) {  //only cover when we are actually branching
         //we want to hit the corner distances
         bins max_neg       = {MAX_NEG_BRANCH_DIST};  //max negative distance physically allowed in mem
         bins pc_minus_four = {-4}; //branch to the instruction below PC
@@ -104,7 +104,7 @@ class if_stage_coverage extends uvm_object;
     /***************** PC COVERAGE ********************/
 
     //We want PC to hit the following corner addresses
-    pc: coverpoint item.pc {
+    pc_if: coverpoint item.pc_if {
         bins first_addr          = {INST_MEM_FIRST_ADDR};
         bins second_addr         = {INST_MEM_FIRST_ADDR + 'd4};
         bins second_to_last_addr = {INST_MEM_LAST_ADDR  - 'd4};
@@ -115,16 +115,16 @@ class if_stage_coverage extends uvm_object;
     //We want to both branch and not branch from each corner.
     //  -NOTE: if pc is the last_addr and we don't take the branch the
     //         rtl will silently wrap to the start of memory
-    pc_x_branch: cross pc, branch {
+    pc_x_branch: cross pc_if, branch_ex {
       //Not branching when we are at the last_addr will take us out of
       //bounds. We will ignore it for now and cover OOB PC coverage separately
-      ignore_bins last_addr_x_not_taken = binsof(pc.last_addr) && binsof(branch.not_taken);
+      ignore_bins last_addr_x_not_taken = binsof(pc_if.last_addr) && binsof(branch_ex.not_taken);
     }
 
 
     /**************** INST COVERAGE *******************/
 
-    inst: coverpoint item.inst {
+    inst_if: coverpoint item.inst_if {
       bins all_ones   = {WORD_ALL_ONES};
       bins all_zeros  = {WORD_ALL_ZEROS};
       bins non_corner = default;
@@ -135,8 +135,8 @@ class if_stage_coverage extends uvm_object;
     //This shouldn't happen during normal operation, but the rtl silently
     //rounds this down to be word aligned, so we'll cover it. Also in the
     //future when exceptions get implemented this will throw an exception
-    misaligned_branch: coverpoint (item.branch_target[1:0] != 2'b00)
-      iff(item.branch) { //only cover on actual branches
+    misaligned_branch: coverpoint (item.branch_target_ex[1:0] != 2'b00)
+      iff(item.branch_ex) { //only cover on actual branches
         bins hit = {1};
     }
 
@@ -149,8 +149,8 @@ class if_stage_coverage extends uvm_object;
     //a misaligned PC (So PC_misaligned + 4). This stresses the PC + 4 logic
     //and makes sure it handles the silent rounding down the misaligned byte_offset properly.
     increment_misaligned_pc: coverpoint (
-      (item.pc[1:0] != 2'b00) &&  //make sure the current PC is misaligned
-      (!item.branch)              //make sure we aren't branching (so doing PC + 4 instead)
+      (item.pc_if[1:0] != 2'b00) &&  //make sure the current PC is misaligned
+      (!item.branch_ex)              //make sure we aren't branching (so doing PC + 4 instead)
     ){
       bins hit = {1};
     }
@@ -163,13 +163,13 @@ class if_stage_coverage extends uvm_object;
 
     //PC can either increment (pc + 4) into the out of bounds, or it can
     //branch into out of bounds. We need to cover both scenarios.
-    branch_to_oob_pc: coverpoint (item.branch_target > INST_MEM_LAST_ADDR)
-      iff(item.branch) {
+    branch_to_oob_pc: coverpoint (item.branch_target_ex > INST_MEM_LAST_ADDR)
+      iff(item.branch_ex) {
         bins hit = {1};
     }
     increment_to_oob_pc: coverpoint (
-      (item.pc == INST_MEM_LAST_ADDR) &&  //if we are at the last address
-      (!item.branch)                      //and we don't branch then we will increment OOB
+      (item.pc_if == INST_MEM_LAST_ADDR) &&  //if we are at the last address
+      (!item.branch_ex)                      //and we don't branch then we will increment OOB
     ) {
         bins hit = {1};
     }
@@ -183,9 +183,9 @@ class if_stage_coverage extends uvm_object;
     //(This makes sure the PC + 4 logic handles both the wrapping of
     //addresses and the dropping of misaligned byte_offsets at the same time)
     increment_misaligned_pc_to_oob: coverpoint (
-      (item.pc[1:0] != 2'b00)                           &&  //if the current PC is misaligned
-      ({item.pc[XLEN-1:2],2'b00} == INST_MEM_LAST_ADDR) &&  //and it points to the last addr (ignoring the byte_offset)
-      (!item.branch)                                        //and we don't branch, then we will be incrementing a misaligned PC OOB
+      (item.pc_if[1:0] != 2'b00)                           &&  //if the current PC is misaligned
+      ({item.pc_if[XLEN-1:2],2'b00} == INST_MEM_LAST_ADDR) &&  //and it points to the last addr (ignoring the byte_offset)
+      (!item.branch_ex)                                        //and we don't branch, then we will be incrementing a misaligned PC OOB
     ) {
       bins hit = {1};
     }

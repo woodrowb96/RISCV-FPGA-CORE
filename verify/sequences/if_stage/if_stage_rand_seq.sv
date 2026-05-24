@@ -24,11 +24,11 @@ class if_stage_rand_seq extends if_stage_base_seq;
         1: begin
           if (!item.randomize() with {
             //force a branch when PC is at the last addr (keep PC in-bounds)
-            (prev_pc == INST_MEM_LAST_ADDR) -> (branch == 1);
+            (prev_pc == INST_MEM_LAST_ADDR) -> (branch_ex == 1);
             //mirror normal operation: branch ~20% of the time
-            branch dist { 1 := 1, 0 := 5 };
+            branch_ex dist { 1 := 1, 0 := 5 };
             //restrict branch_target to corner addresses
-            branch_target inside {
+            branch_target_ex inside {
               INST_MEM_FIRST_ADDR,
               INST_MEM_FIRST_ADDR + 4,
               INST_MEM_LAST_ADDR  - 4,
@@ -40,8 +40,8 @@ class if_stage_rand_seq extends if_stage_base_seq;
         //full range (seq_item's legal_branch_target_range + word_aligned still active)
         5: begin
           if (!item.randomize() with {
-            (prev_pc == INST_MEM_LAST_ADDR) -> (branch == 1);
-            branch dist { 1 := 1, 0 := 5 };
+            (prev_pc == INST_MEM_LAST_ADDR) -> (branch_ex == 1);
+            branch_ex dist { 1 := 1, 0 := 5 };
           }) `uvm_fatal("SEQ", "Failed item.randomize() (full_range)")
         end
       endcase
@@ -50,8 +50,8 @@ class if_stage_rand_seq extends if_stage_base_seq;
       finish_item(item);
 
       //update prev_pc: branch taken -> jump to branch_target; else PC += 4
-      if (item.branch === 1'b1) begin
-        prev_pc = item.branch_target;
+      if (item.branch_ex === 1'b1) begin
+        prev_pc = item.branch_target_ex;
       end
       else begin
         prev_pc += 'd4;

@@ -24,30 +24,30 @@ class if_stage_ref_model extends uvm_object;
   endfunction
 
   function void update(if_stage_seq_item item);
-    case(item.branch)
+    case(item.branch_ex)
       0: begin
       //Dont take branch
         ref_pc = ref_pc + 'd4;
       end
       1: begin
       //take the branch
-        if(item.branch_target[1:0] != 2'b00) begin
-          $warning("[IF_STAGE_REF_MODEL]: misaligned branch_target: branch_target:%0d",
-            item.branch_target);
+        if(item.branch_target_ex[1:0] != 2'b00) begin
+          $warning("[IF_STAGE_REF_MODEL]: misaligned branch_target_ex: branch_target_ex:%0d",
+            item.branch_target_ex);
         end
 
-        if(item.branch_target >= (INST_MEM_DEPTH * 4)) begin
-          $warning("[IF_STAGE_REF_MODEL]: out of bounds branch_target: branch_target:%0d",
-            item.branch_target);
+        if(item.branch_target_ex >= (INST_MEM_DEPTH * 4)) begin
+          $warning("[IF_STAGE_REF_MODEL]: out of bounds branch_target_ex: branch_target_ex:%0d",
+            item.branch_target_ex);
         end
 
-        ref_pc = item.branch_target;
+        ref_pc = item.branch_target_ex;
       end
       default: begin
       //invalid branch
       //this is undefined behavior in the rtl, so set ref_pc to x's and print an error
         ref_pc = 'x;
-        $error("[IF_STAGE_REF_MODEL]: invalid branch, branch:%b", item.branch);
+        $error("[IF_STAGE_REF_MODEL]: invalid branch_ex, branch_ex:%b", item.branch_ex);
       end
     endcase
   endfunction
