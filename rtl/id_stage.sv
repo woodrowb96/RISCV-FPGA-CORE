@@ -35,13 +35,15 @@ module id_stage
   input logic wr_en_wb,
 
   //input
-  input word_t    inst_if,
-  input word_t    wr_data_if,
+  input word_t pc_if,
+  input word_t inst_if,
+  input word_t wr_data_wb,
 
   //output
-  output word_t    rs1_data_id,
-  output word_t    rs2_data_id,
-  output word_t    imm_id
+  output word_t pc_id,
+  output word_t rs1_data_id,
+  output word_t rs2_data_id,
+  output word_t imm_id
 );
 
 endmodule
