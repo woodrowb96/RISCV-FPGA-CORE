@@ -6,7 +6,7 @@ module mem_stage
   input logic clk,
 
   //control
-  input byte_sel_t wr_sel_mem,
+  input byte_sel_t mem_wr_byte_sel_ex,
 
   //input
   input word_t alu_result_ex,
@@ -14,6 +14,6 @@ module mem_stage
 
   //output
   output word_t alu_result_mem,
-  output word_t rd_data_mem
+  output word_t load_data_mem
 );
 endmodule
