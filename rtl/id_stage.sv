@@ -45,5 +45,33 @@ module id_stage
   output word_t rs2_data_id,
   output word_t imm_id
 );
+  rf_addr_t rs1_addr;
+  rf_addr_t rs2_addr;
+  rf_addr_t rd_addr;
 
+  /************** PASS THROUGHS **************/
+  assign pc_id = pc_if;
+
+  /*********** PARSE RS/RD FROM INST **********/
+  assign rs1_addr = inst_if[19:15];
+  assign rs2_addr = inst_if[24:20];
+  assign rd_addr  = inst_if[11:7];
+
+  /************** REG_FILE ********************/
+  reg_file u_reg_file (
+    .clk          (clk),
+    .write_en     (reg_wr_en_wb),
+    .write_addr   (rd_addr),
+    .write_data   (rd_data_wb),
+    .read_addr_1  (rs1_addr),
+    .read_addr_2  (rs2_addr),
+    .read_data_1  (rs1_data_id),
+    .read_data_2  (rs2_data_id)
+  );
+
+  /*********** IMMEDIATE GENERATION **********/
+  imm_gen u_imm_gen (
+    .inst(inst_if),
+    .imm(imm_id)
+  );
 endmodule

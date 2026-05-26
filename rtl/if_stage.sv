@@ -93,5 +93,4 @@ module if_stage #(parameter string PROGRAM = NO_PROGRAM) (
     .inst_addr(pc_if),
     .inst(inst_if)
   );
-
 endmodule
