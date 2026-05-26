@@ -20,21 +20,21 @@ class reg_file_driver extends uvm_driver #(reg_file_seq_item);
     super.run_phase(phase);
 
     @(vif.cb_drv);
-    vif.cb_drv.wr_en    <= 1'b0;
-    vif.cb_drv.wr_reg   <= X0;
-    vif.cb_drv.rd_reg_1 <= X0;
-    vif.cb_drv.rd_reg_2 <= X0;
-    vif.cb_drv.wr_data  <= '0;
+    vif.cb_drv.write_en    <= 1'b0;
+    vif.cb_drv.write_addr   <= X0;
+    vif.cb_drv.read_addr_1 <= X0;
+    vif.cb_drv.read_addr_2 <= X0;
+    vif.cb_drv.write_data  <= '0;
 
     forever begin
       seq_item_port.get_next_item(item);
 
       @(vif.cb_drv);
-      vif.cb_drv.wr_en     <= item.wr_en;
-      vif.cb_drv.wr_reg    <= item.wr_reg;
-      vif.cb_drv.wr_data   <= item.wr_data;
-      vif.cb_drv.rd_reg_1  <= item.rd_reg_1;
-      vif.cb_drv.rd_reg_2  <= item.rd_reg_2;
+      vif.cb_drv.write_en     <= item.write_en;
+      vif.cb_drv.write_addr    <= item.write_addr;
+      vif.cb_drv.write_data   <= item.write_data;
+      vif.cb_drv.read_addr_1  <= item.read_addr_1;
+      vif.cb_drv.read_addr_2  <= item.read_addr_2;
 
       seq_item_port.item_done();
     end

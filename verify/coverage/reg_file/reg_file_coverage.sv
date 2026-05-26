@@ -4,7 +4,7 @@
   COVERAGE SAMPLING ASSUMPTIONS:
         - sample() is being called AFTER the DUT signals have been driven onto the DUT's input ports
           and AFTER the combinatorial rd_reg's have had time to propagate to the rd_data outputs
-          but BEFORE the new wr_data has been clocked into the wr_reg.
+          but BEFORE the new write_data has been clocked into the write_addr.
 
         -NOTE:
             - The covergroup uses written, prev_wr_en and prev_register to collect coverage.
@@ -42,15 +42,15 @@ class reg_file_coverage extends uvm_object;
   function void reset_state();
     written = '0;     //none of the registers have been written yet
     prev_wr_en = '0;  //we didnt write previously
-    prev_wr_reg = 'x; //we have no past wr_reg
+    prev_wr_reg = 'x; //we have no past write_addr
   endfunction
 
   function void update_state();
-    if(item.wr_en) begin
-      written[item.wr_reg] = 1'b1;
+    if(item.write_en) begin
+      written[item.write_addr] = 1'b1;
     end
-    prev_wr_en = item.wr_en;
-    prev_wr_reg = item.wr_reg;
+    prev_wr_en = item.write_en;
+    prev_wr_reg = item.write_addr;
   endfunction
 
   function void print_coverage_report();
@@ -59,16 +59,16 @@ class reg_file_coverage extends uvm_object;
     $display("***   reg_file_coverage: %6.2f%%        ***", total);
     $display("========================================");
     if (total < 100.0) begin
-      $display("  wr_en:                                %6.2f%%", cg.wr_en.get_coverage());
-      $display("  wr_reg:                               %6.2f%%", cg.wr_reg.get_coverage());
+      $display("  write_en:                                %6.2f%%", cg.write_en.get_coverage());
+      $display("  write_addr:                               %6.2f%%", cg.write_addr.get_coverage());
       $display("  wr_en_x_wr_reg:                       %6.2f%%", cg.wr_en_x_wr_reg.get_coverage());
       $display("  back_to_back_wr:                      %6.2f%%", cg.back_to_back_wr.get_coverage());
-      $display("  wr_data:                              %6.2f%%", cg.wr_data.get_coverage());
+      $display("  write_data:                              %6.2f%%", cg.write_data.get_coverage());
       $display("  wr_data_x_wr_reg:                     %6.2f%%", cg.wr_data_x_wr_reg.get_coverage());
-      $display("  rd_reg_1:                             %6.2f%%", cg.rd_reg_1.get_coverage());
-      $display("  rd_reg_2:                             %6.2f%%", cg.rd_reg_2.get_coverage());
-      $display("  rd_data_1:                            %6.2f%%", cg.rd_data_1.get_coverage());
-      $display("  rd_data_2:                            %6.2f%%", cg.rd_data_2.get_coverage());
+      $display("  read_addr_1:                             %6.2f%%", cg.read_addr_1.get_coverage());
+      $display("  read_addr_2:                             %6.2f%%", cg.read_addr_2.get_coverage());
+      $display("  read_data_1:                            %6.2f%%", cg.read_data_1.get_coverage());
+      $display("  read_data_2:                            %6.2f%%", cg.read_data_2.get_coverage());
       $display("  rd_data_1_x_rd_reg_1:                 %6.2f%%", cg.rd_data_1_x_rd_reg_1.get_coverage());
       $display("  rd_data_2_x_rd_reg_2:                 %6.2f%%", cg.rd_data_2_x_rd_reg_2.get_coverage());
       $display("  simultaneous_reads_from_the_same_reg: %6.2f%%", cg.simultaneous_reads_from_the_same_reg.get_coverage());
@@ -89,34 +89,34 @@ class reg_file_coverage extends uvm_object;
   /*==============================  COVERGROUP  =================================*/
   covergroup cg;
     /************************** WRITE COVERAGE ************************/
-    wr_en: coverpoint item.wr_en{
+    write_en: coverpoint item.write_en{
       bins write = {1'b1};
       bins no_write = {1'b0};
     }
 
     //cover the lower 31 writable registers
-    wr_reg: coverpoint item.wr_reg {
+    write_addr: coverpoint item.write_addr {
       ignore_bins x0 = {X0};  //we'll cover x0 behavior separately
     }
 
     //we want to write and not write to each writable register
-    wr_en_x_wr_reg: cross wr_en, wr_reg;
+    wr_en_x_wr_reg: cross write_en, write_addr;
 
-    back_to_back_wr: coverpoint ((item.wr_reg == prev_wr_reg) && (item.wr_en && prev_wr_en)) {
+    back_to_back_wr: coverpoint ((item.write_addr == prev_wr_reg) && (item.write_en && prev_wr_en)) {
         bins hit = {1};
     }
 
-    //Note: iff(item.wr_en && item.wr_reg)
-    //  - (wr_en && wr_reg != X0): we only want to collect when we are writing into a writable register
-    wr_data: coverpoint item.wr_data
-      iff(item.wr_en && item.wr_reg != X0) {
+    //Note: iff(item.write_en && item.write_addr)
+    //  - (write_en && write_addr != X0): we only want to collect when we are writing into a writable register
+    write_data: coverpoint item.write_data
+      iff(item.write_en && item.write_addr != X0) {
         bins zeros      = {WORD_ALL_ZEROS};
         bins all_ones   = {WORD_ALL_ONES};
         bins non_corner = default;
       }
 
     //we want to write corner values into all the writable registers
-    wr_data_x_wr_reg: cross wr_data, wr_reg;
+    wr_data_x_wr_reg: cross write_data, write_addr;
 
 
     /*********************** READ COVERAGE ***************************/
@@ -131,58 +131,58 @@ class reg_file_coverage extends uvm_object;
     //       really give us much to verify rd_reg functionality.
     //       We want to collect coverage on functionality ONLY when its
     //       in a verifiable state.
-    rd_reg_1: coverpoint item.rd_reg_1
-      iff(written[item.rd_reg_1]) {
+    read_addr_1: coverpoint item.read_addr_1
+      iff(written[item.read_addr_1]) {
         ignore_bins x0 = {X0};    //we'll cover x0 separately
     }
-    rd_reg_2: coverpoint item.rd_reg_2
-      iff(written[item.rd_reg_2]) {
+    read_addr_2: coverpoint item.read_addr_2
+      iff(written[item.read_addr_2]) {
         ignore_bins x0 = {X0};
     }
 
-    rd_data_1: coverpoint item.rd_data_1
-      iff(item.rd_reg_1 != X0) {
+    read_data_1: coverpoint item.read_data_1
+      iff(item.read_addr_1 != X0) {
         bins zeros      = {WORD_ALL_ZEROS};
         bins all_ones   = {WORD_ALL_ONES};
         bins non_corner = default;
     }
-    rd_data_2: coverpoint item.rd_data_2
-      iff(item.rd_reg_2 != X0) {
+    read_data_2: coverpoint item.read_data_2
+      iff(item.read_addr_2 != X0) {
         bins zeros      = {WORD_ALL_ZEROS};
         bins all_ones   = {WORD_ALL_ONES};
         bins non_corner = default;
     }
 
     //read out corners from all 31 non-x0 registers
-    rd_data_1_x_rd_reg_1: cross rd_data_1, rd_reg_1;
-    rd_data_2_x_rd_reg_2: cross rd_data_2, rd_reg_2;
+    rd_data_1_x_rd_reg_1: cross read_data_1, read_addr_1;
+    rd_data_2_x_rd_reg_2: cross read_data_2, read_addr_2;
 
     //NOTE: iff(written[rd_reg])
     //   - We only care about this scenario when the register holds valid written data.
     //     Simultaneous reads to uninitialized registers isn't really an interesting functionality.
-    simultaneous_reads_from_the_same_reg: coverpoint (item.rd_reg_1 == item.rd_reg_2)
-      iff(written[item.rd_reg_1]) {
+    simultaneous_reads_from_the_same_reg: coverpoint (item.read_addr_1 == item.read_addr_2)
+      iff(written[item.read_addr_1]) {
         bins hit = {1};
     }
 
     //Cover reading and writing to the same register during the same clk cycle.
     //  - rd_data will read out the OLD data in the register, NOT the NEW
-    //    wr_data about to be written in.
-    //  - NOTE: iff(rd_data != wr_data)
+    //    write_data about to be written in.
+    //  - NOTE: iff(rd_data != write_data)
     //     - We can only verify this functionality (that rd_data isn't
-    //       reading wr_data yet) when rd_data and wr_data are different.
+    //       reading write_data yet) when rd_data and write_data are different.
     //  - NOTE:
-    //     - I don't guard with iff(written[rd_reg_1]) here. The
+    //     - I don't guard with iff(written[read_addr_1]) here. The
     //       interesting functionality here is that the new writes aren't
     //       appearing in the register yet. So we dont really care if
     //       the current rd_data is uninitialized, we just care that it
-    //       is not what's on the wr_data port yet.
-    read_during_write_reg_1: coverpoint ((item.wr_reg == item.rd_reg_1) && item.wr_en)
-      iff(item.rd_data_1 != item.wr_data) {
+    //       is not what's on the write_data port yet.
+    read_during_write_reg_1: coverpoint ((item.write_addr == item.read_addr_1) && item.write_en)
+      iff(item.read_data_1 != item.write_data) {
         bins hit = {1};
     }
-    read_during_write_reg_2: coverpoint ((item.wr_reg == item.rd_reg_2) && item.wr_en)
-      iff(item.rd_data_2 != item.wr_data) {
+    read_during_write_reg_2: coverpoint ((item.write_addr == item.read_addr_2) && item.write_en)
+      iff(item.read_data_2 != item.write_data) {
         bins hit = {1};
     }
 
@@ -192,7 +192,7 @@ class reg_file_coverage extends uvm_object;
     //      - There is a small verifiability gap here.
     //      - Consider the following corner scenario:
     //              @clk rd_reg has 5 in it                     //first cycle
-    //              @clk wr_reg writes 5 into rd_reg            //second cycle
+    //              @clk write_addr writes 5 into rd_reg            //second cycle
     //              @clk we rd_reg again (triggering coverage)  //third cycle
     //        On the third cycle we can't really verify much about the
     //        functionality (Is new write data available for reading in the
@@ -202,10 +202,10 @@ class reg_file_coverage extends uvm_object;
     //        the added infrastructure complexity would be worth it, but for a
     //        personal project I am choosing to keep the coverage class relatively
     //        simple in this regard.
-    next_cycle_read_after_write_reg_1: coverpoint ((item.rd_reg_1 == prev_wr_reg) && prev_wr_en) {
+    next_cycle_read_after_write_reg_1: coverpoint ((item.read_addr_1 == prev_wr_reg) && prev_wr_en) {
       bins hit = {1};
     }
-    next_cycle_read_after_write_reg_2: coverpoint ((item.rd_reg_2 == prev_wr_reg) && prev_wr_en) {
+    next_cycle_read_after_write_reg_2: coverpoint ((item.read_addr_2 == prev_wr_reg) && prev_wr_en) {
       bins hit = {1};
     }
 
@@ -213,15 +213,15 @@ class reg_file_coverage extends uvm_object;
     /************************* X0 COVERAGE ******************************/
 
     //We want to cover exercising x0s write immunity behavior
-    // - Note: iff(wr_data != 0)
+    // - Note: iff(write_data != 0)
     //    - x0 is hardwired to zero. We can only verify x0_write_immunity
     //      functionality when we are trying to write non-zero into it.
-    x0_write_immunity: coverpoint (item.wr_reg == X0 && item.wr_en)
-      iff (item.wr_data != '0) {
+    x0_write_immunity: coverpoint (item.write_addr == X0 && item.write_en)
+      iff (item.write_data != '0) {
         bins hit = {1};
     }
 
-    x0_rd_reg_1: coverpoint (item.rd_reg_1 == X0);
-    x0_rd_reg_2: coverpoint (item.rd_reg_2 == X0);
+    x0_rd_reg_1: coverpoint (item.read_addr_1 == X0);
+    x0_rd_reg_2: coverpoint (item.read_addr_2 == X0);
   endgroup
 endclass

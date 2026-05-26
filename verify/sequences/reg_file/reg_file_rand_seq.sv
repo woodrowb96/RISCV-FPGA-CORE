@@ -13,14 +13,14 @@ class reg_file_rand_seq extends reg_file_base_seq;
 
       start_item(item);
       randcase
-        //bias toward corner wr_data values
+        //bias toward corner write_data values
         5: begin
           if (!item.randomize() with {
-            wr_data inside { WORD_ALL_ZEROS, WORD_ALL_ONES };
+            write_data inside { WORD_ALL_ZEROS, WORD_ALL_ONES };
           }) `uvm_fatal("SEQ", "Failed item.randomize() (corners)")
         end
 
-        //fully random wr_data
+        //fully random write_data
         1: begin
           if (!item.randomize())
             `uvm_fatal("SEQ", "Failed item.randomize() (full range)")

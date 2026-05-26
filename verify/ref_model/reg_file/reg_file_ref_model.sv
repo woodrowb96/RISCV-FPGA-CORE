@@ -9,8 +9,8 @@ class reg_file_ref_model extends uvm_object;
   endfunction
 
   function void update(reg_file_seq_item item);
-    if(item.wr_en) begin
-      write(item.wr_reg, item.wr_data);
+    if(item.write_en) begin
+      write(item.write_addr, item.write_data);
     end
   endfunction
 

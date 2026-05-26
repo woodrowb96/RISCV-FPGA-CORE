@@ -5,15 +5,15 @@ CLK:
   - synchronous operations are synced to the posedge of the clk
 
 CONTROL:
-  - logic wr_en_wb: 1 bit wr_en
+  - logic reg_wr_en_wb: 1 bit reg_file write enable
       - Controls when the reg_file is written to
-      - When 1: wr_data is written into wr_reg @(posedge clk)
-      - When 0: wr_data is not written
+      - When 1: rd_data_wb is written into the destination register @(posedge clk)
+      - When 0: rd_data_wb is not written
 
 INPUT:
   - word_t inst_if: 32bit instruction from the if_stage
 
-  - word_t rd_data_wb: data which is to be written into the wr_reg
+  - word_t rd_data_wb: data which is to be written into the destination register
       - This signal is routed back into the ID stage from the WB stage
 
 OUTPUT:

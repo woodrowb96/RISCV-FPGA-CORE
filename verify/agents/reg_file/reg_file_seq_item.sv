@@ -1,13 +1,13 @@
 class reg_file_seq_item extends uvm_sequence_item;
   `uvm_object_utils(reg_file_seq_item)
 
-  rand logic     wr_en;     //control
-  rand rf_addr_t wr_reg;    //input
-  rand word_t    wr_data;
-  rand rf_addr_t rd_reg_1;
-  rand rf_addr_t rd_reg_2;
-  word_t         rd_data_1; //output
-  word_t         rd_data_2;
+  rand logic     write_en;     //control
+  rand rf_addr_t write_addr;    //input
+  rand word_t    write_data;
+  rand rf_addr_t read_addr_1;
+  rand rf_addr_t read_addr_2;
+  word_t         read_data_1; //output
+  word_t         read_data_2;
 
   function new(string name = "reg_file_seq_item");
     super.new(name);
@@ -15,11 +15,11 @@ class reg_file_seq_item extends uvm_sequence_item;
 
   virtual function string convert2string();
     return $sformatf(
-      "wr_en:%b | wr_reg=%d wr_data=%h | rd_reg_1=%d rd_reg_2=%d | rd_data_1=%h rd_data_2=%h",
-        wr_en,
-        wr_reg, wr_data,
-        rd_reg_1, rd_reg_2,
-        rd_data_1, rd_data_2);
+      "write_en:%b | write_addr=%d write_data=%h | read_addr_1=%d read_addr_2=%d | read_data_1=%h read_data_2=%h",
+        write_en,
+        write_addr, write_data,
+        read_addr_1, read_addr_2,
+        read_data_1, read_data_2);
   endfunction
 
   function bit do_compare(uvm_object rhs, uvm_comparer comparer);
@@ -28,8 +28,8 @@ class reg_file_seq_item extends uvm_sequence_item;
     if (!$cast(rhs_, rhs))
       return 0;
 
-    return (rd_data_1 === rhs_.rd_data_1 &&
-            rd_data_2 === rhs_.rd_data_2);
+    return (read_data_1 === rhs_.read_data_1 &&
+            read_data_2 === rhs_.read_data_2);
   endfunction
 
   /****************** NOTE *********************************/
@@ -38,10 +38,10 @@ class reg_file_seq_item extends uvm_sequence_item;
   //    constraint solver.
   /*********************************************************/
   function void post_randomize();
-    if(!(wr_data inside {WORD_ALL_ZEROS, WORD_ALL_ONES})) begin
+    if(!(write_data inside {WORD_ALL_ZEROS, WORD_ALL_ONES})) begin
       randcase
-        1: wr_data[XLEN-1] = 1'b0;
-        1: wr_data[XLEN-1] = 1'b1;
+        1: write_data[XLEN-1] = 1'b0;
+        1: write_data[XLEN-1] = 1'b1;
       endcase
     end
   endfunction

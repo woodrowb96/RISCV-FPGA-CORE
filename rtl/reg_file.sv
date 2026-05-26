@@ -2,20 +2,20 @@
   Register file module for a riscv rv32i implementation.
 
 Control:
-  wr_en: active high write enable signal
+  write_en: active high write enable signal
 
 Input:
-  wr_reg:  register index we are writing to
-  wr_data: write data
+  write_addr:  register index we are writing to
+  write_data: write data
             - synchronous writes
-            - written into wr_reg @(posedge clk)
+            - written into write_addr @(posedge clk)
 
-  rd_reg_1: index we are reading rd_data_1 from
-  rd_reg_2: index we are reading rd_data_2 from
+  read_addr_1: index we are reading read_data_1 from
+  read_addr_2: index we are reading read_data_2 from
 
 Output:
-  rd_data_1: data read from rd_reg_1
-  rd_data_2: data read from rd_reg_2
+  read_data_1: data read from read_addr_1
+  read_data_2: data read from read_addr_2
               - asynchronous reads
 
 NOTE:
@@ -28,18 +28,18 @@ module reg_file (
   input logic clk,
 
   //control
-  input logic wr_en,
+  input logic write_en,
 
   //input
-  input rf_addr_t wr_reg,
-  input word_t wr_data,
+  input rf_addr_t write_addr,
+  input word_t    write_data,
 
-  input rf_addr_t rd_reg_1,
-  input rf_addr_t rd_reg_2,
+  input rf_addr_t read_addr_1,
+  input rf_addr_t read_addr_2,
 
   //output
-  output word_t rd_data_1,
-  output word_t rd_data_2
+  output word_t read_data_1,
+  output word_t read_data_2
 );
   /************ REGISTER FILE ***********************/
   word_t reg_file [0:RF_DEPTH-1];
@@ -47,14 +47,14 @@ module reg_file (
 
   /************ SYNCHRONOUS WRITES *******************/
   always_ff @(posedge clk) begin
-    if(wr_en && (wr_reg != X0)) begin //make sure we dont write to x0
-      reg_file[wr_reg] <= wr_data;
+    if(write_en && (write_addr != X0)) begin //make sure we dont write to x0
+      reg_file[write_addr] <= write_data;
     end
   end
 
   /************ ASYNCHRONOUS READS *******************/
   always_comb begin
-    rd_data_1 = (rd_reg_1 == X0) ? '0 : reg_file[rd_reg_1];
-    rd_data_2 = (rd_reg_2 == X0) ? '0 : reg_file[rd_reg_2];
+    read_data_1 = (read_addr_1 == X0) ? '0 : reg_file[read_addr_1];
+    read_data_2 = (read_addr_2 == X0) ? '0 : reg_file[read_addr_2];
   end
 endmodule

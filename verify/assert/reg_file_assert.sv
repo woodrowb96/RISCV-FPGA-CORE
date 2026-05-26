@@ -4,30 +4,30 @@ module reg_file_assert
   input logic clk,
 
   //DUT input
-  input logic wr_en,
-  input rf_addr_t rd_reg_1,
-  input rf_addr_t rd_reg_2,
-  input rf_addr_t wr_reg,
-  input word_t wr_data,
+  input logic write_en,
+  input rf_addr_t read_addr_1,
+  input rf_addr_t read_addr_2,
+  input rf_addr_t write_addr,
+  input word_t write_data,
 
   //Dut output
-  input word_t rd_data_1,
-  input word_t rd_data_2
+  input word_t read_data_1,
+  input word_t read_data_2
 );
   /*=============================================================================*/
   /*--------------------------  WRITE CHECK -------------------------------------*/
   /*=============================================================================*/
 
-  //if(wr_en) => wr_data should now appear in the register on the NEXT CLK
+  //if(write_en) => write_data should now appear in the register on the NEXT CLK
   property write_next_clk_prop;
     @(posedge clk)
-    (wr_en && wr_reg != X0) |=> (reg_file.reg_file[$past(wr_reg)] === $past(wr_data));
+    (write_en && write_addr != X0) |=> (reg_file.reg_file[$past(write_addr)] === $past(write_data));
   endproperty
 
   write_next_clk_assert:
     assert property(write_next_clk_prop) else
-      $error("[REG_FILE_ASSERT] write_next_clk: wr_data was not written into the reg_file, wr_reg:%0d, wr_data:%0h, reg_file[wr_reg]:%0h",
-              wr_reg, wr_data, reg_file.reg_file[wr_reg]);
+      $error("[REG_FILE_ASSERT] write_next_clk: write_data was not written into the reg_file, write_addr:%0d, write_data:%0h, reg_file[write_addr]:%0h",
+              write_addr, write_data, reg_file.reg_file[write_addr]);
 
   /*=============================================================================*/
   /*--------------------------  NO WRITE CHECK ----------------------------------*/
@@ -40,7 +40,7 @@ module reg_file_assert
         assert property(
           @(posedge clk)
           //If we are NOT writing to the CURRENT index |=> then on the NEXT CLK data in the reg should not have changed
-          !(wr_en && wr_reg == index) |=> reg_file.reg_file[index] === $past(reg_file.reg_file[index])
+          !(write_en && write_addr == index) |=> reg_file.reg_file[index] === $past(reg_file.reg_file[index])
         );
     end
   endgenerate
@@ -56,13 +56,13 @@ module reg_file_assert
   endproperty
 
   read_rd_reg_1_assert:
-    assert property(read_prop(rd_reg_1, rd_data_1)) else
+    assert property(read_prop(read_addr_1, read_data_1)) else
       $error("[REG_FILE_ASSERT] read_rd_reg_1: expected:%0h, actual:%0h",
-              reg_file.reg_file[rd_reg_1], rd_data_1);
+              reg_file.reg_file[read_addr_1], read_data_1);
   read_rd_reg_2_assert:
-    assert property(read_prop(rd_reg_2, rd_data_2)) else
+    assert property(read_prop(read_addr_2, read_data_2)) else
       $error("[REG_FILE_ASSERT] read_rd_reg_2: expected:%0h, actual:%0h",
-              reg_file.reg_file[rd_reg_2], rd_data_2);
+              reg_file.reg_file[read_addr_2], read_data_2);
 
 
   /*=============================================================================*/
@@ -76,11 +76,11 @@ module reg_file_assert
   endproperty
 
   x0_rd_zero_rd_reg_1_assert:
-    assert property(x0_rd_zero_prop(rd_reg_1, rd_data_1)) else
-      $error("[REG_FILE_ASSERT] x0_rd_zero_rd_reg_1: rd_data_1=0x%0h", rd_data_1);
+    assert property(x0_rd_zero_prop(read_addr_1, read_data_1)) else
+      $error("[REG_FILE_ASSERT] x0_rd_zero_rd_reg_1: read_data_1=0x%0h", read_data_1);
   x0_rd_zero_rd_reg_2_assert:
-    assert property(x0_rd_zero_prop(rd_reg_2, rd_data_2)) else
-      $error("[REG_FILE_ASSERT] x0_rd_zero_rd_reg_2: rd_data_2=0x%0h", rd_data_2);
+    assert property(x0_rd_zero_prop(read_addr_2, read_data_2)) else
+      $error("[REG_FILE_ASSERT] x0_rd_zero_rd_reg_2: read_data_2=0x%0h", read_data_2);
 
   /*=============================================================================*/
   /*------------------------- X0 WRITE CHECK -------------------------------------*/

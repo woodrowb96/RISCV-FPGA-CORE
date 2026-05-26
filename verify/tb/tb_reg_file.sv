@@ -18,13 +18,13 @@ module tb_reg_file
 
   /*********** DUT *************/
   reg_file dut(.clk(clk),
-              .wr_en(intf.wr_en),
-              .rd_reg_1(intf.rd_reg_1),
-              .rd_reg_2(intf.rd_reg_2),
-              .wr_reg(intf.wr_reg),
-              .wr_data(intf.wr_data),
-              .rd_data_1(intf.rd_data_1),
-              .rd_data_2(intf.rd_data_2));
+              .write_en(intf.write_en),
+              .read_addr_1(intf.read_addr_1),
+              .read_addr_2(intf.read_addr_2),
+              .write_addr(intf.write_addr),
+              .write_data(intf.write_data),
+              .read_data_1(intf.read_data_1),
+              .read_data_2(intf.read_data_2));
 
   /*********** BIND ASSERTIONS *************/
   bind tb_reg_file.dut reg_file_assert dut_assert(.*);

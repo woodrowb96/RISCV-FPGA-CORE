@@ -23,16 +23,16 @@ class reg_file_scoreboard extends uvm_scoreboard;
     `uvm_info("SCB" , $sformatf("actual:%s", actual.convert2string()), UVM_HIGH)
 
     expected = reg_file_seq_item::type_id::create("expected");
-    expected.wr_en    = actual.wr_en;
-    expected.wr_reg   = actual.wr_reg;
-    expected.wr_data  = actual.wr_data;
-    expected.rd_reg_1 = actual.rd_reg_1;
-    expected.rd_reg_2 = actual.rd_reg_2;
+    expected.write_en    = actual.write_en;
+    expected.write_addr   = actual.write_addr;
+    expected.write_data  = actual.write_data;
+    expected.read_addr_1 = actual.read_addr_1;
+    expected.read_addr_2 = actual.read_addr_2;
 
     //reads are combinatorial so well read the ref_model outputs BEFORE we
     //update the ref_model state
-    expected.rd_data_1 = ref_model.read(expected.rd_reg_1);
-    expected.rd_data_2 = ref_model.read(expected.rd_reg_2);
+    expected.read_data_1 = ref_model.read(expected.read_addr_1);
+    expected.read_data_2 = ref_model.read(expected.read_addr_2);
 
     //If we pass send the item to coverage, else report error
     if(actual.compare(expected)) begin
@@ -43,7 +43,7 @@ class reg_file_scoreboard extends uvm_scoreboard;
                                   actual.convert2string(), expected.convert2string()))
     end
 
-    //Update the state (write wr_data into wr_reg) AFTER we read the inputs
+    //Update the state (write write_data into write_addr) AFTER we read the inputs
     ref_model.update(expected);
   endfunction
 endclass

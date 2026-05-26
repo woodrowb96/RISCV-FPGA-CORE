@@ -27,13 +27,13 @@ class reg_file_monitor extends uvm_monitor;
     forever begin
       @(vif.cb_mon);
       item = reg_file_seq_item::type_id::create("item");
-      item.wr_en     = vif.cb_mon.wr_en;
-      item.wr_reg    = vif.cb_mon.wr_reg;
-      item.wr_data   = vif.cb_mon.wr_data;
-      item.rd_reg_1  = vif.cb_mon.rd_reg_1;
-      item.rd_reg_2  = vif.cb_mon.rd_reg_2;
-      item.rd_data_1 = vif.cb_mon.rd_data_1;
-      item.rd_data_2 = vif.cb_mon.rd_data_2;
+      item.write_en     = vif.cb_mon.write_en;
+      item.write_addr    = vif.cb_mon.write_addr;
+      item.write_data   = vif.cb_mon.write_data;
+      item.read_addr_1  = vif.cb_mon.read_addr_1;
+      item.read_addr_2  = vif.cb_mon.read_addr_2;
+      item.read_data_1 = vif.cb_mon.read_data_1;
+      item.read_data_2 = vif.cb_mon.read_data_2;
 
       observed_ap.write(item);
       `uvm_info("MON", $sformatf("Saw item %s", item.convert2string()), UVM_HIGH)
