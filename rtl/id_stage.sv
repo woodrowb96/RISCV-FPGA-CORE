@@ -13,7 +13,7 @@ CONTROL:
 INPUT:
   - word_t inst_if: 32bit instruction from the if_stage
 
-  - word_t wr_data_if: data which is to be written into the wr_reg
+  - word_t rd_data_wb: data which is to be written into the wr_reg
       - This signal is routed back into the ID stage from the WB stage
 
 OUTPUT:
@@ -32,12 +32,12 @@ module id_stage
   input logic clk,
 
   //control
-  input logic wr_en_wb,
+  input logic reg_wr_en_wb,
 
   //input
   input word_t pc_if,
   input word_t inst_if,
-  input word_t wr_data_wb,
+  input word_t rd_data_wb,
 
   //output
   output word_t pc_id,
