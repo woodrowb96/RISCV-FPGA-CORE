@@ -31,4 +31,15 @@ package rv32i_control_pkg;
     MEM = 1'b0,
     ALU = 1'b1
   } wb_sel_t;
+
+  typedef enum logic[2:0] {
+    NONE  = 3'd0,
+    BEQ   = 3'd1,
+    BNE   = 3'd2,
+    BLT   = 3'd3,
+    BGE   = 3'd4,
+    BLTU  = 3'd5,
+    BGEU  = 3'd6,
+    JUMP  = 3'd7
+  } branch_type_t;
 endpackage
