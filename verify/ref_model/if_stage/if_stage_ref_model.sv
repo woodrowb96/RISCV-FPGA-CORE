@@ -24,7 +24,7 @@ class if_stage_ref_model extends uvm_object;
   endfunction
 
   function void update(if_stage_seq_item item);
-    case(item.branch_ex)
+    case(item.branch_taken_ex)
       0: begin
       //Dont take branch
         ref_pc = ref_pc + 'd4;
@@ -47,7 +47,7 @@ class if_stage_ref_model extends uvm_object;
       //invalid branch
       //this is undefined behavior in the rtl, so set ref_pc to x's and print an error
         ref_pc = 'x;
-        $error("[IF_STAGE_REF_MODEL]: invalid branch_ex, branch_ex:%b", item.branch_ex);
+        $error("[IF_STAGE_REF_MODEL]: invalid branch_taken_ex, branch_taken_ex:%b", item.branch_taken_ex);
       end
     endcase
   endfunction

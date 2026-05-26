@@ -42,13 +42,13 @@ class if_stage_misaligned_oob_seq extends if_stage_base_seq;
       if (!item.randomize() with {
         //force a branch when PC drifts into the middle of the program
         //(keeps stimulus concentrated around the corners)
-        ((prev_pc >= (INST_MEM_FIRST_ADDR + 5)) && (prev_pc <= (INST_MEM_LAST_ADDR - 5))) -> (branch_ex == 1);
+        ((prev_pc >= (INST_MEM_FIRST_ADDR + 5)) && (prev_pc <= (INST_MEM_LAST_ADDR - 5))) -> (branch_taken_ex == 1);
         //force a branch if PC has walked too far past the last addr
-        (prev_pc >= INST_MEM_LAST_ADDR + 5) -> (branch_ex == 1);
+        (prev_pc >= INST_MEM_LAST_ADDR + 5) -> (branch_taken_ex == 1);
 
         //branch ~9% of the time -- gives PC headroom to walk OOB before
         //being reigned in by a branch
-        branch_ex dist { 1 := 1, 0 := 10 };
+        branch_taken_ex dist { 1 := 1, 0 := 10 };
 
         //branch_target lives either in the low range or the upper
         //(slightly-OOB) range
@@ -64,7 +64,7 @@ class if_stage_misaligned_oob_seq extends if_stage_base_seq;
       //update prev_pc: branch taken -> jump to branch_target; else PC += 4.
       //The DUT stores the raw branch_target/PC+4 in its PC register (including
       //misaligned LSBs and OOB values), so this prediction matches.
-      if (item.branch_ex === 1'b1) begin
+      if (item.branch_taken_ex === 1'b1) begin
         prev_pc = item.branch_target_ex;
       end
       else begin

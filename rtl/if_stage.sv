@@ -9,7 +9,7 @@ RESET:
       - resets the following signals:
           - PC <= 0
 CONTROL (back-edge from EX)
-  - branch_ex: 1 bit branch select
+  - branch_taken_ex: 1 bit branch select
       - determines whether we continue incrementing PC or take the jump to the branch_target
       - The next PC is set according to the following:
           - 1 : pc_if <= branch_target_ex
@@ -56,13 +56,13 @@ module if_stage #(parameter string PROGRAM = NO_PROGRAM) (
   input logic clk,
   input logic reset_n,
 
-  //control (back-edge from EX)
-  input logic branch_ex,
+  //control
+  input logic branch_taken_ex,
 
-  //input (back-edge from EX)
+  //input
   input word_t branch_target_ex,
 
-  //output (lives in IF)
+  //output
   output word_t pc_if,
   output word_t inst_if
 );
@@ -70,7 +70,7 @@ module if_stage #(parameter string PROGRAM = NO_PROGRAM) (
 
   /************ CALC NEXT PC *******************/
   always_comb begin
-    if(branch_ex) begin
+    if(branch_taken_ex) begin
       pc_next = branch_target_ex;
     end
     else begin

@@ -31,7 +31,7 @@ class if_stage_scoreboard extends uvm_scoreboard;
     `uvm_info("SCB" , $sformatf("actual:%s", actual.convert2string()), UVM_HIGH)
 
     expected = if_stage_seq_item::type_id::create("expected");
-    expected.branch_ex        = actual.branch_ex;
+    expected.branch_taken_ex        = actual.branch_taken_ex;
     expected.branch_target_ex = actual.branch_target_ex;
 
     //Predict expected output

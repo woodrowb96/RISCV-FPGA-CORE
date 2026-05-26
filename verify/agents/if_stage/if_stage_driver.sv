@@ -22,7 +22,7 @@ class if_stage_driver extends uvm_driver #(if_stage_seq_item);
     if_stage_seq_item item;
     super.run_phase(phase);
 
-    if_vif.branch_ex        = 1'b0;
+    if_vif.branch_taken_ex        = 1'b0;
     if_vif.branch_target_ex = 'd5;
     @(if_vif.cb_drv);  //clk initial values onto the DUT
 
@@ -38,7 +38,7 @@ class if_stage_driver extends uvm_driver #(if_stage_seq_item);
           forever begin
             seq_item_port.get_next_item(item);
             @(if_vif.cb_drv);
-            if_vif.cb_drv.branch_ex        <= item.branch_ex;
+            if_vif.cb_drv.branch_taken_ex        <= item.branch_taken_ex;
             if_vif.cb_drv.branch_target_ex <= item.branch_target_ex;
             seq_item_port.item_done();
           end
@@ -50,7 +50,7 @@ class if_stage_driver extends uvm_driver #(if_stage_seq_item);
       disable fork;
 
       //Drive the interface during the reset
-      if_vif.cb_drv.branch_ex        <= 1'b0;
+      if_vif.cb_drv.branch_taken_ex        <= 1'b0;
       if_vif.cb_drv.branch_target_ex <= 'd5;
     end
   endtask

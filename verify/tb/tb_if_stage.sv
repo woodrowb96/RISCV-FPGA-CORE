@@ -25,7 +25,7 @@ module tb_if_stage
   if_stage #(.PROGRAM(DUT_PROGRAM)) dut (
     .clk(clk),
     .reset_n(rst_intf.reset_n),
-    .branch_ex(if_intf.branch_ex),
+    .branch_taken_ex(if_intf.branch_taken_ex),
     .branch_target_ex(if_intf.branch_target_ex),
     .pc_if(if_intf.pc_if),
     .inst_if(if_intf.inst_if)

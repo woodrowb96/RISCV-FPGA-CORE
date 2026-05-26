@@ -1,7 +1,7 @@
 class if_stage_seq_item extends uvm_sequence_item;
   `uvm_object_utils(if_stage_seq_item)
 
-  rand logic branch_ex;          //control (back-edge from EX)
+  rand logic branch_taken_ex;          //control (back-edge from EX)
   rand word_t branch_target_ex;  //input   (back-edge from EX)
   word_t pc_if;                  //output
   word_t inst_if;
@@ -19,8 +19,8 @@ class if_stage_seq_item extends uvm_sequence_item;
 
   virtual function string convert2string();
     return $sformatf(
-      "branch_ex:%b | branch_target_ex=%d | pc_if=%d inst_if=%h",
-       branch_ex, branch_target_ex, pc_if, inst_if);
+      "branch_taken_ex:%b | branch_target_ex=%d | pc_if=%d inst_if=%h",
+       branch_taken_ex, branch_target_ex, pc_if, inst_if);
   endfunction
 
   virtual function bit do_compare(uvm_object rhs, uvm_comparer comparer);

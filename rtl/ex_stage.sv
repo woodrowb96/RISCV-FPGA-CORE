@@ -15,7 +15,7 @@ module ex_stage
   //output
   output word_t rs2_data_ex,
   output word_t alu_result_ex,
-  output logic  branch_ex,
+  output logic  branch_taken_ex,
   output word_t branch_target_ex
 );
 endmodule
