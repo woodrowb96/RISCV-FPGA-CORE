@@ -46,5 +46,5 @@ package rv32i_control_pkg;
   typedef enum logic {
     PC  = 1'b0,
     RS1 = 1'b1
-  } branch_target_src_t;
+  } branch_target_src_sel_t;
 endpackage
