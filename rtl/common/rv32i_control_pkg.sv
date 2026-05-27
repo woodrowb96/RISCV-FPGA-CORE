@@ -42,4 +42,9 @@ package rv32i_control_pkg;
     BGEU  = 3'd6,
     JUMP  = 3'd7
   } branch_type_t;
+
+  typedef enum logic {
+    PC  = 1'b0,
+    RS1 = 1'b1
+  } branch_target_src_t;
 endpackage
