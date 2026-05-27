@@ -12,4 +12,18 @@ module wb_stage
   //output
   output word_t rd_data_wb
 );
+  /********* WRITE BACK SELECT *************/
+  always_comb begin
+    unique case(wb_sel_mem)
+      MEM: begin
+        rd_data_wb = load_data_mem;
+      end
+      ALU: begin
+        rd_data_wb = alu_result_mem;
+      end
+      default: begin
+        rd_data_wb = 'x;
+      end
+    endcase
+  end
 endmodule
