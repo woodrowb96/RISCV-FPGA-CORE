@@ -29,11 +29,11 @@ class data_mem_monitor extends uvm_monitor;
       item = data_mem_seq_item::type_id::create("item");
 
       //sample DUT inputs
-      item.wr_sel  = vif.cb_mon.wr_sel;
+      item.store_byte_sel  = vif.cb_mon.store_byte_sel;
       item.addr    = vif.cb_mon.addr;
-      item.wr_data = vif.cb_mon.wr_data;
+      item.store_data = vif.cb_mon.store_data;
       //sample DUT output
-      item.rd_data = vif.cb_mon.rd_data;
+      item.load_data = vif.cb_mon.load_data;
 
       observed_ap.write(item);
       `uvm_info("MON", $sformatf("Saw item %s", item.convert2string()), UVM_HIGH)

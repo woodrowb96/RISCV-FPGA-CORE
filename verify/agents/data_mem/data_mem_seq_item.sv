@@ -1,10 +1,10 @@
 class data_mem_seq_item extends uvm_sequence_item;
   `uvm_object_utils(data_mem_seq_item)
 
-  rand byte_sel_t wr_sel;   //control
+  rand byte_sel_t store_byte_sel;   //control
   rand word_t     addr;     //input
-  rand word_t     wr_data;
-  word_t          rd_data;  //output
+  rand word_t     store_data;
+  word_t          load_data;  //output
 
   //memory is byte-addressable and DATA_MEM_LAST_ADDR is the last byte;
   //base addresses near the end will exercise the byte-offset wrap-around
@@ -18,10 +18,10 @@ class data_mem_seq_item extends uvm_sequence_item;
 
   virtual function string convert2string();
     return $sformatf(
-      "wr_sel:%0b | addr=%0d wr_data=%h | rd_data=%h",
-        wr_sel,
-        addr, wr_data,
-        rd_data);
+      "store_byte_sel:%0b | addr=%0d store_data=%h | load_data=%h",
+        store_byte_sel,
+        addr, store_data,
+        load_data);
   endfunction
 
   function bit do_compare(uvm_object rhs, uvm_comparer comparer);
@@ -30,7 +30,7 @@ class data_mem_seq_item extends uvm_sequence_item;
     if (!$cast(rhs_, rhs))
       return 0;
 
-    return (rd_data === rhs_.rd_data);
+    return (load_data === rhs_.load_data);
   endfunction
 
   /******** NOTE ********/
@@ -39,10 +39,10 @@ class data_mem_seq_item extends uvm_sequence_item;
   //    constraint solver.
   /***********************/
   function void post_randomize();
-    if(!(wr_data inside {WORD_ALL_ZEROS, WORD_ALL_ONES})) begin
+    if(!(store_data inside {WORD_ALL_ZEROS, WORD_ALL_ONES})) begin
       randcase
-        1: wr_data[XLEN-1] = 1'b0;
-        1: wr_data[XLEN-1] = 1'b1;
+        1: store_data[XLEN-1] = 1'b0;
+        1: store_data[XLEN-1] = 1'b1;
       endcase
     end
   endfunction

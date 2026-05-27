@@ -17,10 +17,10 @@ module data_mem_assert
   import rv32i_control_pkg::*;
 (
   input logic clk,
-  input byte_sel_t wr_sel,
+  input byte_sel_t store_byte_sel,
   input word_t addr,
-  input word_t wr_data,
-  input word_t rd_data
+  input word_t store_data,
+  input word_t load_data
 );
   typedef logic [$clog2(DATA_MEM_DEPTH)-1:0] lut_addr_t;
 
@@ -133,56 +133,56 @@ module data_mem_assert
   end
 
   /*=============================================================================*/
-  /*------------------------ WR_SEL ROUTE CHECK ---------------------------------*/
+  /*------------------------ STORE_BYTE_SEL ROUTE CHECK ---------------------------------*/
   /*=============================================================================*/
   byte_sel_t lut_ram_wr_en_exp;
 
-  //look at the byte offset and make sure wr_sel is routed correctly
+  //look at the byte offset and make sure store_byte_sel is routed correctly
   always @(posedge clk) begin
     #0
     unique case(addr[1:0])
 
       /******* offset 0 ******/
       //We are word aligned
-      // - wr_sel routed to: {u_byte_3, u_byte_2, u_byte_1, u_byte_0}
+      // - store_byte_sel routed to: {u_byte_3, u_byte_2, u_byte_1, u_byte_0}
       2'b00: begin
-        lut_ram_wr_en_exp = {wr_sel[3], wr_sel[2], wr_sel[1], wr_sel[0]};
+        lut_ram_wr_en_exp = {store_byte_sel[3], store_byte_sel[2], store_byte_sel[1], store_byte_sel[0]};
 
         assert(data_mem.lut_ram_wr_en === lut_ram_wr_en_exp) else
-          $error("[DATA_MEM_ASSERT] wr_sel route failed: offset=00 addr=%0h, expected=%0h, actual=%0h",
+          $error("[DATA_MEM_ASSERT] store_byte_sel route failed: offset=00 addr=%0h, expected=%0h, actual=%0h",
                   addr, lut_ram_wr_en_exp, data_mem.lut_ram_wr_en);
       end
 
       /******* offset 1 ******/
       //We are shifted over a byte
-      // - wr_sel routed to: {u_byte_2, u_byte_1, u_byte_0, u_byte_3}
+      // - store_byte_sel routed to: {u_byte_2, u_byte_1, u_byte_0, u_byte_3}
       2'b01: begin
-        lut_ram_wr_en_exp = {wr_sel[2], wr_sel[1], wr_sel[0], wr_sel[3]};
+        lut_ram_wr_en_exp = {store_byte_sel[2], store_byte_sel[1], store_byte_sel[0], store_byte_sel[3]};
 
         assert(data_mem.lut_ram_wr_en === lut_ram_wr_en_exp) else
-          $error("[DATA_MEM_ASSERT] wr_sel route failed: offset=01 addr=%0h, expected=%0h, actual=%0h",
+          $error("[DATA_MEM_ASSERT] store_byte_sel route failed: offset=01 addr=%0h, expected=%0h, actual=%0h",
                   addr, lut_ram_wr_en_exp, data_mem.lut_ram_wr_en);
       end
 
       /******* offset 2 ******/
       //We are shifted over two bytes
-      // - wr_sel routed to: {u_byte_1, u_byte_0, u_byte_3, u_byte_2}
+      // - store_byte_sel routed to: {u_byte_1, u_byte_0, u_byte_3, u_byte_2}
       2'b10: begin
-        lut_ram_wr_en_exp = {wr_sel[1], wr_sel[0], wr_sel[3], wr_sel[2]};
+        lut_ram_wr_en_exp = {store_byte_sel[1], store_byte_sel[0], store_byte_sel[3], store_byte_sel[2]};
 
         assert(data_mem.lut_ram_wr_en === lut_ram_wr_en_exp) else
-          $error("[DATA_MEM_ASSERT] wr_sel route failed: offset=10 addr=%0h, expected=%0h, actual=%0h",
+          $error("[DATA_MEM_ASSERT] store_byte_sel route failed: offset=10 addr=%0h, expected=%0h, actual=%0h",
                   addr, lut_ram_wr_en_exp, data_mem.lut_ram_wr_en);
       end
 
       /******* offset 3 ******/
       //We are shifted over three bytes
-      // - wr_sel routed to: {u_byte_0, u_byte_3, u_byte_2, u_byte_1}
+      // - store_byte_sel routed to: {u_byte_0, u_byte_3, u_byte_2, u_byte_1}
       2'b11: begin
-        lut_ram_wr_en_exp = {wr_sel[0], wr_sel[3], wr_sel[2], wr_sel[1]};
+        lut_ram_wr_en_exp = {store_byte_sel[0], store_byte_sel[3], store_byte_sel[2], store_byte_sel[1]};
 
         assert(data_mem.lut_ram_wr_en === lut_ram_wr_en_exp) else
-          $error("[DATA_MEM_ASSERT] wr_sel route failed: offset=11 addr=%0h, expected=%0h, actual=%0h",
+          $error("[DATA_MEM_ASSERT] store_byte_sel route failed: offset=11 addr=%0h, expected=%0h, actual=%0h",
                   addr, lut_ram_wr_en_exp, data_mem.lut_ram_wr_en);
       end
 
@@ -191,69 +191,69 @@ module data_mem_assert
   end
 
   /*=============================================================================*/
-  /*------------------------ WR_DATA ROUTE CHECK --------------------------------*/
+  /*------------------------ STORE_DATA ROUTE CHECK --------------------------------*/
   /*=============================================================================*/
-  word_t wr_data_actual;
+  word_t store_data_actual;
 
-  //make sure we are routing the right wr_data based on byte offset
+  //make sure we are routing the right store_data based on byte offset
   always @(posedge clk) begin
     #0
     unique case(addr[1:0])
 
       /******* offset 0 ******/
       //We are word aligned
-      // - wr_data routed to: {u_byte_3, u_byte_2, u_byte_1, u_byte_0}
+      // - store_data routed to: {u_byte_3, u_byte_2, u_byte_1, u_byte_0}
       2'b00: begin
-        wr_data_actual = { {data_mem.u_byte_3.wr_data,
+        store_data_actual = { {data_mem.u_byte_3.wr_data,
                             data_mem.u_byte_2.wr_data,
                             data_mem.u_byte_1.wr_data,
                             data_mem.u_byte_0.wr_data} };
 
-        assert(wr_data === wr_data_actual) else
-          $error("[DATA_MEM_ASSERT] wr_data route failed: offset=00 addr=%0h, expected=%0h, actual=%0h",
-                  addr, wr_data, wr_data_actual);
+        assert(store_data === store_data_actual) else
+          $error("[DATA_MEM_ASSERT] store_data route failed: offset=00 addr=%0h, expected=%0h, actual=%0h",
+                  addr, store_data, store_data_actual);
       end
 
       /******* offset 1 ******/
       //We are shifted over a byte
-      // - wr_data routed to: {u_byte_0, u_byte_3, u_byte_2, u_byte_1}
+      // - store_data routed to: {u_byte_0, u_byte_3, u_byte_2, u_byte_1}
       2'b01: begin
-        wr_data_actual = { {data_mem.u_byte_0.wr_data,
+        store_data_actual = { {data_mem.u_byte_0.wr_data,
                             data_mem.u_byte_3.wr_data,
                             data_mem.u_byte_2.wr_data,
                             data_mem.u_byte_1.wr_data} };
 
-        assert(wr_data === wr_data_actual) else
-          $error("[DATA_MEM_ASSERT] wr_data route failed: offset=01 addr=%0h, expected=%0h, actual=%0h",
-                  addr, wr_data, wr_data_actual);
+        assert(store_data === store_data_actual) else
+          $error("[DATA_MEM_ASSERT] store_data route failed: offset=01 addr=%0h, expected=%0h, actual=%0h",
+                  addr, store_data, store_data_actual);
       end
 
       /******* offset 2 ******/
       //We are shifted over two bytes
-      // - wr_data routed to: {u_byte_1, u_byte_0, u_byte_3, u_byte_2}
+      // - store_data routed to: {u_byte_1, u_byte_0, u_byte_3, u_byte_2}
       2'b10: begin
-        wr_data_actual = { {data_mem.u_byte_1.wr_data,
+        store_data_actual = { {data_mem.u_byte_1.wr_data,
                             data_mem.u_byte_0.wr_data,
                             data_mem.u_byte_3.wr_data,
                             data_mem.u_byte_2.wr_data} };
 
-        assert(wr_data === wr_data_actual) else
-          $error("[DATA_MEM_ASSERT] wr_data route failed: offset=10 addr=%0h, expected=%0h, actual=%0h",
-                  addr, wr_data, wr_data_actual);
+        assert(store_data === store_data_actual) else
+          $error("[DATA_MEM_ASSERT] store_data route failed: offset=10 addr=%0h, expected=%0h, actual=%0h",
+                  addr, store_data, store_data_actual);
       end
 
       /******* offset 3 ******/
       //We are shifted over three bytes
-      // - wr_data routed to: {u_byte_2, u_byte_1, u_byte_0, u_byte_3}
+      // - store_data routed to: {u_byte_2, u_byte_1, u_byte_0, u_byte_3}
       2'b11: begin
-        wr_data_actual = { {data_mem.u_byte_2.wr_data,
+        store_data_actual = { {data_mem.u_byte_2.wr_data,
                             data_mem.u_byte_1.wr_data,
                             data_mem.u_byte_0.wr_data,
                             data_mem.u_byte_3.wr_data} };
 
-        assert(wr_data === wr_data_actual) else
-          $error("[DATA_MEM_ASSERT] wr_data route failed: offset=11 addr=%0h, expected=%0h, actual=%0h",
-                  addr, wr_data, wr_data_actual);
+        assert(store_data === store_data_actual) else
+          $error("[DATA_MEM_ASSERT] store_data route failed: offset=11 addr=%0h, expected=%0h, actual=%0h",
+                  addr, store_data, store_data_actual);
       end
 
       default: begin end
@@ -261,70 +261,70 @@ module data_mem_assert
   end
 
   /*=============================================================================*/
-  /*------------------------ RD_DATA ROUTE CHECK --------------------------------*/
+  /*------------------------ LOAD_DATA ROUTE CHECK --------------------------------*/
   /*=============================================================================*/
-  word_t rd_data_exp;
+  word_t load_data_exp;
 
   //Look at the byte offset, construct the expected word directly from the
-  //byte lane memories, and compare it to the actual rd_data
+  //byte lane memories, and compare it to the actual load_data
   always @(posedge clk) begin
     #0
     unique case(addr[1:0])
 
       /******* offset 0 ******/
       //We are word aligned
-      // - rd_data formed from: {u_byte_3, u_byte_2, u_byte_1, u_byte_0}
+      // - load_data formed from: {u_byte_3, u_byte_2, u_byte_1, u_byte_0}
       2'b00: begin
-        rd_data_exp = {data_mem.u_byte_3.mem[lut_addr_t'(addr[XLEN-1:2])],
+        load_data_exp = {data_mem.u_byte_3.mem[lut_addr_t'(addr[XLEN-1:2])],
                       data_mem.u_byte_2.mem[lut_addr_t'(addr[XLEN-1:2])],
                       data_mem.u_byte_1.mem[lut_addr_t'(addr[XLEN-1:2])],
                       data_mem.u_byte_0.mem[lut_addr_t'(addr[XLEN-1:2])]};
 
-        assert(rd_data === rd_data_exp) else
-          $error("[DATA_MEM_ASSERT] rd_data route failed: offset=00 addr=%0h, expected=%0h, actual=%0h",
-                  addr, rd_data_exp, rd_data);
+        assert(load_data === load_data_exp) else
+          $error("[DATA_MEM_ASSERT] load_data route failed: offset=00 addr=%0h, expected=%0h, actual=%0h",
+                  addr, load_data_exp, load_data);
       end
 
       /******* offset 1 ******/
       //We are shifted over a byte
-      // - rd_data formed from: {u_byte_0(+1), u_byte_3, u_byte_2, u_byte_1}
+      // - load_data formed from: {u_byte_0(+1), u_byte_3, u_byte_2, u_byte_1}
       2'b01: begin
-        rd_data_exp = {data_mem.u_byte_0.mem[lut_addr_t'(addr[XLEN-1:2] + 'd1)],
+        load_data_exp = {data_mem.u_byte_0.mem[lut_addr_t'(addr[XLEN-1:2] + 'd1)],
                       data_mem.u_byte_3.mem[lut_addr_t'(addr[XLEN-1:2])],
                       data_mem.u_byte_2.mem[lut_addr_t'(addr[XLEN-1:2])],
                       data_mem.u_byte_1.mem[lut_addr_t'(addr[XLEN-1:2])]};
 
-        assert(rd_data === rd_data_exp) else
-          $error("[DATA_MEM_ASSERT] rd_data route failed: offset=01 addr=%0h, expected=%0h, actual=%0h",
-                  addr, rd_data_exp, rd_data);
+        assert(load_data === load_data_exp) else
+          $error("[DATA_MEM_ASSERT] load_data route failed: offset=01 addr=%0h, expected=%0h, actual=%0h",
+                  addr, load_data_exp, load_data);
       end
 
       /******* offset 2 ******/
       //We are shifted over two bytes
-      // - rd_data formed from: {u_byte_1(+1), u_byte_0(+1), u_byte_3, u_byte_2}
+      // - load_data formed from: {u_byte_1(+1), u_byte_0(+1), u_byte_3, u_byte_2}
       2'b10: begin
-        rd_data_exp = {data_mem.u_byte_1.mem[lut_addr_t'(addr[XLEN-1:2] + 'd1)],
+        load_data_exp = {data_mem.u_byte_1.mem[lut_addr_t'(addr[XLEN-1:2] + 'd1)],
                       data_mem.u_byte_0.mem[lut_addr_t'(addr[XLEN-1:2] + 'd1)],
                       data_mem.u_byte_3.mem[lut_addr_t'(addr[XLEN-1:2])],
                       data_mem.u_byte_2.mem[lut_addr_t'(addr[XLEN-1:2])]};
 
-        assert(rd_data === rd_data_exp) else
-          $error("[DATA_MEM_ASSERT] rd_data route failed: offset=10 addr=%0h, expected=%0h, actual=%0h",
-                  addr, rd_data_exp, rd_data);
+        assert(load_data === load_data_exp) else
+          $error("[DATA_MEM_ASSERT] load_data route failed: offset=10 addr=%0h, expected=%0h, actual=%0h",
+                  addr, load_data_exp, load_data);
       end
 
       /******* offset 3 ******/
       //We are shifted over three bytes
-      // - rd_data formed from: {u_byte_2(+1), u_byte_1(+1), u_byte_0(+1), u_byte_3}
+      // - load_data formed from: {u_byte_2(+1), u_byte_1(+1), u_byte_0(+1), u_byte_3}
       2'b11: begin
-        rd_data_exp = {data_mem.u_byte_2.mem[lut_addr_t'(addr[XLEN-1:2] + 'd1)],
+        load_data_exp = {data_mem.u_byte_2.mem[lut_addr_t'(addr[XLEN-1:2] + 'd1)],
                       data_mem.u_byte_1.mem[lut_addr_t'(addr[XLEN-1:2] + 'd1)],
                       data_mem.u_byte_0.mem[lut_addr_t'(addr[XLEN-1:2] + 'd1)],
                       data_mem.u_byte_3.mem[lut_addr_t'(addr[XLEN-1:2])]};
 
-        assert(rd_data === rd_data_exp) else
-          $error("[DATA_MEM_ASSERT] rd_data route failed: offset=11 addr=%0h, expected=%0h, actual=%0h",
-                  addr, rd_data_exp, rd_data);
+        assert(load_data === load_data_exp) else
+          $error("[DATA_MEM_ASSERT] load_data route failed: offset=11 addr=%0h, expected=%0h, actual=%0h",
+                  addr, load_data_exp, load_data);
       end
 
       default: begin end

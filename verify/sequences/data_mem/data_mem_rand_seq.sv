@@ -33,13 +33,13 @@ class data_mem_rand_seq extends data_mem_base_seq;
               DATA_MEM_LAST_WORD_ADDR + 2,
               DATA_MEM_LAST_ADDR
             };
-            wr_sel dist {
+            store_byte_sel dist {
               4'b0000 := 1, //no_write
               4'b0001 := 3, //sb
               4'b0011 := 3, //sh
               4'b1111 := 3  //sw
             };
-            wr_data dist {
+            store_data dist {
               WORD_ALL_ZEROS                   := 1,
               WORD_ALL_ONES                    := 1,
               [WORD_ALL_ZEROS : WORD_ALL_ONES] :/ 5
@@ -51,13 +51,13 @@ class data_mem_rand_seq extends data_mem_base_seq;
         5: begin
           if (!item.randomize() with {
             addr inside { prev_written_addr };
-            wr_sel dist {
+            store_byte_sel dist {
               4'b0000 := 1,
               4'b0001 := 3,
               4'b0011 := 3,
               4'b1111 := 3
             };
-            wr_data dist {
+            store_data dist {
               WORD_ALL_ZEROS                   := 1,
               WORD_ALL_ONES                    := 1,
               [WORD_ALL_ZEROS : WORD_ALL_ONES] :/ 5
@@ -68,13 +68,13 @@ class data_mem_rand_seq extends data_mem_base_seq;
         //full address range
         3: begin
           if (!item.randomize() with {
-            wr_sel dist {
+            store_byte_sel dist {
               4'b0000 := 1,
               4'b0001 := 3,
               4'b0011 := 3,
               4'b1111 := 3
             };
-            wr_data dist {
+            store_data dist {
               WORD_ALL_ZEROS                   := 1,
               WORD_ALL_ONES                    := 1,
               [WORD_ALL_ZEROS : WORD_ALL_ONES] :/ 5
@@ -84,7 +84,7 @@ class data_mem_rand_seq extends data_mem_base_seq;
       endcase
 
       //track addresses where any byte was written
-      if (item.wr_sel) prev_written_addr.push_back(item.addr);
+      if (item.store_byte_sel) prev_written_addr.push_back(item.addr);
 
       `uvm_info("SEQ", $sformatf("Generate new item: %s", item.convert2string()), UVM_HIGH);
       finish_item(item);

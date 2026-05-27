@@ -34,10 +34,10 @@ class data_mem_ref_model extends uvm_object;
     ref_mem_addr_t byte_1 = ref_mem_addr_t'((item.addr + 'd1) % REF_MEM_DEPTH);
     ref_mem_addr_t byte_0 = ref_mem_addr_t'((item.addr + 'd0) % REF_MEM_DEPTH);
 
-    //look at wr_sel and write the proper bytes
-    if(item.wr_sel[3]) mem[byte_3] = item.wr_data[31:24];
-    if(item.wr_sel[2]) mem[byte_2] = item.wr_data[23:16];
-    if(item.wr_sel[1]) mem[byte_1] = item.wr_data[15:8];
-    if(item.wr_sel[0]) mem[byte_0] = item.wr_data[7:0];
+    //look at store_byte_sel and write the proper bytes
+    if(item.store_byte_sel[3]) mem[byte_3] = item.store_data[31:24];
+    if(item.store_byte_sel[2]) mem[byte_2] = item.store_data[23:16];
+    if(item.store_byte_sel[1]) mem[byte_1] = item.store_data[15:8];
+    if(item.store_byte_sel[0]) mem[byte_0] = item.store_data[7:0];
   endfunction
 endclass

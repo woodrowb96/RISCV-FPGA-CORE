@@ -5,20 +5,20 @@ interface data_mem_intf
   input logic clk
 );
   //DUT control
-  byte_sel_t wr_sel;
+  byte_sel_t store_byte_sel;
   //DUT input
   word_t addr;
-  word_t wr_data;
+  word_t store_data;
   //DUT output
-  word_t rd_data;
+  word_t load_data;
 
   clocking cb_drv @(posedge clk);
     default output #1;
-    output wr_sel, addr, wr_data;
+    output store_byte_sel, addr, store_data;
   endclocking
 
   clocking cb_mon @(posedge clk);
     default input #1step;
-    input wr_sel, addr, wr_data, rd_data;
+    input store_byte_sel, addr, store_data, load_data;
   endclocking
 endinterface

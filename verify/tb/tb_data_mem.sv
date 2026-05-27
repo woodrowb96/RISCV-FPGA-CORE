@@ -18,10 +18,10 @@ module tb_data_mem
 
   /*********** DUT *************/
   data_mem dut(.clk(clk),
-               .wr_sel(intf.wr_sel),
+               .store_byte_sel(intf.store_byte_sel),
                .addr(intf.addr),
-               .wr_data(intf.wr_data),
-               .rd_data(intf.rd_data)
+               .store_data(intf.store_data),
+               .load_data(intf.load_data)
                );
 
   /*********** BIND ASSERTIONS *************/

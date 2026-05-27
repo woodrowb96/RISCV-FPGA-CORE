@@ -2,7 +2,7 @@
   Data memory module for a riscv rv32i implementation
 
 Control:
-  wr_sel: 4bit byte sensitive write enable signal.
+  store_byte_sel: 4bit byte sensitive write enable signal.
           - We can enable and disable individual bytes in a word to write to, ie:
               4'b0000 -> no write
               4'b0001 -> write to the least significant byte
@@ -14,16 +14,16 @@ Input:
   addr: Address we are writing and reading to.
         - Memory is byte addressable, so we can start our reads and writes from any byte.
 
-  wr_data:  32bit write data
+  store_data:  32bit store data
             - clocked in @(posedge clk)
             - Memory is byte addressable, but we can write in up to a word of data
-            - Use wr_sel to select which bytes in the word are getting written
+            - Use store_byte_sel to select which bytes in the word are getting written
 
 Output:
-  rd_data:  32bit read data
+  load_data:  32bit load data
             - read out combinatorially
             - Byte addressable
-            - No sub byte control (so no rd_sel like we do for writes).
+            - No sub byte control (so no load_byte_sel like we do for stores).
               We always read out a whole word of data and
               leave the sub byte selection to the datapath.
 
@@ -40,14 +40,14 @@ module data_mem (
   input logic clk,
 
   //control
-  input byte_sel_t wr_sel,
+  input byte_sel_t store_byte_sel,
 
   //input
   input word_t addr,
-  input word_t wr_data,
+  input word_t store_data,
 
   //output
-  output word_t rd_data
+  output word_t load_data
 );
   typedef logic [$clog2(DATA_MEM_DEPTH)-1:0] lut_addr_t;
 
@@ -57,12 +57,12 @@ module data_mem (
   byte_t [3:0] lut_ram_wr_data;
   byte_sel_t   lut_ram_wr_en;
 
-  //spilt out wr_data bytes
-  byte_t wr_data_byte_3, wr_data_byte_2, wr_data_byte_1, wr_data_byte_0;
-  assign wr_data_byte_3 = wr_data[31:24];
-  assign wr_data_byte_2 = wr_data[23:16];
-  assign wr_data_byte_1 = wr_data[15:8];
-  assign wr_data_byte_0 = wr_data[7:0];
+  //spilt out store_data bytes
+  byte_t store_data_byte_3, store_data_byte_2, store_data_byte_1, store_data_byte_0;
+  assign store_data_byte_3 = store_data[31:24];
+  assign store_data_byte_2 = store_data[23:16];
+  assign store_data_byte_1 = store_data[15:8];
+  assign store_data_byte_0 = store_data[7:0];
 
   /*************** ENFORCE POWER OF 2 DEPTH *************************/
   //Depth needs to be a power of 2, so addresses wrap properly
@@ -108,8 +108,8 @@ module data_mem (
   /********************** SIGNAL ROUTING ******************************/
   //look at the byte offset and:
   //  - calc the correct line in memory each byte_lane should point to
-  //  - route wr_data bytes and wr_sel bits to the proper byte_lanes
-  //  - route byte_lane output bytes to form the correct rd_data
+  //  - route store_data bytes and store_byte_sel bits to the proper byte_lanes
+  //  - route byte_lane output bytes to form the correct load_data
   /*******************************************************************/
 
   always_comb begin
@@ -119,72 +119,72 @@ module data_mem (
       //We are word aligned
       // - Byte_lane 0 is the LSB
       // - Byte_lane 3 is the MSB
-      // - wr_sel/data routed to: {byte_lane_3, byte_lane_2, byte_lane_1, byte_lane_0}
-      // - rd_data formed from:   {byte_lane_3, byte_lane_2, byte_lane_1, byte_lane_0}
+      // - store_byte_sel/data routed to: {byte_lane_3, byte_lane_2, byte_lane_1, byte_lane_0}
+      // - load_data formed from:         {byte_lane_3, byte_lane_2, byte_lane_1, byte_lane_0}
       2'b00: begin
         byte_3_addr = lut_addr_t'(addr[XLEN-1:2]); //most significant byte
         byte_2_addr = lut_addr_t'(addr[XLEN-1:2]);
         byte_1_addr = lut_addr_t'(addr[XLEN-1:2]);
         byte_0_addr = lut_addr_t'(addr[XLEN-1:2]); //least significant byte
 
-        lut_ram_wr_en   = {wr_sel[3], wr_sel[2], wr_sel[1], wr_sel[0]};
-        lut_ram_wr_data = {wr_data_byte_3, wr_data_byte_2, wr_data_byte_1, wr_data_byte_0};
+        lut_ram_wr_en   = {store_byte_sel[3], store_byte_sel[2], store_byte_sel[1], store_byte_sel[0]};
+        lut_ram_wr_data = {store_data_byte_3, store_data_byte_2, store_data_byte_1, store_data_byte_0};
 
-        rd_data = {lut_ram_rd_data[3], lut_ram_rd_data[2], lut_ram_rd_data[1], lut_ram_rd_data[0]};
+        load_data = {lut_ram_rd_data[3], lut_ram_rd_data[2], lut_ram_rd_data[1], lut_ram_rd_data[0]};
       end
 
       /******* offset 1 ******/
       //We are shifted over a byte
       // - Byte_lane 1 is now the LSB
       // - Byte_lane 0 is now the MSB and gets bumped to the next line
-      // - wr_sel/data routed to: {byte_lane_2, byte_lane_1, byte_lane_0, byte_lane_3}
-      // - rd_data formed from:   {byte_lane_0, byte_lane_3, byte_lane_2, byte_lane_1}
+      // - store_byte_sel/data routed to: {byte_lane_2, byte_lane_1, byte_lane_0, byte_lane_3}
+      // - load_data formed from:         {byte_lane_0, byte_lane_3, byte_lane_2, byte_lane_1}
       2'b01: begin
         byte_0_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1; //MSB
         byte_3_addr = lut_addr_t'(addr[XLEN-1:2]);
         byte_2_addr = lut_addr_t'(addr[XLEN-1:2]);
         byte_1_addr = lut_addr_t'(addr[XLEN-1:2]);       //LSB
 
-        lut_ram_wr_en   = {wr_sel[2], wr_sel[1], wr_sel[0], wr_sel[3]};
-        lut_ram_wr_data = {wr_data_byte_2, wr_data_byte_1, wr_data_byte_0, wr_data_byte_3};
+        lut_ram_wr_en   = {store_byte_sel[2], store_byte_sel[1], store_byte_sel[0], store_byte_sel[3]};
+        lut_ram_wr_data = {store_data_byte_2, store_data_byte_1, store_data_byte_0, store_data_byte_3};
 
-        rd_data = {lut_ram_rd_data[0], lut_ram_rd_data[3], lut_ram_rd_data[2], lut_ram_rd_data[1]};
+        load_data = {lut_ram_rd_data[0], lut_ram_rd_data[3], lut_ram_rd_data[2], lut_ram_rd_data[1]};
       end
 
       /******* offset 2 ******/
       //We are shifted over two bytes
       // - Byte_lane 2 is now the LSB
       // - Byte_lane 1 is now the MSB and gets bumped to the next line
-      // - wr_sel/data routed to: {byte_lane_1, byte_lane_0, byte_lane_3, byte_lane_2}
-      // - rd_data formed from:   {byte_lane_1, byte_lane_0, byte_lane_3, byte_lane_2}
+      // - store_byte_sel/data routed to: {byte_lane_1, byte_lane_0, byte_lane_3, byte_lane_2}
+      // - load_data formed from:         {byte_lane_1, byte_lane_0, byte_lane_3, byte_lane_2}
       2'b10: begin
         byte_1_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1;   //MSB
         byte_0_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1;
         byte_3_addr = lut_addr_t'(addr[XLEN-1:2]);
         byte_2_addr = lut_addr_t'(addr[XLEN-1:2]);         //LSB
 
-        lut_ram_wr_en   = {wr_sel[1], wr_sel[0], wr_sel[3], wr_sel[2]};
-        lut_ram_wr_data = {wr_data_byte_1, wr_data_byte_0, wr_data_byte_3, wr_data_byte_2};
+        lut_ram_wr_en   = {store_byte_sel[1], store_byte_sel[0], store_byte_sel[3], store_byte_sel[2]};
+        lut_ram_wr_data = {store_data_byte_1, store_data_byte_0, store_data_byte_3, store_data_byte_2};
 
-        rd_data = {lut_ram_rd_data[1], lut_ram_rd_data[0], lut_ram_rd_data[3], lut_ram_rd_data[2]};
+        load_data = {lut_ram_rd_data[1], lut_ram_rd_data[0], lut_ram_rd_data[3], lut_ram_rd_data[2]};
       end
 
       /******* offset 3 ******/
       //We are shifted over three bytes
       // - Byte_lane 3 is now the LSB
       // - Byte_lane 2 is now the MSB and gets bumped to the next line
-      // - wr_sel/data routed to: {byte_lane_0, byte_lane_3, byte_lane_2, byte_lane_1}
-      // - rd_data formed from:   {byte_lane_2, byte_lane_1, byte_lane_0, byte_lane_3}
+      // - store_byte_sel/data routed to: {byte_lane_0, byte_lane_3, byte_lane_2, byte_lane_1}
+      // - load_data formed from:         {byte_lane_2, byte_lane_1, byte_lane_0, byte_lane_3}
       2'b11: begin
         byte_2_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1;    //MSB
         byte_1_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1;
         byte_0_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1;
         byte_3_addr = lut_addr_t'(addr[XLEN-1:2]);          //LSB
 
-        lut_ram_wr_en   = {wr_sel[0], wr_sel[3], wr_sel[2], wr_sel[1]};
-        lut_ram_wr_data = {wr_data_byte_0, wr_data_byte_3, wr_data_byte_2, wr_data_byte_1};
+        lut_ram_wr_en   = {store_byte_sel[0], store_byte_sel[3], store_byte_sel[2], store_byte_sel[1]};
+        lut_ram_wr_data = {store_data_byte_0, store_data_byte_3, store_data_byte_2, store_data_byte_1};
 
-        rd_data = {lut_ram_rd_data[2], lut_ram_rd_data[1], lut_ram_rd_data[0], lut_ram_rd_data[3]};
+        load_data = {lut_ram_rd_data[2], lut_ram_rd_data[1], lut_ram_rd_data[0], lut_ram_rd_data[3]};
       end
     endcase
   end

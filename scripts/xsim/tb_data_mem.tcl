@@ -1,10 +1,10 @@
 add_wave tb_data_mem/clk
 add_wave_divider
-add_wave -radix bin tb_data_mem/intf/wr_sel
+add_wave -radix bin tb_data_mem/intf/store_byte_sel
 add_wave_divider
 add_wave -radix hex tb_data_mem/intf/addr
-add_wave -radix hex tb_data_mem/intf/wr_data
-add_wave -radix hex tb_data_mem/intf/rd_data
+add_wave -radix hex tb_data_mem/intf/store_data
+add_wave -radix hex tb_data_mem/intf/load_data
 add_wave_divider
 add_wave -radix hex tb_data_mem/dut/byte_0_addr
 add_wave -radix hex tb_data_mem/dut/byte_1_addr

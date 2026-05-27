@@ -23,13 +23,13 @@ class data_mem_scoreboard extends uvm_scoreboard;
     `uvm_info("SCB" , $sformatf("actual:%s", actual.convert2string()), UVM_HIGH)
 
     expected = data_mem_seq_item::type_id::create("expected");
-    expected.wr_sel  = actual.wr_sel;
+    expected.store_byte_sel  = actual.store_byte_sel;
     expected.addr    = actual.addr;
-    expected.wr_data = actual.wr_data;
+    expected.store_data = actual.store_data;
 
     //reads are combinatorial so we read the ref_model output BEFORE we
     //update the ref_model state
-    expected.rd_data = ref_model.read(expected.addr);
+    expected.load_data = ref_model.read(expected.addr);
 
     //If we pass send the item to coverage, else report error
     if(actual.compare(expected)) begin
@@ -40,7 +40,7 @@ class data_mem_scoreboard extends uvm_scoreboard;
                                   actual.convert2string(), expected.convert2string()))
     end
 
-    //Update the state (write bytes selected by wr_sel) AFTER we read
+    //Update the state (write bytes selected by store_byte_sel) AFTER we read
     ref_model.update(expected);
   endfunction
 endclass

@@ -1,12 +1,12 @@
 /*
   COVERAGE SAMPLING ASSUMPTIONS:
         - sample() is being called AFTER the DUT signals have been driven onto
-          the DUT's input ports and AFTER the combinatorial rd_data has had
-          time to settle, but BEFORE the new wr_data has been clocked into
+          the DUT's input ports and AFTER the combinatorial load_data has had
+          time to settle, but BEFORE the new store_data has been clocked into
           memory.
 
         - NOTE:
-            - The covergroup uses state (written, prev_wr_sel, prev_addr) to
+            - The covergroup uses state (written, prev_store_byte_sel, prev_addr) to
               collect some of its coverpoints. State is updated in sample().
               If you drive/clock the DUT without calling sample(), update those
               variables manually or coverage will get out of sync.
@@ -19,7 +19,7 @@ class data_mem_coverage extends uvm_object;
   //per-address byte-write history: tracks which bytes have ever been
   //written at each addr (so reads of written bytes can be distinguished)
   byte_sel_t written [word_t];
-  byte_sel_t prev_wr_sel;
+  byte_sel_t prev_store_byte_sel;
   word_t     prev_addr;
 
   function new(string name = "data_mem_coverage");
@@ -36,18 +36,18 @@ class data_mem_coverage extends uvm_object;
 
   function void reset_state();
     written.delete();
-    prev_wr_sel = '0;
+    prev_store_byte_sel = '0;
     prev_addr   = 'x;
   endfunction
 
   function void update_state();
     if(!written.exists(item.addr)) begin
-      written[item.addr] = item.wr_sel;
+      written[item.addr] = item.store_byte_sel;
     end
     else begin
-      written[item.addr] |= item.wr_sel;
+      written[item.addr] |= item.store_byte_sel;
     end
-    prev_wr_sel = item.wr_sel;
+    prev_store_byte_sel = item.store_byte_sel;
     prev_addr   = item.addr;
   endfunction
 
@@ -59,18 +59,18 @@ class data_mem_coverage extends uvm_object;
     if (total < 100.0) begin
       $display("  addr:                                        %6.2f%%", cg.addr.get_coverage());
       $display("  byte_offset:                                 %6.2f%%", cg.byte_offset.get_coverage());
-      $display("  wr_sel:                                      %6.2f%%", cg.wr_sel.get_coverage());
-      $display("  wr_data:                                     %6.2f%%", cg.wr_data.get_coverage());
-      $display("  wr_sel_x_addr_x_wr_data:                     %6.2f%%", cg.wr_sel_x_addr_x_wr_data.get_coverage());
-      $display("  wr_sel_x_byte_offset_x_wr_data:              %6.2f%%", cg.wr_sel_x_byte_offset_x_wr_data.get_coverage());
+      $display("  store_byte_sel:                                      %6.2f%%", cg.store_byte_sel.get_coverage());
+      $display("  store_data:                                     %6.2f%%", cg.store_data.get_coverage());
+      $display("  store_byte_sel_x_addr_x_store_data:                     %6.2f%%", cg.store_byte_sel_x_addr_x_store_data.get_coverage());
+      $display("  store_byte_sel_x_byte_offset_x_store_data:              %6.2f%%", cg.store_byte_sel_x_byte_offset_x_store_data.get_coverage());
       $display("  back_to_back_write:                          %6.2f%%", cg.back_to_back_write.get_coverage());
       $display("  back_to_back_write_x_byte_offset:            %6.2f%%", cg.back_to_back_write_x_byte_offset.get_coverage());
       $display("  written_bytes:                               %6.2f%%", cg.written_bytes.get_coverage());
       $display("  addr_x_written_bytes:                        %6.2f%%", cg.addr_x_written_bytes.get_coverage());
       $display("  byte_offset_x_written_bytes:                 %6.2f%%", cg.byte_offset_x_written_bytes.get_coverage());
-      $display("  rd_data:                                     %6.2f%%", cg.rd_data.get_coverage());
-      $display("  rd_data_x_addr:                              %6.2f%%", cg.rd_data_x_addr.get_coverage());
-      $display("  rd_data_x_byte_offset:                       %6.2f%%", cg.rd_data_x_byte_offset.get_coverage());
+      $display("  load_data:                                     %6.2f%%", cg.load_data.get_coverage());
+      $display("  load_data_x_addr:                              %6.2f%%", cg.load_data_x_addr.get_coverage());
+      $display("  load_data_x_byte_offset:                       %6.2f%%", cg.load_data_x_byte_offset.get_coverage());
       $display("  read_during_write:                           %6.2f%%", cg.read_during_write.get_coverage());
       $display("  read_during_write_x_addr:                    %6.2f%%", cg.read_during_write_x_addr.get_coverage());
       $display("  read_during_write_x_byte_offset:             %6.2f%%", cg.read_during_write_x_byte_offset.get_coverage());
@@ -111,8 +111,8 @@ class data_mem_coverage extends uvm_object;
 
     /********************* WRITE COVERAGE *********************/
 
-    //the specific wr_sel patterns that rv32i ops generate
-    wr_sel: coverpoint item.wr_sel {
+    //the specific store_byte_sel patterns that rv32i ops generate
+    store_byte_sel: coverpoint item.store_byte_sel {
       bins no_write = {4'b0000};   //not writing
       bins sb       = {4'b0001};   //store-byte
       bins sh       = {4'b0011};   //store-halfword
@@ -120,36 +120,36 @@ class data_mem_coverage extends uvm_object;
       bins others   = default;
     }
 
-    //all 1s and all 0s through wr_data
+    //all 1s and all 0s through store_data
     //  - NOTE: only collect when we are actually writing
-    wr_data: coverpoint item.wr_data
-      iff(item.wr_sel) {
+    store_data: coverpoint item.store_data
+      iff(item.store_byte_sel) {
         bins all_ones    = {WORD_ALL_ONES};
         bins all_zeros   = {WORD_ALL_ZEROS};
         bins non_corners = default;
     }
 
-    //write all 1s and all 0s to each corner addr, with each wr_sel pattern
-    wr_sel_x_addr_x_wr_data: cross addr, wr_sel, wr_data {
+    //write all 1s and all 0s to each corner addr, with each store_byte_sel pattern
+    store_byte_sel_x_addr_x_store_data: cross addr, store_byte_sel, store_data {
       //don't collect the cross when we aren't writing
-      ignore_bins no_write_x_wr_data = binsof(wr_sel.no_write) && binsof(wr_data);
+      ignore_bins no_write_x_store_data = binsof(store_byte_sel.no_write) && binsof(store_data);
     }
 
-    //write all 1s and all 0s at each byte_offset, with each wr_sel pattern
-    wr_sel_x_byte_offset_x_wr_data: cross byte_offset, wr_sel, wr_data {
-      ignore_bins no_write_x_wr_data = binsof(wr_sel.no_write) && binsof(wr_data);
+    //write all 1s and all 0s at each byte_offset, with each store_byte_sel pattern
+    store_byte_sel_x_byte_offset_x_store_data: cross byte_offset, store_byte_sel, store_data {
+      ignore_bins no_write_x_store_data = binsof(store_byte_sel.no_write) && binsof(store_data);
     }
 
 
     /*********** BACK TO BACK WRITE COVERAGE **********************/
 
     //back-to-back writes to the same address.
-    //  - (item.wr_sel & prev_wr_sel) bitwise AND picks out which bytes overlap
+    //  - (item.store_byte_sel & prev_store_byte_sel) bitwise AND picks out which bytes overlap
     //    between consecutive transactions. Writes are byte granular so we bin
     //    each byte lane separately via wildcard bins.
     //  - iff (item.addr == prev_addr): back-to-back only counts when its
     //    actually the same address.
-    back_to_back_write: coverpoint (item.wr_sel & prev_wr_sel)
+    back_to_back_write: coverpoint (item.store_byte_sel & prev_store_byte_sel)
       iff (item.addr == prev_addr) {
         wildcard bins byte_0 = {4'b???1};
         wildcard bins byte_1 = {4'b??1?};
@@ -180,26 +180,26 @@ class data_mem_coverage extends uvm_object;
     //read written bytes from each byte offset
     byte_offset_x_written_bytes: cross byte_offset, written_bytes;
 
-    rd_data: coverpoint item.rd_data {
+    load_data: coverpoint item.load_data {
       bins all_ones    = {WORD_ALL_ONES};
       bins all_zeros   = {WORD_ALL_ZEROS};
       bins non_corners = default;
     }
 
     //read corner data out of each corner address
-    rd_data_x_addr: cross rd_data, addr;
+    load_data_x_addr: cross load_data, addr;
 
     //read corner data out of each byte offset
-    rd_data_x_byte_offset: cross rd_data, byte_offset;
+    load_data_x_byte_offset: cross load_data, byte_offset;
 
 
     /************** READ DURING WRITE COVERAGE *********************/
 
-    //Reads and writes use the same address, so as long as wr_sel != 0 all
+    //Reads and writes use the same address, so as long as store_byte_sel != 0 all
     //reads are during a write. Writes are byte granular so we use wildcard
     //bins to make sure we did a read_during_write while each byte was being
     //written.
-    read_during_write: coverpoint (item.wr_sel) {
+    read_during_write: coverpoint (item.store_byte_sel) {
       wildcard bins byte_0 = {4'b???1};
       wildcard bins byte_1 = {4'b??1?};
       wildcard bins byte_2 = {4'b?1??};
@@ -216,7 +216,7 @@ class data_mem_coverage extends uvm_object;
     /*********  NEXT CYCLE READ AFTER WRITE COVERAGE *********************/
 
     //reading a write on the clk cycle immediately following the write
-    next_cycle_read_after_write: coverpoint prev_wr_sel
+    next_cycle_read_after_write: coverpoint prev_store_byte_sel
       iff(item.addr == prev_addr) {
         wildcard bins byte_0 = {4'b???1};
         wildcard bins byte_1 = {4'b??1?};
