@@ -23,9 +23,9 @@ package rv32i_control_pkg;
   /******************* FLOW CONTROL *************************/
 
   typedef enum logic {
-    REG = 1'b0,
+    RS2 = 1'b0,
     IMM = 1'b1
-  } alu_src_sel_t;
+  } alu_src_sel_2_t;
 
   typedef enum logic {
     MEM = 1'b0,
