@@ -20,4 +20,92 @@ module control
   //output (wb_stage control)
   output wb_sel_t wb_sel_id
 );
+  opcode_t opcode;
+  f3_t     f3;
+  f7_t     f7;
+
+  /********** PARSE INST FIELDS **************/
+  assign opcode = opcode_t'(inst_id[6:0]);
+  assign f3     = inst_id[14:12];
+  assign f7     = inst_id[31:25];
+
+  /*********** DECODE CONTROL ****************/
+  always_comb begin
+    //default assignments implement a NOP
+    rd_wr_en_id              = '0;
+    alu_op_id                = ALU_ADD;
+    alu_src_sel_2_id         = RS2;
+    branch_type_id           = NONE;
+    branch_target_src_sel_id = PC;
+    mem_store_byte_sel_id    = '0;
+    wb_sel_id                = ALU;
+
+    unique case(opcode)
+      OP_REG: begin
+        rd_wr_en_id = 1'b1; //all OP_REGs will write to the register
+        unique case(f3)
+          F3_ADD_SUB: begin
+            unique case(f7)
+              F7_ADD: begin
+                alu_op_id = ALU_ADD;
+              end
+              F7_SUB: begin
+                alu_op_id = ALU_SUB;
+              end
+            endcase
+          end
+          F3_SLL: begin
+            alu_op_id = ALU_SLL;
+          end
+          F3_SLT: begin
+            alu_op_id = ALU_SLT;
+          end
+          F3_SLTU: begin
+            alu_op_id = ALU_SLTU;
+          end
+          F3_XOR: begin
+            alu_op_id = ALU_XOR;
+          end
+          F3_SRL_SRA: begin
+            unique case(f7)
+              F7_SRL: begin
+                alu_op_id = ALU_SRL;
+              end
+              F7_SRA: begin
+                alu_op_id = ALU_SRA;
+              end
+            endcase
+          end
+          F3_OR: begin
+            alu_op_id = ALU_OR;
+          end
+          F3_AND: begin
+            alu_op_id = ALU_AND;
+          end
+        endcase
+      end
+      OP_IMM: begin
+      end
+      OP_LOAD: begin
+      end
+      OP_STORE: begin
+      end
+      OP_BRANCH:begin
+      end
+      OP_LUI: begin
+      end
+      OP_AUIPC: begin
+      end
+      OP_JAL: begin
+      end
+      OP_JALR: begin
+      end
+      OP_FENCE: begin
+      //fence is impemented as a NOP
+      end
+      OP_SYSTEM: begin
+      //NOT IMPLEMENTED YET
+      end
+    endcase
+  end
 endmodule
