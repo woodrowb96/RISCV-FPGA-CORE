@@ -3,10 +3,10 @@ module ex_stage
   import rv32i_control_pkg::*;
 (
   //control
-  input alu_op_t        alu_op_id,
-  input alu_src_sel_2_t alu_src_sel_2_id,
-  input branch_type_t   branch_type_id,
-  input branch_type_t   branch_target_src_sel_id,
+  input alu_op_t                  alu_op_id,
+  input alu_src_sel_2_t           alu_src_sel_2_id,
+  input branch_type_t             branch_type_id,
+  input branch_target_src_sel_t   branch_target_src_sel_id,
 
   //input
   input word_t pc_id,
