@@ -103,4 +103,12 @@ package rv32i_control_pkg;
   localparam f3_t F3_SB = 3'b000;
   localparam f3_t F3_SH = 3'b001;
   localparam f3_t F3_SW = 3'b010;
+
+  /***************** OP_BRANCH F3 AND F7 PARAMS ***********************/
+  localparam f3_t F3_BEQ  = 3'b000;
+  localparam f3_t F3_BNE  = 3'b001;
+  localparam f3_t F3_BLT  = 3'b100;
+  localparam f3_t F3_BGE  = 3'b101;
+  localparam f3_t F3_BLTU = 3'b110;
+  localparam f3_t F3_BGEU = 3'b111;
 endpackage

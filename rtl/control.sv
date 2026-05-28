@@ -162,6 +162,27 @@ module control
         endcase
       end
       OP_BRANCH:begin
+        branch_target_src_sel_id = PC;    //Branches use PC to calc the target address
+        unique case(f3)
+          F3_BEQ: begin
+            branch_type_id = BEQ;
+          end
+          F3_BNE: begin
+            branch_type_id = BNE;
+          end
+          F3_BLT: begin
+            branch_type_id = BLT;
+          end
+          F3_BGE: begin
+            branch_type_id = BGE;
+          end
+          F3_BLTU: begin
+            branch_type_id = BLTU;
+          end
+          F3_BGEU: begin
+            branch_type_id = BGEU;
+          end
+        endcase
       end
       OP_LUI: begin
       end
