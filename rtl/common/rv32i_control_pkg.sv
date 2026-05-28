@@ -56,6 +56,14 @@ package rv32i_control_pkg;
     RS1 = 1'b1
   } branch_target_src_sel_t;
 
+  typedef enum logic[2:0] {
+    LOAD_B  = 3'b000,
+    LOAD_H  = 3'b001,
+    LOAD_W  = 3'b010,
+    LOAD_BU = 3'b011,
+    LOAD_HU = 3'b100
+  }load_type_t;
+
   /***************** OP_REG F3 AND F7 PARAMS ***********************/
   localparam f3_t F3_ADD_SUB = 3'b000;
   localparam f3_t F3_SLL     = 3'b001;
