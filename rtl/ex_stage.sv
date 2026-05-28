@@ -100,6 +100,9 @@ module ex_stage
       JUMP: begin
         branch_taken_ex = 1'b1;
       end
+      NONE: begin
+        branch_taken_ex = 1'b0;
+      end
       default: begin
         branch_taken_ex = 'x;
       end

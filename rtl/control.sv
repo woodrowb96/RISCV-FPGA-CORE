@@ -147,8 +147,8 @@ module control
         endcase
       end
       OP_STORE: begin
-        alu_op_id                = ALU_ADD; //OP_STORE needs to add in the alu to calc addr
-        alu_src_sel_2_id         = IMM;     //OP_STORE addr calc needs the imm
+        alu_op_id        = ALU_ADD; //OP_STORE needs to add in the alu to calc addr
+        alu_src_sel_2_id = IMM;     //OP_STORE addr calc needs the imm
         unique case(f3)
           F3_SB: begin
             mem_store_byte_sel_id = 4'b0001;
