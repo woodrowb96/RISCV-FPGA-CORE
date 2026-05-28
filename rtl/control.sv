@@ -15,7 +15,8 @@ module control
   output branch_target_src_sel_t branch_target_src_sel_id,
 
   //output (mem_stage control)
-  output byte_sel_t mem_store_byte_sel_id,
+  output byte_sel_t  mem_store_byte_sel_id,
+  output load_type_t mem_load_type_id,
 
   //output (wb_stage control)
   output wb_sel_t wb_sel_id
@@ -38,6 +39,7 @@ module control
     branch_type_id           = NONE;
     branch_target_src_sel_id = PC;
     mem_store_byte_sel_id    = '0;
+    mem_load_type_id         = LOAD_B;
     wb_sel_id                = ALU;
 
     unique case(opcode)
@@ -122,6 +124,27 @@ module control
         endcase
       end
       OP_LOAD: begin
+        rd_wr_en_id      = 1'b1;    //all OP_LOAD will write to the register
+        alu_src_sel_2_id = IMM;     //all OP_LOAD need to source from the immediate
+        alu_op_id        = ALU_ADD; //all OP_LOAD need to use the alu add to comp the addr
+        wb_sel_id        = MEM;     //all OP_LOAD need to write back from data_mem
+        unique case(f3)
+          F3_LB: begin
+            mem_load_type_id = LOAD_B;
+          end
+          F3_LH: begin
+            mem_load_type_id = LOAD_H;
+          end
+          F3_LW: begin
+            mem_load_type_id = LOAD_W;
+          end
+          F3_LBU: begin
+            mem_load_type_id = LOAD_BU;
+          end
+          F3_LHU: begin
+            mem_load_type_id = LOAD_HU;
+          end
+        endcase
       end
       OP_STORE: begin
       end
