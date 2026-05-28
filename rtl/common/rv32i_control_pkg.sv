@@ -56,7 +56,7 @@ package rv32i_control_pkg;
     RS1 = 1'b1
   } branch_target_src_sel_t;
 
-  /***************** OP_REG F3 PARAMS ***********************/
+  /***************** OP_REG F3 AND F7 PARAMS ***********************/
   localparam f3_t F3_ADD_SUB = 3'b000;
   localparam f3_t F3_SLL     = 3'b001;
   localparam f3_t F3_SLT     = 3'b010;
@@ -66,9 +66,21 @@ package rv32i_control_pkg;
   localparam f3_t F3_OR      = 3'b110;
   localparam f3_t F3_AND     = 3'b111;
 
-  /*************** OP_REG F7 PARAMS *************************/
   localparam f7_t F7_ADD = 7'b0000000;
   localparam f7_t F7_SUB = 7'b0100000;
   localparam f7_t F7_SRL = 7'b0000000;
   localparam f7_t F7_SRA = 7'b0100000;
+
+  /***************** OP_IMM F3 AND F7 PARAMS ***********************/
+  localparam f3_t F3_ADDI      = 3'b000;
+  localparam f3_t F3_SLLI      = 3'b001;
+  localparam f3_t F3_SLTI      = 3'b010;
+  localparam f3_t F3_SLTIU     = 3'b011;
+  localparam f3_t F3_XORI      = 3'b100;
+  localparam f3_t F3_SRLI_SRAI = 3'b101;
+  localparam f3_t F3_ORI       = 3'b110;
+  localparam f3_t F3_ANDI      = 3'b111;
+
+  localparam f7_t F7_SRLI = 7'b0000000;
+  localparam f7_t F7_SRAI = 7'b0100000;
 endpackage

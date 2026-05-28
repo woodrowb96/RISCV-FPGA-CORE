@@ -85,6 +85,41 @@ module control
         endcase
       end
       OP_IMM: begin
+        rd_wr_en_id      = 1'b1; //all OP_IMM will write to the register
+        alu_src_sel_2_id = IMM;  //all OP_IMM need to source from the immediate
+        unique case(f3)
+          F3_ADDI: begin
+            alu_op_id = ALU_ADD;
+          end
+          F3_SLLI: begin
+            alu_op_id = ALU_SLL;
+          end
+          F3_SLTI: begin
+            alu_op_id = ALU_SLT;
+          end
+          F3_SLTIU: begin
+            alu_op_id = ALU_SLTU;
+          end
+          F3_XORI: begin
+            alu_op_id = ALU_XOR;
+          end
+          F3_SRLI_SRAI: begin
+            unique case(f7)
+              F7_SRLI: begin
+                alu_op_id = ALU_SRL;
+              end
+              F7_SRAI: begin
+                alu_op_id = ALU_SRA;
+              end
+            endcase
+          end
+          F3_ORI: begin
+            alu_op_id = ALU_OR;
+          end
+          F3_ANDI: begin
+            alu_op_id = ALU_AND;
+          end
+        endcase
       end
       OP_LOAD: begin
       end
@@ -101,7 +136,7 @@ module control
       OP_JALR: begin
       end
       OP_FENCE: begin
-      //fence is impemented as a NOP
+      //fence is implemented as a NOP
       end
       OP_SYSTEM: begin
       //NOT IMPLEMENTED YET
