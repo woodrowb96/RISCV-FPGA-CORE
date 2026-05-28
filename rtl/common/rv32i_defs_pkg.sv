@@ -30,6 +30,12 @@ package rv32i_defs_pkg;
     OP_LUI    = 7'b0110111,  // U-type
     OP_AUIPC  = 7'b0010111,  // U-type
     OP_JAL    = 7'b1101111,  // J-type
-    OP_JALR   = 7'b1100111   // I-type
+    OP_JALR   = 7'b1100111,  // I-type
+    OP_FENCE  = 7'b0001111,  // Implemented as a NOP
+    OP_SYSTEM = 7'b1110011   //WILL NOT BE IMPLEMENTED YET
   } opcode_t;
+
+  typedef logic[2:0] f3_t;
+  typedef logic[6:0] f7_t;
+
 endpackage
