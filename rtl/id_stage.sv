@@ -5,7 +5,7 @@ CLK:
   - synchronous operations are synced to the posedge of the clk
 
 CONTROL:
-  - logic reg_wr_en_wb: 1 bit reg_file write enable
+  - logic rd_wr_en_wb: 1 bit reg_file write enable
       - Controls when the reg_file is written to
       - When 1: rd_data_wb is written into the destination register @(posedge clk)
       - When 0: rd_data_wb is not written
@@ -32,7 +32,7 @@ module id_stage
   input logic clk,
 
   //control
-  input logic reg_wr_en_wb,
+  input logic rd_wr_en_wb,
 
   //input
   input word_t pc_if,
@@ -60,7 +60,7 @@ module id_stage
   /************** REG_FILE ********************/
   reg_file u_reg_file (
     .clk          (clk),
-    .write_en     (reg_wr_en_wb),
+    .write_en     (rd_wr_en_wb),
     .write_addr   (rd_addr),
     .write_data   (rd_data_wb),
     .read_addr_1  (rs1_addr),
