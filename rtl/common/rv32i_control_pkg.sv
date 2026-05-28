@@ -65,4 +65,10 @@ package rv32i_control_pkg;
   localparam f3_t F3_SRL_SRA = 3'b101;
   localparam f3_t F3_OR      = 3'b110;
   localparam f3_t F3_AND     = 3'b111;
+
+  /*************** OP_REG F7 PARAMS *************************/
+  localparam f7_t F7_ADD = 7'b0000000;
+  localparam f7_t F7_SUB = 7'b0100000;
+  localparam f7_t F7_SRL = 7'b0000000;
+  localparam f7_t F7_SRA = 7'b0100000;
 endpackage
