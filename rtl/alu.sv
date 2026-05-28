@@ -1,19 +1,8 @@
 /*
   ALU module for riscv rv32i implementation.
 
-  NOTE: I havent implemented all the operations yet.
-
 Control:
   alu_op  : 4'b alu operation
-
-  ---------ALU CONTROL-----------------
-  | ALU_OP  | Function | result       |
-  -------------------------------------
-  | 0000    | ALU_AND  | in_a & in_b  |
-  | 0001    | ALU_OR   | in_a | in_b  |
-  | 0010    | ALU_ADD  | in_a + in_b  |
-  | 0110    | ALU_SUB  | in_a - in_b  |
-  -------------------------------------
 
 Input:
   in_a  :  32'b input a
@@ -54,11 +43,30 @@ module alu(
       ALU_OR: begin
         result = in_a | in_b;
       end
+      ALU_XOR: begin
+        result = in_a ^ in_b;
+      end
       ALU_ADD: begin
         result = in_a + in_b;
       end
       ALU_SUB: begin
         result = in_a - in_b;
+      end
+      ALU_SLT: begin
+        result = $signed(in_a) < $signed(in_b);
+      end
+      ALU_SLTU: begin
+        result = in_a < in_b;
+      end
+      ALU_SLL: begin
+        //per rv32i spec we only shift by the amount in the lower 5 bits of in_b
+        result = in_a << in_b[4:0];
+      end
+      ALU_SRL: begin
+        result = in_a >> in_b[4:0];
+      end
+      ALU_SRA: begin
+        result = $signed(in_a) >>> in_b[4:0];
       end
       default: begin
         result = '0;
