@@ -83,4 +83,11 @@ package rv32i_control_pkg;
 
   localparam f7_t F7_SRLI = 7'b0000000;
   localparam f7_t F7_SRAI = 7'b0100000;
+
+  /***************** OP_LOAD F3 AND F7 PARAMS ***********************/
+  localparam f3_t F3_LB  = 3'b000;
+  localparam f3_t F3_LH  = 3'b001;
+  localparam f3_t F3_LW  = 3'b010;
+  localparam f3_t F3_LBU = 3'b100;
+  localparam f3_t F3_LHU = 3'b101;
 endpackage
