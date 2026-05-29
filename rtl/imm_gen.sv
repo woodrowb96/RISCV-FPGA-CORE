@@ -24,9 +24,6 @@ Output:
       - J-type:
                 - encoded immediate split across instruction
                 - imm = {{11{inst[31]}}, inst[31], inst[19:12], inst[20], inst[30:21], 1'b0}
-
-  Note: Invalid opcodes/instructions
-    - Output when this module gets passed an invalid opcode/instruction is undefined.
 */
 module imm_gen
   import rv32i_defs_pkg::*;
@@ -66,11 +63,14 @@ module imm_gen
       OP_JAL: begin
         imm = {{11{inst[31]}}, inst[31], inst[19:12], inst[20], inst[30:21], 1'b0};
       end
+      //Unimplemented (Both currently are NOPs)
+      OP_FENCE, OP_SYSTEM: begin
+        imm = '0;
+      end
       //invalid opcodes
       default: begin
-        imm = 'x; //output x's, behavior is undefined
+        imm = '0;
       end
     endcase
   end
-
 endmodule
