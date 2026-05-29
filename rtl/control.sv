@@ -201,6 +201,13 @@ module control
         wb_sel_id        = ALU;       //Write pc + imm back to rd
       end
       OP_JAL: begin
+        rd_wr_en_id              = 1'b1; //Need to write pc + 4 back to rd
+        alu_op_id                = ALU_ADD;
+        alu_src_sel_1_id         = SRC1_PC;
+        alu_src_sel_2_id         = FOUR;
+        branch_type_id           = JUMP;
+        branch_target_src_sel_id = PC;    //Target address is PC + IMM
+        wb_sel_id                = ALU;
       end
       OP_JALR: begin
       end
