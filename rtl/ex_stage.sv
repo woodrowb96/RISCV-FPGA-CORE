@@ -83,10 +83,12 @@ module ex_stage
   always_comb begin
     unique case(branch_target_src_sel_id)
       PC: begin
-        branch_target_ex = imm_id + pc_id; //imm_id has already been shifted left in the imm_gen
+        //imm_id has already been shifted left in the imm_gen module
+        branch_target_ex = imm_id + pc_id;
       end
       RS1: begin
-        branch_target_ex = imm_id + rs1_data_id;
+        //per the spec bit 0 should be set to 0, so we mask the addition<F10>
+        branch_target_ex = (imm_id + rs1_data_id) & ~32'b1;
       end
       default: begin
         branch_target_ex = 'x;
