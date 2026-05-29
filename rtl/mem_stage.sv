@@ -49,7 +49,7 @@ module mem_stage
         load_data_mem = {16'b0, raw_load_data[15:0]};
       end
       default: begin
-        load_data_mem = 'x;
+        load_data_mem = '0;
       end
     endcase
   end

@@ -22,7 +22,7 @@ module wb_stage
         rd_data_wb = alu_result_mem;
       end
       default: begin
-        rd_data_wb = 'x;
+        rd_data_wb = '0;
       end
     endcase
   end
