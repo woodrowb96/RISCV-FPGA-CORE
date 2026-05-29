@@ -30,6 +30,12 @@ package rv32i_control_pkg;
 
   /******************* FLOW CONTROL *************************/
 
+  typedef enum logic [1:0] {
+    SRC1_RS1  = 2'b00,
+    SRC1_PC   = 2'b01,
+    SRC1_ZERO = 2'b10
+  } alu_src_sel_1_t;
+
   typedef enum logic {
     RS2 = 1'b0,
     IMM = 1'b1

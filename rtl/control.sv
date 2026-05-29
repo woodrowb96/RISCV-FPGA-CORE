@@ -10,6 +10,7 @@ module control
 
   //output (ex_stage control)
   output alu_op_t                alu_op_id,
+  output alu_src_sel_1_t         alu_src_sel_1_id,
   output alu_src_sel_2_t         alu_src_sel_2_id,
   output branch_type_t           branch_type_id,
   output branch_target_src_sel_t branch_target_src_sel_id,
@@ -35,6 +36,7 @@ module control
     //default assignments implement a NOP
     rd_wr_en_id              = '0;
     alu_op_id                = ALU_ADD;
+    alu_src_sel_1_id         = SRC1_RS1;
     alu_src_sel_2_id         = RS2;
     branch_type_id           = NONE;
     branch_target_src_sel_id = PC;

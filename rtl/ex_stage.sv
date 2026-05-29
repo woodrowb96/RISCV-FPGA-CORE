@@ -4,6 +4,7 @@ module ex_stage
 (
   //control
   input alu_op_t                  alu_op_id,
+  input alu_src_sel_1_t           alu_src_sel_1_id,
   input alu_src_sel_2_t           alu_src_sel_2_id,
   input branch_type_t             branch_type_id,
   input branch_target_src_sel_t   branch_target_src_sel_id,
@@ -20,7 +21,7 @@ module ex_stage
   output word_t alu_result_ex,
   output word_t rs2_data_ex
 );
-  //alu source selection
+  word_t alu_src_1;
   word_t alu_src_2;
 
   //signals used to calc the branch_taken
@@ -30,6 +31,24 @@ module ex_stage
 
   /************** PASS THROUGHS **************/
   assign rs2_data_ex = rs2_data_id;
+
+  /********* ALU SOURCE_1 SELECT ************/
+  always_comb begin
+    unique case(alu_src_sel_1_id)
+      SRC1_RS1: begin
+        alu_src_1 = rs1_data_id;
+      end
+      SRC1_PC: begin
+        alu_src_1 = pc_id;
+      end
+      SRC1_ZERO: begin
+        alu_src_1 = '0;
+      end
+      default: begin
+        alu_src_1 = 'x;
+      end
+    endcase
+  end
 
   /********* ALU SOURCE_2 SELECT ************/
   always_comb begin
@@ -49,7 +68,7 @@ module ex_stage
   /***************** ALU *******************/
   alu u_alu (
     .alu_op (alu_op_id),
-    .in_a   (rs1_data_id),
+    .in_a   (alu_src_1),
     .in_b   (alu_src_2),
     .result (alu_result_ex)
   );
