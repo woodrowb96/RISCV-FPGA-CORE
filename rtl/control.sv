@@ -3,220 +3,220 @@ module control
   import rv32i_control_pkg::*;
 (
   //input
-  input word_t inst_id,
+  input word_t inst,
 
   //output (id_stage control)
-  output logic rd_wr_en_id,
+  output logic rd_wr_en,
 
   //output (ex_stage control)
-  output alu_op_t                alu_op_id,
-  output alu_src_sel_1_t         alu_src_sel_1_id,
-  output alu_src_sel_2_t         alu_src_sel_2_id,
-  output branch_type_t           branch_type_id,
-  output branch_target_src_sel_t branch_target_src_sel_id,
+  output alu_op_t                alu_op,
+  output alu_src_sel_1_t         alu_src_sel_1,
+  output alu_src_sel_2_t         alu_src_sel_2,
+  output branch_type_t           branch_type,
+  output branch_target_src_sel_t branch_target_src_sel,
 
   //output (mem_stage control)
-  output byte_sel_t  mem_store_byte_sel_id,
-  output load_type_t mem_load_type_id,
+  output byte_sel_t  store_byte_sel,
+  output load_type_t load_type,
 
   //output (wb_stage control)
-  output wb_sel_t wb_sel_id
+  output wb_sel_t wb_sel
 );
   opcode_t opcode;
   f3_t     f3;
   f7_t     f7;
 
   /********** PARSE INST FIELDS **************/
-  assign opcode = opcode_t'(inst_id[6:0]);
-  assign f3     = inst_id[14:12];
-  assign f7     = inst_id[31:25];
+  assign opcode = opcode_t'(inst[6:0]);
+  assign f3     = inst[14:12];
+  assign f7     = inst[31:25];
 
   /*********** DECODE CONTROL ****************/
   always_comb begin
     //default assignments implement a NOP
-    rd_wr_en_id              = '0;
-    alu_op_id                = ALU_ADD;
-    alu_src_sel_1_id         = SRC1_RS1;
-    alu_src_sel_2_id         = RS2;
-    branch_type_id           = NONE;
-    branch_target_src_sel_id = PC;
-    mem_store_byte_sel_id    = '0;
-    mem_load_type_id         = LOAD_B;
-    wb_sel_id                = ALU;
+    rd_wr_en              = '0;
+    alu_op                = ALU_ADD;
+    alu_src_sel_1         = SRC1_RS1;
+    alu_src_sel_2         = SRC2_RS2;
+    branch_type           = BR_NONE;
+    branch_target_src_sel = BTGT_PC;
+    store_byte_sel        = '0;
+    load_type             = LOAD_B;
+    wb_sel                = WB_ALU;
 
     unique case(opcode)
       OP_REG: begin
-        rd_wr_en_id = 1'b1; //all OP_REGs will write to the register
+        rd_wr_en = 1'b1; //all OP_REGs will write to the register
         unique case(f3)
           F3_ADD_SUB: begin
             unique case(f7)
               F7_ADD: begin
-                alu_op_id = ALU_ADD;
+                alu_op = ALU_ADD;
               end
               F7_SUB: begin
-                alu_op_id = ALU_SUB;
+                alu_op = ALU_SUB;
               end
             endcase
           end
           F3_SLL: begin
-            alu_op_id = ALU_SLL;
+            alu_op = ALU_SLL;
           end
           F3_SLT: begin
-            alu_op_id = ALU_SLT;
+            alu_op = ALU_SLT;
           end
           F3_SLTU: begin
-            alu_op_id = ALU_SLTU;
+            alu_op = ALU_SLTU;
           end
           F3_XOR: begin
-            alu_op_id = ALU_XOR;
+            alu_op = ALU_XOR;
           end
           F3_SRL_SRA: begin
             unique case(f7)
               F7_SRL: begin
-                alu_op_id = ALU_SRL;
+                alu_op = ALU_SRL;
               end
               F7_SRA: begin
-                alu_op_id = ALU_SRA;
+                alu_op = ALU_SRA;
               end
             endcase
           end
           F3_OR: begin
-            alu_op_id = ALU_OR;
+            alu_op = ALU_OR;
           end
           F3_AND: begin
-            alu_op_id = ALU_AND;
+            alu_op = ALU_AND;
           end
         endcase
       end
       OP_IMM: begin
-        rd_wr_en_id      = 1'b1; //all OP_IMM will write to the register
-        alu_src_sel_2_id = IMM;  //all OP_IMM need to source from the immediate
+        rd_wr_en      = 1'b1;     //all OP_IMM will write to the register
+        alu_src_sel_2 = SRC2_IMM; //all OP_IMM need to source from the immediate
         unique case(f3)
           F3_ADDI: begin
-            alu_op_id = ALU_ADD;
+            alu_op = ALU_ADD;
           end
           F3_SLLI: begin
-            alu_op_id = ALU_SLL;
+            alu_op = ALU_SLL;
           end
           F3_SLTI: begin
-            alu_op_id = ALU_SLT;
+            alu_op = ALU_SLT;
           end
           F3_SLTIU: begin
-            alu_op_id = ALU_SLTU;
+            alu_op = ALU_SLTU;
           end
           F3_XORI: begin
-            alu_op_id = ALU_XOR;
+            alu_op = ALU_XOR;
           end
           F3_SRLI_SRAI: begin
             unique case(f7)
               F7_SRLI: begin
-                alu_op_id = ALU_SRL;
+                alu_op = ALU_SRL;
               end
               F7_SRAI: begin
-                alu_op_id = ALU_SRA;
+                alu_op = ALU_SRA;
               end
             endcase
           end
           F3_ORI: begin
-            alu_op_id = ALU_OR;
+            alu_op = ALU_OR;
           end
           F3_ANDI: begin
-            alu_op_id = ALU_AND;
+            alu_op = ALU_AND;
           end
         endcase
       end
       OP_LOAD: begin
-        rd_wr_en_id      = 1'b1;    //all OP_LOAD will write to the register
-        alu_src_sel_2_id = IMM;     //all OP_LOAD need to source from the immediate
-        alu_op_id        = ALU_ADD; //all OP_LOAD need to use the alu add to comp the addr
-        wb_sel_id        = MEM;     //all OP_LOAD need to write back from data_mem
+        rd_wr_en      = 1'b1;     //all OP_LOAD will write to the register
+        alu_src_sel_2 = SRC2_IMM; //all OP_LOAD need to source from the immediate
+        alu_op        = ALU_ADD;  //all OP_LOAD need to use the alu add to comp the addr
+        wb_sel        = WB_MEM;   //all OP_LOAD need to write back from data_mem
         unique case(f3)
           F3_LB: begin
-            mem_load_type_id = LOAD_B;
+            load_type = LOAD_B;
           end
           F3_LH: begin
-            mem_load_type_id = LOAD_H;
+            load_type = LOAD_H;
           end
           F3_LW: begin
-            mem_load_type_id = LOAD_W;
+            load_type = LOAD_W;
           end
           F3_LBU: begin
-            mem_load_type_id = LOAD_BU;
+            load_type = LOAD_BU;
           end
           F3_LHU: begin
-            mem_load_type_id = LOAD_HU;
+            load_type = LOAD_HU;
           end
         endcase
       end
       OP_STORE: begin
-        alu_op_id        = ALU_ADD; //OP_STORE needs to add in the alu to calc addr
-        alu_src_sel_2_id = IMM;     //OP_STORE addr calc needs the imm
+        alu_op        = ALU_ADD;  //OP_STORE needs to add in the alu to calc addr
+        alu_src_sel_2 = SRC2_IMM; //OP_STORE addr calc needs the imm
         unique case(f3)
           F3_SB: begin
-            mem_store_byte_sel_id = 4'b0001;
+            store_byte_sel = 4'b0001;
           end
           F3_SH: begin
-            mem_store_byte_sel_id = 4'b0011;
+            store_byte_sel = 4'b0011;
           end
           F3_SW: begin
-            mem_store_byte_sel_id = 4'b1111;
+            store_byte_sel = 4'b1111;
           end
         endcase
       end
       OP_BRANCH:begin
-        branch_target_src_sel_id = PC;    //Branches use PC to calc the target address
+        branch_target_src_sel = BTGT_PC;    //Branches use PC to calc the target address
         unique case(f3)
           F3_BEQ: begin
-            branch_type_id = BEQ;
+            branch_type = BR_BEQ;
           end
           F3_BNE: begin
-            branch_type_id = BNE;
+            branch_type = BR_BNE;
           end
           F3_BLT: begin
-            branch_type_id = BLT;
+            branch_type = BR_BLT;
           end
           F3_BGE: begin
-            branch_type_id = BGE;
+            branch_type = BR_BGE;
           end
           F3_BLTU: begin
-            branch_type_id = BLTU;
+            branch_type = BR_BLTU;
           end
           F3_BGEU: begin
-            branch_type_id = BGEU;
+            branch_type = BR_BGEU;
           end
         endcase
       end
       OP_LUI: begin
-        rd_wr_en_id      = 1'b1;      //We need to write the immediate back to rd
-        alu_src_sel_1_id = SRC1_ZERO; //ADD zero to the immediate so that it gets written back
-        alu_src_sel_2_id = IMM;
-        alu_op_id        = ALU_ADD;
-        wb_sel_id        = ALU;      //The imm is getting passed through the alu and written back
+        rd_wr_en      = 1'b1;      //We need to write the immediate back to rd
+        alu_src_sel_1 = SRC1_ZERO; //ADD zero to the immediate so that it gets written back
+        alu_src_sel_2 = SRC2_IMM;
+        alu_op        = ALU_ADD;
+        wb_sel        = WB_ALU;    //The imm is getting passed through the alu and written back
       end
       OP_AUIPC: begin
-        rd_wr_en_id      = 1'b1;      //We need to write the immediate back to rd
-        alu_src_sel_1_id = SRC1_PC;   //ADD PC to the immediate
-        alu_src_sel_2_id = IMM;
-        alu_op_id        = ALU_ADD;
-        wb_sel_id        = ALU;       //Write pc + imm back to rd
+        rd_wr_en      = 1'b1;      //We need to write the immediate back to rd
+        alu_src_sel_1 = SRC1_PC;   //ADD PC to the immediate
+        alu_src_sel_2 = SRC2_IMM;
+        alu_op        = ALU_ADD;
+        wb_sel        = WB_ALU;    //Write pc + imm back to rd
       end
       OP_JAL: begin
-        rd_wr_en_id              = 1'b1; //Need to write pc + 4 back to rd
-        alu_op_id                = ALU_ADD;
-        alu_src_sel_1_id         = SRC1_PC;
-        alu_src_sel_2_id         = FOUR;
-        branch_type_id           = JUMP;
-        branch_target_src_sel_id = PC;    //Target address is PC + IMM
-        wb_sel_id                = ALU;
+        rd_wr_en              = 1'b1; //Need to write pc + 4 back to rd
+        alu_op                = ALU_ADD;
+        alu_src_sel_1         = SRC1_PC;
+        alu_src_sel_2         = SRC2_FOUR;
+        branch_type           = BR_JUMP;
+        branch_target_src_sel = BTGT_PC;    //Target address is PC + IMM
+        wb_sel                = WB_ALU;
       end
       OP_JALR: begin
-        rd_wr_en_id              = 1'b1;    //Need to write pc + 4 back to rd
-        alu_op_id                = ALU_ADD;
-        alu_src_sel_1_id         = SRC1_PC;
-        alu_src_sel_2_id         = FOUR;
-        branch_type_id           = JUMP;
-        branch_target_src_sel_id = RS1;    //Target address is RS1 + IMM
-        wb_sel_id                = ALU;
+        rd_wr_en              = 1'b1;    //Need to write pc + 4 back to rd
+        alu_op                = ALU_ADD;
+        alu_src_sel_1         = SRC1_PC;
+        alu_src_sel_2         = SRC2_FOUR;
+        branch_type           = BR_JUMP;
+        branch_target_src_sel = BTGT_RS1;    //Target address is RS1 + IMM
+        wb_sel                = WB_ALU;
       end
       OP_FENCE: begin
       //fence is implemented as a NOP

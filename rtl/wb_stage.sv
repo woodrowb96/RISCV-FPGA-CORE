@@ -15,10 +15,10 @@ module wb_stage
   /********* WRITE BACK SELECT *************/
   always_comb begin
     unique case(wb_sel_mem)
-      MEM: begin
+      WB_MEM: begin
         rd_data_wb = load_data_mem;
       end
-      ALU: begin
+      WB_ALU: begin
         rd_data_wb = alu_result_mem;
       end
       default: begin

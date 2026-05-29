@@ -28,8 +28,7 @@ package rv32i_control_pkg;
     ALU_SRA  = 4'b1100
   } alu_op_t;
 
-  /******************* FLOW CONTROL *************************/
-
+  /************** DATA PATH CONTROL ****************************/
   typedef enum logic [1:0] {
     SRC1_RS1  = 2'b00,
     SRC1_PC   = 2'b01,
@@ -37,30 +36,30 @@ package rv32i_control_pkg;
   } alu_src_sel_1_t;
 
   typedef enum logic [1:0] {
-    RS2  = 2'b00,
-    IMM  = 2'b01,
-    FOUR = 2'b10
+    SRC2_RS2  = 2'b00,
+    SRC2_IMM  = 2'b01,
+    SRC2_FOUR = 2'b10
   } alu_src_sel_2_t;
 
   typedef enum logic {
-    MEM = 1'b0,
-    ALU = 1'b1
+    WB_MEM = 1'b0,
+    WB_ALU = 1'b1
   } wb_sel_t;
 
   typedef enum logic[2:0] {
-    NONE  = 3'd0,
-    BEQ   = 3'd1,
-    BNE   = 3'd2,
-    BLT   = 3'd3,
-    BGE   = 3'd4,
-    BLTU  = 3'd5,
-    BGEU  = 3'd6,
-    JUMP  = 3'd7
+    BR_NONE  = 3'd0,
+    BR_BEQ   = 3'd1,
+    BR_BNE   = 3'd2,
+    BR_BLT   = 3'd3,
+    BR_BGE   = 3'd4,
+    BR_BLTU  = 3'd5,
+    BR_BGEU  = 3'd6,
+    BR_JUMP  = 3'd7
   } branch_type_t;
 
   typedef enum logic {
-    PC  = 1'b0,
-    RS1 = 1'b1
+    BTGT_PC  = 1'b0,
+    BTGT_RS1 = 1'b1
   } branch_target_src_sel_t;
 
   typedef enum logic[2:0] {

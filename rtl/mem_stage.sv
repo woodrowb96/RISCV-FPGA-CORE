@@ -5,8 +5,8 @@ module mem_stage
   input logic clk,
 
   //control
-  input byte_sel_t  mem_store_byte_sel_ex,
-  input load_type_t mem_load_type_ex,
+  input byte_sel_t  store_byte_sel_ex,
+  input load_type_t load_type_ex,
 
   //input
   input word_t alu_result_ex,
@@ -24,7 +24,7 @@ module mem_stage
   /************** DATA MEMORY************/
   data_mem u_data_mem (
     .clk(clk),
-    .store_byte_sel(mem_store_byte_sel_ex),
+    .store_byte_sel(store_byte_sel_ex),
     .addr(alu_result_ex),
     .store_data(rs2_data_ex),
     .load_data(raw_load_data)
@@ -32,7 +32,7 @@ module mem_stage
 
   /*********** CALC LOAD DATA ***************/
   always_comb begin
-    unique case(mem_load_type_ex)
+    unique case(load_type_ex)
       LOAD_B: begin
         load_data_mem = {{24{raw_load_data[7]}}, raw_load_data[7:0]};
       end

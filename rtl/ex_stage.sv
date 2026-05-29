@@ -53,13 +53,13 @@ module ex_stage
   /********* ALU SOURCE_2 SELECT ************/
   always_comb begin
     unique case(alu_src_sel_2_id)
-      RS2: begin
+      SRC2_RS2: begin
         alu_src_2 = rs2_data_id;
       end
-      IMM: begin
+      SRC2_IMM: begin
         alu_src_2 = imm_id;
       end
-      FOUR: begin
+      SRC2_FOUR: begin
         alu_src_2 = 'd4;
       end
       default: begin
@@ -82,11 +82,11 @@ module ex_stage
   /***********************************************/
   always_comb begin
     unique case(branch_target_src_sel_id)
-      PC: begin
+      BTGT_PC: begin
         //imm_id has already been shifted left in the imm_gen module
         branch_target_ex = imm_id + pc_id;
       end
-      RS1: begin
+      BTGT_RS1: begin
         //per the spec bit 0 should be set to 0, so we mask the addition
         branch_target_ex = (imm_id + rs1_data_id) & ~32'b1;
       end
@@ -103,28 +103,28 @@ module ex_stage
     ltu = rs1_data_id <  rs2_data_id;
 
     unique case(branch_type_id)
-      BEQ: begin
+      BR_BEQ: begin
         branch_taken_ex = eq;
       end
-      BNE: begin
+      BR_BNE: begin
         branch_taken_ex = !eq;
       end
-      BLT: begin
+      BR_BLT: begin
         branch_taken_ex = lt;
       end
-      BGE: begin
+      BR_BGE: begin
         branch_taken_ex = !lt;
       end
-      BLTU: begin
+      BR_BLTU: begin
         branch_taken_ex = ltu;
       end
-      BGEU: begin
+      BR_BGEU: begin
         branch_taken_ex = !ltu;
       end
-      JUMP: begin
+      BR_JUMP: begin
         branch_taken_ex = 1'b1;
       end
-      NONE: begin
+      BR_NONE: begin
         branch_taken_ex = 1'b0;
       end
       default: begin
