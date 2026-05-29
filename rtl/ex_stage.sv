@@ -3,11 +3,11 @@ module ex_stage
   import rv32i_control_pkg::*;
 (
   //control
-  input alu_op_t                  alu_op_id,
-  input alu_src_sel_1_t           alu_src_sel_1_id,
-  input alu_src_sel_2_t           alu_src_sel_2_id,
-  input branch_type_t             branch_type_id,
-  input branch_target_src_sel_t   branch_target_src_sel_id,
+  input alu_op_t                alu_op_id,
+  input alu_src_sel_1_t         alu_src_sel_1_id,
+  input alu_src_sel_2_t         alu_src_sel_2_id,
+  input branch_type_t           branch_type_id,
+  input branch_target_src_sel_t branch_target_src_sel_id,
 
   //input
   input word_t pc_id,
@@ -45,7 +45,7 @@ module ex_stage
         alu_src_1 = '0;
       end
       default: begin
-        alu_src_1 = 'x;
+        alu_src_1 = '0;
       end
     endcase
   end
@@ -63,7 +63,7 @@ module ex_stage
         alu_src_2 = 'd4;
       end
       default: begin
-        alu_src_2 = 'x;
+        alu_src_2 = '0;
       end
     endcase
   end
@@ -91,7 +91,7 @@ module ex_stage
         branch_target_ex = (imm_id + rs1_data_id) & ~32'b1;
       end
       default: begin
-        branch_target_ex = 'x;
+        branch_target_ex = '0;
       end
     endcase
   end
@@ -128,7 +128,7 @@ module ex_stage
         branch_taken_ex = 1'b0;
       end
       default: begin
-        branch_taken_ex = 'x;
+        branch_taken_ex = 1'b0;
       end
     endcase
   end
