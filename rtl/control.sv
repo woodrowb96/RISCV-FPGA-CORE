@@ -46,7 +46,10 @@ module control
 
     unique case(opcode)
       OP_REG: begin
-        rd_wr_en = 1'b1; //all OP_REGs will write to the register
+        rd_wr_en      = 1'b1;     //all OP_REGs will write to the register
+        alu_src_sel_1 = SRC1_RS1; //ALU does the operation on the bothe registers
+        alu_src_sel_2 = SRC2_RS2;
+        wb_sel        = WB_ALU;   //all OP_REGS will write back the alu result
         unique case(f3)
           F3_ADD_SUB: begin
             unique case(f7)
@@ -90,7 +93,9 @@ module control
       end
       OP_IMM: begin
         rd_wr_en      = 1'b1;     //all OP_IMM will write to the register
-        alu_src_sel_2 = SRC2_IMM; //all OP_IMM need to source from the immediate
+        alu_src_sel_1 = SRC1_RS1; //all OP_IMM do the operation on RS1 and the immediate
+        alu_src_sel_2 = SRC2_IMM;
+        wb_sel        = WB_ALU;   //all OP_IMM will write back the alu result
         unique case(f3)
           F3_ADDI: begin
             alu_op = ALU_ADD;
@@ -127,8 +132,9 @@ module control
       end
       OP_LOAD: begin
         rd_wr_en      = 1'b1;     //all OP_LOAD will write to the register
-        alu_src_sel_2 = SRC2_IMM; //all OP_LOAD need to source from the immediate
-        alu_op        = ALU_ADD;  //all OP_LOAD need to use the alu add to comp the addr
+        alu_src_sel_1 = SRC1_RS1; //all OP_LOADs will add the imm to the rs1 to get the addr
+        alu_src_sel_2 = SRC2_IMM;
+        alu_op        = ALU_ADD;
         wb_sel        = WB_MEM;   //all OP_LOAD need to write back from data_mem
         unique case(f3)
           F3_LB: begin
@@ -149,8 +155,9 @@ module control
         endcase
       end
       OP_STORE: begin
-        alu_op        = ALU_ADD;  //OP_STORE needs to add in the alu to calc addr
-        alu_src_sel_2 = SRC2_IMM; //OP_STORE addr calc needs the imm
+        alu_op        = ALU_ADD;  //OP_STORE needs to add the imm to rs1 to calc the addr
+        alu_src_sel_1 = SRC1_RS1;
+        alu_src_sel_2 = SRC2_IMM;
         unique case(f3)
           F3_SB: begin
             store_byte_sel = 4'b0001;
