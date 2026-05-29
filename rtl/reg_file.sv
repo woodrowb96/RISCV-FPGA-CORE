@@ -21,9 +21,9 @@ Output:
 NOTE:
      - Register x0 (reg_file[0]) always returns '0
 */
-import rv32i_defs_pkg::*;
-
-module reg_file (
+module reg_file
+  import rv32i_defs_pkg::*;
+(
   //clk
   input logic clk,
 

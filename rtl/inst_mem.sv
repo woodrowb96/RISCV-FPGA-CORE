@@ -18,10 +18,10 @@ NOTE:
       down to the next lower word. It doesnt throw a flag or error I'll leave the catching
       and handling of misaligned access to other parts of the riscv implementation.
 */
-import rv32i_defs_pkg::*;
-import rv32i_config_pkg::*;
-
-module inst_mem #(parameter string PROGRAM = "") (
+module inst_mem
+  import rv32i_defs_pkg::*;
+  import rv32i_config_pkg::*;
+#(parameter string PROGRAM = "") (
   //input
   input word_t inst_addr,
 

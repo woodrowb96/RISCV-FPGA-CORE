@@ -31,11 +31,11 @@ NOTE:  OUT_OF_BOUND ACCESS
   Out of bound access silently wraps around to the start of memory.
   This module doesnt throw a flag or error and leaves that to other parts of the implementation.
 */
-import rv32i_defs_pkg::*;
-import rv32i_config_pkg::*;
-import rv32i_control_pkg::*;
-
-module data_mem (
+module data_mem
+  import rv32i_defs_pkg::*;
+  import rv32i_config_pkg::*;
+  import rv32i_control_pkg::*;
+(
   //clk
   input logic clk,
 

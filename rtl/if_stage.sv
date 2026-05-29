@@ -48,10 +48,10 @@ NOTE: EXCEPTION HANDLING (deferred)
       Out-of-bounds addresses silently wrap around to the start of memory
       (inst_addr == INST_MEM_DEPTH + 50 becomes inst_addr == 50).
 */
-import rv32i_defs_pkg::*;
-import rv32i_config_pkg::*;
-
-module if_stage #(parameter string PROGRAM = NO_PROGRAM) (
+module if_stage
+  import rv32i_defs_pkg::*;
+  import rv32i_config_pkg::*;
+#(parameter string PROGRAM = NO_PROGRAM) (
   //clk and reset
   input logic clk,
   input logic reset_n,

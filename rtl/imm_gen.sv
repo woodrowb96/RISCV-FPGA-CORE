@@ -28,9 +28,9 @@ Output:
   Note: Invalid opcodes/instructions
     - Output when this module gets passed an invalid opcode/instruction is undefined.
 */
-import rv32i_defs_pkg::*;
-
-module imm_gen(
+module imm_gen
+  import rv32i_defs_pkg::*;
+(
   //input
   input word_t inst,
 

@@ -32,9 +32,9 @@ Control:
       - 4'b0010 -> write to the second to last byte
       - 4'b1111 -> write the whole word
 */
-import rv32i_control_pkg::*;
-
-module data_path #(parameter string PROGRAM = "NO_INST_MEM_PROGRAM_SPECIFIED")(
+module data_path
+  import rv32i_control_pkg::*;
+#(parameter string PROGRAM = "NO_INST_MEM_PROGRAM_SPECIFIED")(
   //clock
   input logic clk,
 

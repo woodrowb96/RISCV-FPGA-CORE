@@ -15,10 +15,10 @@ Output:
 Output flags:
   zero: 1'b zero flag, set when result == 0
 */
-import rv32i_defs_pkg::*;
-import rv32i_control_pkg::*;
-
-module alu(
+module alu
+  import rv32i_defs_pkg::*;
+  import rv32i_control_pkg::*;
+(
   //control
   input alu_op_t alu_op,
 
