@@ -187,8 +187,18 @@ module control
         endcase
       end
       OP_LUI: begin
+        rd_wr_en_id      = 1'b1;      //We need to write the immediate back to rd
+        alu_src_sel_1_id = SRC1_ZERO; //ADD zero to the immediate so that it gets written back
+        alu_src_sel_2_id = IMM;
+        alu_op_id        = ALU_ADD;
+        wb_sel_id        = ALU;      //The imm is getting passed through the alu and written back
       end
       OP_AUIPC: begin
+        rd_wr_en_id      = 1'b1;      //We need to write the immediate back to rd
+        alu_src_sel_1_id = SRC1_PC;   //ADD PC to the immediate
+        alu_src_sel_2_id = IMM;
+        alu_op_id        = ALU_ADD;
+        wb_sel_id        = ALU;       //Write pc + imm back to rd
       end
       OP_JAL: begin
       end
