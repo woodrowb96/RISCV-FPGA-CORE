@@ -87,7 +87,7 @@ module ex_stage
         branch_target_ex = imm_id + pc_id;
       end
       RS1: begin
-        //per the spec bit 0 should be set to 0, so we mask the addition<F10>
+        //per the spec bit 0 should be set to 0, so we mask the addition
         branch_target_ex = (imm_id + rs1_data_id) & ~32'b1;
       end
       default: begin

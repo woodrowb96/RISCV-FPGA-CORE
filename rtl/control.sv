@@ -210,6 +210,13 @@ module control
         wb_sel_id                = ALU;
       end
       OP_JALR: begin
+        rd_wr_en_id              = 1'b1;    //Need to write pc + 4 back to rd
+        alu_op_id                = ALU_ADD;
+        alu_src_sel_1_id         = SRC1_PC;
+        alu_src_sel_2_id         = FOUR;
+        branch_type_id           = JUMP;
+        branch_target_src_sel_id = RS1;    //Target address is RS1 + IMM
+        wb_sel_id                = ALU;
       end
       OP_FENCE: begin
       //fence is implemented as a NOP
