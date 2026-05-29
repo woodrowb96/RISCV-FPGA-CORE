@@ -36,9 +36,10 @@ package rv32i_control_pkg;
     SRC1_ZERO = 2'b10
   } alu_src_sel_1_t;
 
-  typedef enum logic {
-    RS2 = 1'b0,
-    IMM = 1'b1
+  typedef enum logic [1:0] {
+    RS2  = 2'b00,
+    IMM  = 2'b01,
+    FOUR = 2'b10
   } alu_src_sel_2_t;
 
   typedef enum logic {

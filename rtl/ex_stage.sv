@@ -59,6 +59,9 @@ module ex_stage
       IMM: begin
         alu_src_2 = imm_id;
       end
+      FOUR: begin
+        alu_src_2 = 'd4;
+      end
       default: begin
         alu_src_2 = 'x;
       end
