@@ -83,6 +83,21 @@ package rv32i_verify_pkg;
   localparam word_t SIGNED_POS_LOWER_HALF = WORD_MAX_SIGNED_POS / 2;
   localparam word_t SIGNED_NEG_LOWER_HALF = 32'hC000_0000;
 
+  /**************** RISCV INSTRUCTIONS ******************************/
+  typedef enum {
+    INST_ADD, INST_SUB, INST_SLL, INST_SLT, INST_SLTU, INST_XOR, INST_SRL, INST_SRA, INST_OR, INST_AND,
+    INST_ADDI, INST_SLLI, INST_SLTI, INST_SLTIU, INST_XORI, INST_SRLI, INST_SRAI, INST_ORI, INST_ANDI,
+    INST_LB, INST_LH, INST_LW, INST_LBU, INST_LHU,
+    INST_SB, INST_SH, INST_SW,
+    INST_BEQ, INST_BNE, INST_BGE, INST_BLT, INST_BLTU, INST_BGEU,
+    INST_LUI,
+    INST_AUIPC,
+    INST_JAL,
+    INST_JALR,
+    INST_FENCE,              //Implemented as a NOP currently
+    INST_ECALL, INST_EBREAK, //NOT IMPLEMENTED YET
+    INST_INVALID
+  } inst_label_t;
 
   /**************** UTILITY FUNCTIONS ******************************/
 
