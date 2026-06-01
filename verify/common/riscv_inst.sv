@@ -42,7 +42,7 @@ class riscv_inst extends uvm_object;
   }
 
   constraint valid_imm {
-    if (opcode inside {OP_LOAD, OP_STORE, OP_JALR}) {
+    if (opcode inside {OP_IMM, OP_LOAD, OP_STORE, OP_JALR}) {
       imm[31:12] == {20{imm[11]}};   // S-type: sign-extend imm[11]
     }
 
@@ -50,9 +50,6 @@ class riscv_inst extends uvm_object;
       //per spec we shift using only the lowest 4 bits
       //the upper 7 bits are set to f7
       imm[11:5] == f7;
-    }
-    else {
-      imm[31:12] == {20{imm[11]}};   // I-type: sign-extend imm[11]
     }
 
     if (opcode == OP_BRANCH) {
@@ -202,5 +199,14 @@ class riscv_inst extends uvm_object;
       default:   asm = $sformatf("INVALID_OPCODE(%0h)", opcode);
     endcase
     return $sformatf("%s  [0x%08h]", asm, to_word());
+  endfunction
+
+  virtual function bit do_compare(uvm_object rhs, uvm_comparer comparer);
+    riscv_inst rhs_;
+
+    if(!$cast(rhs_, rhs))
+      return 0;
+
+    return this.to_word() == rhs_.to_word();
   endfunction
 endclass

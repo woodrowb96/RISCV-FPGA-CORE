@@ -1,8 +1,8 @@
 class if_stage_seq_item extends uvm_sequence_item;
   `uvm_object_utils(if_stage_seq_item)
 
-  rand logic branch_taken_ex;          //control (back-edge from EX)
-  rand word_t branch_target_ex;  //input   (back-edge from EX)
+  rand logic branch_taken_ex;    //control
+  rand word_t branch_target_ex;  //input
   word_t pc_if;                  //output
   word_t inst_if;
 
