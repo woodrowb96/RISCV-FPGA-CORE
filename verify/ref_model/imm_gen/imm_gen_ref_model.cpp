@@ -10,7 +10,9 @@ enum Opcodes : uint8_t {
   OpLui    = 0b0110111,
   OpAuipc  = 0b0010111,
   OpJal    = 0b1101111,
-  OpJalr   = 0b1100111
+  OpJalr   = 0b1100111,
+  OpFence  = 0b0001111,
+  OpSystem = 0b1110011
 };
 
 extern "C" {
@@ -106,6 +108,12 @@ extern "C" {
         if(inst & 0x80000000) {
           imm |= 0xFFE00000;
         }
+        break;
+      }
+
+      case OpFence:
+      case OpSystem: {
+        imm = 0;
         break;
       }
 
