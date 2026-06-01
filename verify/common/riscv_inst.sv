@@ -41,31 +41,31 @@ class riscv_inst extends uvm_object;
     if (opcode == OP_SYSTEM) f3 == 3'b000;
   }
 
-  constraint valid_imm {
-    if (opcode inside {OP_IMM, OP_LOAD, OP_STORE, OP_JALR}) {
-      imm[31:12] == {20{imm[11]}};   // S-type: sign-extend imm[11]
-    }
-
-    if(opcode == OP_IMM && f3 inside {F3_SLLI, F3_SRLI_SRAI}) {
-      //per spec we shift using only the lowest 4 bits
-      //the upper 7 bits are set to f7
-      imm[11:5] == f7;
-    }
-
-    if (opcode == OP_BRANCH) {
-      imm[31:13] == {19{imm[12]}};   // B-type: sign-extend imm[12]
-      imm[0]     == '0;              //lowest bit is 0
-    }
-
-    if (opcode == OP_JAL) {
-      imm[31:21] == {11{imm[20]}};   // J-type: sign-extend imm[20]
-      imm[0]     == '0;              //lowest bit is 0
-    }
-
-    if (opcode inside {OP_LUI, OP_AUIPC}) {
-      imm[11:0] == '0;               // U-type: lowest 12 bits are zero
-    }
-  }
+  // constraint valid_imm {
+  //   if (opcode inside {OP_IMM, OP_LOAD, OP_STORE, OP_JALR}) {
+  //     imm[31:12] == {20{imm[11]}};   // S-type: sign-extend imm[11]
+  //   }
+  //
+  //   if(opcode == OP_IMM && f3 inside {F3_SLLI, F3_SRLI_SRAI}) {
+  //     //per spec we shift using only the lowest 4 bits
+  //     //the upper 7 bits are set to f7
+  //     imm[11:5] == f7;
+  //   }
+  //
+  //   if (opcode == OP_BRANCH) {
+  //     imm[31:13] == {19{imm[12]}};   // B-type: sign-extend imm[12]
+  //     imm[0]     == '0;              //lowest bit is 0
+  //   }
+  //
+  //   if (opcode == OP_JAL) {
+  //     imm[31:21] == {11{imm[20]}};   // J-type: sign-extend imm[20]
+  //     imm[0]     == '0;              //lowest bit is 0
+  //   }
+  //
+  //   if (opcode inside {OP_LUI, OP_AUIPC}) {
+  //     imm[11:0] == '0;               // U-type: lowest 12 bits are zero
+  //   }
+  // }
 
   /***********************************************************************************/
   /******************************** METHODS *******************************************/
@@ -147,6 +147,28 @@ class riscv_inst extends uvm_object;
   endfunction
 
   function void post_randomize();
+    //Sign extending (and setting bit 0 to 0) the immediate through constraints was
+    //vivado to crash during simulation so I moved it into the post_randomize function
+    case (opcode)
+      OP_IMM: begin
+        if (f3 inside {F3_SLLI, F3_SRLI_SRAI}) begin
+          imm[11:5] = f7;
+        end
+        imm[31:12] = {20{imm[11]}};
+      end
+      OP_LOAD, OP_STORE, OP_JALR: imm[31:12] = {20{imm[11]}};
+      OP_BRANCH: begin
+        imm[0]     = 1'b0;
+        imm[31:13] = {19{imm[12]}};
+      end
+      OP_JAL: begin
+        imm[0]     = 1'b0;
+        imm[31:21] = {11{imm[20]}};
+      end
+      OP_LUI, OP_AUIPC: imm[11:0] = '0;
+      default: ; // no fix-up for OP_REG, OP_FENCE, OP_SYSTEM
+    endcase
+
     decode_inst_label();
   endfunction
 

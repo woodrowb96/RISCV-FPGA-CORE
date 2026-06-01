@@ -1,7 +1,7 @@
 class id_stage_seq_item extends uvm_sequence_item;
   rand logic      rd_wr_en_wb; //control
   rand riscv_inst inst_if;     //input
-  rand word_t     pc_if;       //input
+  rand word_t     pc_if;
   rand word_t     rd_data_wb;
   word_t          pc_id;       //output
   word_t          rs1_data_id;
