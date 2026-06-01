@@ -27,32 +27,5 @@ class if_stage_monitor extends uvm_monitor;
     if_stage_seq_item item;
     super.run_phase(phase);
 
-    @(if_vif.cb_mon); //wait for the initial drives to get cloked in
-
-    forever begin
-      wait(rst_vif.reset_n === 1'b1);
-
-      //Concurently
-      //  - monitor the items on the interface
-      //  - monitor the reset, exit fork when its asserted
-      fork
-        begin : sample_loop
-          forever begin
-            @(if_vif.cb_mon);
-            item = if_stage_seq_item::type_id::create("item");
-            item.pc_if            = if_vif.cb_mon.pc_if;
-            item.inst_if          = if_vif.cb_mon.inst_if;
-            item.branch_taken_ex        = if_vif.cb_mon.branch_taken_ex;
-            item.branch_target_ex = if_vif.cb_mon.branch_target_ex;
-            observed_ap.write(item);
-            `uvm_info("MON", $sformatf("Saw item %s", item.convert2string()), UVM_HIGH)
-          end
-        end
-        begin : reset_loop
-          @(negedge rst_vif.reset_n);
-        end
-      join_any
-      disable fork;
-    end
   endtask
 endclass
