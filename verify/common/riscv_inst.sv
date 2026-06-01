@@ -74,7 +74,7 @@ class riscv_inst extends uvm_object;
     super.new(name);
   endfunction
 
-  function void post_randomize();
+  function void decode_inst_label();
     inst_label = INST_INVALID;
 
     unique case(opcode)
@@ -146,6 +146,10 @@ class riscv_inst extends uvm_object;
     endcase
   endfunction
 
+  function void post_randomize();
+    decode_inst_label();
+  endfunction
+
   function word_t to_word();
     unique case(opcode)
       OP_REG:           return {f7, rs2, rs1, f3, rd, opcode};
@@ -164,6 +168,28 @@ class riscv_inst extends uvm_object;
       OP_SYSTEM:        return {25'b0, opcode};
       default:          return '0;
     endcase
+  endfunction
+
+  function void from_word(word_t w);
+    opcode = opcode_t'(w[6:0]);
+    rd     = w[11:7];
+    f3     = w[14:12];
+    rs1    = w[19:15];
+    rs2    = w[24:20];
+    f7     = w[31:25];
+
+    unique case (opcode)
+      OP_REG:                   imm = '0;
+      OP_IMM, OP_LOAD, OP_JALR: imm = {{20{w[31]}}, w[31:20]};
+      OP_STORE:                 imm = {{20{w[31]}}, w[31:25], w[11:7]};
+      OP_BRANCH:                imm = {{19{w[31]}}, w[31], w[7], w[30:25], w[11:8], 1'b0};
+      OP_LUI, OP_AUIPC:         imm = {w[31:12], 12'b0};
+      OP_JAL:                   imm = {{11{w[31]}}, w[31], w[19:12], w[20], w[30:21], 1'b0};
+      OP_FENCE, OP_SYSTEM:      imm = '0;
+      default:                  imm = '0;
+    endcase
+
+    decode_inst_label();
   endfunction
 
   //Strip INST_ label from inst_label enum and return the remaining riscv

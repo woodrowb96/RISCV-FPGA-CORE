@@ -99,6 +99,9 @@ package rv32i_verify_pkg;
     INST_INVALID
   } inst_label_t;
 
+  /****************** NOP ******************************************/
+  word_t NOP = {12'b0, X0, F3_ADDI, X0, OP_IMM};
+
   /**************** UTILITY FUNCTIONS ******************************/
 
   //This function is a workaround for a bug in Vivado's $urandom_range function
