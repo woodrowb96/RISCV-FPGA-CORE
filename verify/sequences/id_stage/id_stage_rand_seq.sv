@@ -13,8 +13,23 @@ class id_stage_rand_seq extends id_stage_base_seq;
 
       start_item(item);
 
-      if(!item.randomize())
-        `uvm_fatal("SEQ", "Failed item.randomize()")
+      if(!item.randomize() with {
+        pc_if dist {
+          WORD_ALL_ZEROS    := 5,
+          WORD_ALL_ONES     := 5,
+          WORD_ALT_ONES_55  := 5,
+          WORD_ALT_ONES_AA  := 5,
+          [0:WORD_ALL_ONES] :/ 80
+        };
+
+        rd_data_wb dist {
+          WORD_ALL_ZEROS    := 5,
+          WORD_ALL_ONES     := 5,
+          WORD_ALT_ONES_55  := 5,
+          WORD_ALT_ONES_AA  := 5,
+          [0:WORD_ALL_ONES] :/ 80
+        };
+      }) `uvm_fatal("SEQ", "Failed item.randomize() (corners)")
 
       `uvm_info("SEQ", $sformatf("Generate new item: %s", item.convert2string()), UVM_HIGH);
       finish_item(item);
