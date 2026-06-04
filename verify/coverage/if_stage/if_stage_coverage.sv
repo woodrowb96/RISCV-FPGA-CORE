@@ -1,9 +1,3 @@
-/*
-  COVERAGE SAMPLING ASSUMPTIONS:
-        - sample() is being called AFTER the DUT signals have been driven onto
-          the DUT's input ports and AFTER the combinatorial inst output has
-          settled, but BEFORE the next PC has been clocked onto the current PC.
-*/
 class if_stage_coverage extends uvm_object;
   `uvm_object_utils(if_stage_coverage);
 
