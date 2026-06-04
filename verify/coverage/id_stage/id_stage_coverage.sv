@@ -70,7 +70,7 @@ class id_stage_coverage extends uvm_object;
     //We want to cover each rv32i instruction type so we can check that its rs/rd/imm fields
     //are parsed correctly
     //we want to cover each opcode
-    opcode: coverpoint item.inst[6:0] {
+    opcode: coverpoint item.inst_if.opcode {
       bins op_reg    = {OP_REG};
       bins op_imm    = {OP_IMM};
       bins op_load   = {OP_LOAD};
