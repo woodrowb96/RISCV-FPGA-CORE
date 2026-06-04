@@ -18,6 +18,7 @@ verify/agents/id_stage/id_stage_agent_pkg.sv
 verify/ref_model/imm_gen/imm_gen_ref_model_pkg.sv
 verify/ref_model/reg_file/reg_file_ref_model_pkg.sv
 verify/ref_model/id_stage/id_stage_ref_model_pkg.sv
+verify/coverage/id_stage/id_stage_coverage_pkg.sv
 verify/env/id_stage/id_stage_env_pkg.sv
 verify/sequences/id_stage/id_stage_seq_pkg.sv
 verify/tests/id_stage/id_stage_tests_pkg.sv
